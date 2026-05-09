@@ -4,6 +4,7 @@ import { Slot } from "radix-ui";
 
 import { cn } from "@/lib/utils";
 import { Minus, Plus } from "lucide-react";
+import compassIcon from "@/assets/compass.svg";
 
 const buttonVariants = cva(
   "group/button hover:translate-y-[-1px] active:scale-[0.98] active:not-aria-[haspopup]:translate-y-[2px] hover:cursor-pointer inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-sm font-semibold whitespace-nowrap transition-all outline-none w-fit select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 shadow-md",
@@ -163,7 +164,7 @@ function MapStyleToggle({
       title={`Ubah ke ${labelText}`}
       className={cn(
         "relative flex shrink-0 items-center justify-center overflow-hidden rounded-md border-2 border-black bg-white shadow-md outline-none transition-all",
-        "size-20 sm:size-24",
+        "size-18 sm:size-22",
         "hover:-translate-y-px hover:cursor-pointer active:translate-y-0.5 active:scale-[0.98]",
         className,
       )}
@@ -186,4 +187,39 @@ function MapStyleToggle({
   );
 }
 
-export { Button, ZoomButton, MapStyleToggle, buttonVariants };
+/* =========================================
+   KOMPONEN COMPASS BUTTON 
+========================================= */
+
+export interface CompassButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  bearing: number;
+  onReset: () => void;
+}
+
+function CompassButton({
+  className,
+  bearing,
+  onReset,
+  ...props
+}: CompassButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onReset}
+      className={cn(
+        "p-1 rounded-full border-2 border-black bg-primary shadow-md outline-none transition-all",
+      )}
+      {...props}
+    >
+      <span className="flex items-center justify-center">
+        <img
+          src={compassIcon.src}
+          alt="Compass"
+          className="size-6 sm:size-7 hover:cursor-pointer"
+          style={{ transform: `rotate(${-bearing}deg)` }}
+        />
+      </span>
+    </button>
+  );
+}
+export { Button, ZoomButton, MapStyleToggle, buttonVariants, CompassButton };

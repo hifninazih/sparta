@@ -4,9 +4,14 @@ import { useRef, useState, useEffect } from "react";
 import Map, { MapRef, Marker } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { Button, ZoomButton, MapStyleToggle } from "@/components/button";
+import {
+  Button,
+  ZoomButton,
+  MapStyleToggle,
+  CompassButton,
+} from "@/components/button";
 import { useMapStore } from "@/store/useMapStore";
-import { Layers, Locate, LocateFixed, LogIn, MapPinSearch } from "lucide-react";
+import { Locate, LocateFixed, LogIn, MapPinSearch } from "lucide-react";
 
 export default function Maps() {
   const {
@@ -32,6 +37,7 @@ export default function Maps() {
           "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         ],
         tileSize: 256,
+        maxzoom: 18,
         attribution:
           "&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
       },
@@ -108,6 +114,14 @@ export default function Maps() {
     );
   };
 
+  const handleResetCompass = () => {
+    mapRef.current?.getMap().easeTo({
+      bearing: 0,
+      pitch: 0,
+      duration: 500,
+    });
+  };
+
   const renderLocationIcon = () => {
     if (isLocating) {
       return iconToggle ? <LocateFixed /> : <Locate />;
@@ -151,7 +165,16 @@ export default function Maps() {
         </Button>
       </div>
 
-      <div className="absolute gap-5 items-end flex-col flex right-4 bottom-10 z-10 ">
+      <div className="absolute gap-5 items-end flex-col flex right-4 top-40 z-10 ">
+        {(viewState.bearing !== 0 || viewState.pitch !== 0) && (
+          <CompassButton
+            onReset={handleResetCompass}
+            bearing={viewState.bearing}
+          />
+        )}
+      </div>
+
+      <div className="absolute gap-5 items-end flex-col flex right-4 bottom-35 z-10 ">
         <div className="flex gap-2 flex-col items-center">
           <Button
             variant={"primary"}
@@ -164,9 +187,9 @@ export default function Maps() {
 
           <ZoomButton onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
         </div>
-        {/* <Button variant={"primary"} size={"lg"} startIcon={<Layers />}>
-          Peta Dasar
-        </Button> */}
+      </div>
+
+      <div className="absolute gap-5 items-end flex-col flex right-4 bottom-10 z-10 ">
         <MapStyleToggle isSatellite={isSatellite} onToggle={toggleMapStyle} />
       </div>
     </div>

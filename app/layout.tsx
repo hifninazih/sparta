@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,13 @@ export const metadata: Metadata = {
   description: "Sistem Pemetaan dan Rekomendasi Wisata",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1, // Mencegah zoom in melebihi ukuran asli
+  userScalable: false, // Mematikan kemampuan pinch-to-zoom di HP
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -21,7 +28,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className={cn("h-full", "antialiased", poppins.variable)}>
-      {/* Tambahkan font-sans agar seluruh body otomatis menggunakan font Poppins */}
       <body className="min-h-full flex flex-col font-sans">{children}</body>
     </html>
   );
