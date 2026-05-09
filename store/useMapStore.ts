@@ -11,6 +11,9 @@ interface MapState {
 
   setUserLocation: (loc: [number, number] | null) => void;
   setViewState: (viewState: ViewState) => void;
+
+  isSatellite: boolean;
+  toggleMapStyle: () => void;
 }
 
 export const useMapStore = create<MapState>((set) => ({
@@ -29,4 +32,7 @@ export const useMapStore = create<MapState>((set) => ({
 
   setUserLocation: (loc) => set({ userLocation: loc }),
   setViewState: (newViewState) => set({ viewState: newViewState }),
+
+  isSatellite: false,
+  toggleMapStyle: () => set((state) => ({ isSatellite: !state.isSatellite })),
 }));

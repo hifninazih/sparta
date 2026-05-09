@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import Map, { MapRef, Marker } from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { Button, ZoomButton } from "@/components/button";
+import { Button, ZoomButton, MapStyleToggle } from "@/components/button";
 import { useMapStore } from "@/store/useMapStore";
 import { Layers, Locate, LocateFixed, LogIn, MapPinSearch } from "lucide-react";
 
@@ -16,7 +16,38 @@ export default function Maps() {
     minZoom,
     userLocation,
     setUserLocation,
+    isSatellite,
+    toggleMapStyle,
   } = useMapStore();
+
+  const streetStyle =
+    "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json";
+
+  const satelliteStyle = {
+    version: 8,
+    sources: {
+      "esri-satellite": {
+        type: "raster",
+        tiles: [
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        ],
+        tileSize: 256,
+        attribution:
+          "&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+      },
+    },
+    layers: [
+      {
+        id: "satellite-layer",
+        type: "raster",
+        source: "esri-satellite",
+        minzoom: 0,
+        maxzoom: 22,
+      },
+    ],
+  };
+
+  const currentMapStyle = isSatellite ? satelliteStyle : streetStyle;
 
   const mapRef = useRef<MapRef>(null);
 
@@ -88,7 +119,7 @@ export default function Maps() {
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-slate-100">
+    <div className="relative h-dvh w-full overflow-hidden bg-slate-100">
       <Map
         ref={mapRef}
         initialViewState={viewState}
@@ -96,7 +127,7 @@ export default function Maps() {
         minZoom={minZoom}
         onMove={(e) => setViewState(e.viewState)}
         style={{ width: "100%", height: "100%" }}
-        mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+        mapStyle={currentMapStyle}
       >
         {userLocation && (
           <Marker longitude={userLocation[0]} latitude={userLocation[1]}>
@@ -133,9 +164,10 @@ export default function Maps() {
 
           <ZoomButton onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
         </div>
-        <Button variant={"primary"} size={"lg"} startIcon={<Layers />}>
+        {/* <Button variant={"primary"} size={"lg"} startIcon={<Layers />}>
           Peta Dasar
-        </Button>
+        </Button> */}
+        <MapStyleToggle isSatellite={isSatellite} onToggle={toggleMapStyle} />
       </div>
     </div>
   );

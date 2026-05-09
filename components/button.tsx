@@ -99,7 +99,7 @@ function ZoomButton({
         : "bg-primary text-primary-foreground";
 
   const interactiveClass =
-    "flex hover:cursor-pointer transition-all items-center justify-center p-2.5  hover:bg-black/20 active:not-aria-[haspopup]:translate-y-px outline-none  disabled:pointer-events-none disabled:opacity-50";
+    "flex hover:cursor-pointer transition-all items-center justify-center p-2.5  active:bg-black/20 active:not-aria-[haspopup]:translate-y-px outline-none  disabled:pointer-events-none disabled:opacity-50";
 
   return (
     <div
@@ -135,4 +135,55 @@ function ZoomButton({
   );
 }
 
-export { Button, ZoomButton, buttonVariants };
+/* =========================================
+   KOMPONEN MAP STYLE TOGGLE (SATELIT / STREET)
+========================================= */
+
+export interface MapStyleToggleProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  isSatellite: boolean;
+  onToggle: () => void;
+}
+
+function MapStyleToggle({
+  className,
+  isSatellite,
+  onToggle,
+  ...props
+}: MapStyleToggleProps) {
+  const imgSrc = isSatellite
+    ? "/images/street-basemap.png"
+    : "/images/satellite-basemap.png";
+
+  const labelText = isSatellite ? "Map" : "Satelit";
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      title={`Ubah ke ${labelText}`}
+      className={cn(
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-md border-2 border-black bg-white shadow-md outline-none transition-all",
+        "size-20 sm:size-24",
+        "hover:-translate-y-px hover:cursor-pointer active:translate-y-0.5 active:scale-[0.98]",
+        className,
+      )}
+      {...props}
+    >
+      {/* Gambar Thumbnail */}
+      <img
+        src={imgSrc}
+        alt={labelText}
+        className="h-full select-none w-full object-cover transition-transform duration-500"
+        draggable={false}
+      />
+
+      <div className="absolute bottom-0 left-0 w-full bg-black/60 py-0.5 text-center text-[10px] font-bold tracking-wider text-white backdrop-blur-sm">
+        {labelText}
+      </div>
+
+      <div className="pointer-events-none absolute inset-0 ring-2 ring-inset ring-black/10" />
+    </button>
+  );
+}
+
+export { Button, ZoomButton, MapStyleToggle, buttonVariants };
