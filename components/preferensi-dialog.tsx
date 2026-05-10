@@ -127,6 +127,7 @@ export function PreferensiDialog({ children }: { children: React.ReactNode }) {
             {!isFirstStep && (
               <Button
                 variant="outline"
+                size={"rect"}
                 startIcon={<ArrowLeft />}
                 onClick={prevStep}
               >
