@@ -106,7 +106,7 @@ function ZoomButton({
   return (
     <div
       className={cn(
-        "flex flex-col border border-black border-b-4 border-r-3 rounded-md shadow-md overflow-hidden",
+        "flex flex-col overflow-hidden rounded-md border border-r-3 border-b-4 border-black shadow-md",
         bgClass,
         className,
       )}
@@ -164,7 +164,7 @@ function MapStyleToggle({
       onClick={onToggle}
       title={`Ubah ke ${labelText}`}
       className={cn(
-        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-r-2 border-b-3 border-black bg-white shadow-md outline-none transition-all",
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-r-2 border-b-3 border-black bg-white shadow-md transition-all outline-none",
         "size-18 sm:size-22",
         "hover:-translate-y-px hover:cursor-pointer active:translate-y-0.5 active:scale-[0.98]",
         className,
@@ -175,7 +175,7 @@ function MapStyleToggle({
       <img
         src={imgSrc}
         alt={labelText}
-        className="h-full select-none w-full object-cover transition-transform duration-500"
+        className="h-full w-full object-cover transition-transform duration-500 select-none"
         draggable={false}
       />
 
@@ -183,7 +183,7 @@ function MapStyleToggle({
         {labelText}
       </div>
 
-      <div className="pointer-events-none absolute inset-0 ring-2 ring-inset ring-black/10" />
+      <div className="pointer-events-none absolute inset-0 ring-2 ring-black/10 ring-inset" />
     </button>
   );
 }
@@ -208,7 +208,7 @@ function CompassButton({
       type="button"
       onClick={onReset}
       className={cn(
-        "p-1 rounded-full border-2 border-black bg-primary shadow-md outline-none transition-all",
+        "bg-primary rounded-full border-2 border-black p-1 shadow-md transition-all outline-none",
       )}
       {...props}
     >

@@ -27,7 +27,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
+import { Slider } from "@/components/slider";
 import { Badge } from "@/components/ui/badge";
 import { useSpartaStore } from "@/store/useSpartaStore";
 
@@ -113,7 +113,7 @@ export default function SpartaWebGIS() {
             latitude={userLocation[1]}
             anchor="bottom"
           >
-            <MapPin className="h-8 w-8 text-red-600 fill-red-100 animate-bounce" />
+            <MapPin className="h-8 w-8 animate-bounce fill-red-100 text-red-600" />
           </Marker>
         )}
 
@@ -155,8 +155,8 @@ export default function SpartaWebGIS() {
             closeOnClick={false}
             offset={15} // Geser sedikit ke atas agar tidak menutupi titik
           >
-            <div className="p-2 space-y-1">
-              <h4 className="font-bold text-sm">
+            <div className="space-y-1 p-2">
+              <h4 className="text-sm font-bold">
                 {selectedWisata.properties.nama}
               </h4>
               <p className="text-xs text-slate-600">
@@ -181,15 +181,15 @@ export default function SpartaWebGIS() {
       </Map>
 
       {/* PANEL KIRI: Kontrol Bobot */}
-      <div className="absolute left-4 top-4 z-10 w-full max-w-sm">
-        <Card className="shadow-lg backdrop-blur-sm bg-white/95 border-slate-200">
+      <div className="absolute top-4 left-4 z-10 w-full max-w-sm">
+        <Card className="border-slate-200 bg-white/95 shadow-lg backdrop-blur-sm">
           <CardHeader className="pb-4">
-            <CardTitle className="text-xl font-extrabold text-slate-800 flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-xl font-extrabold text-slate-800">
               <Compass className="h-6 w-6 text-blue-600" /> SPARTA
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="pt-2 space-y-5">
+          <CardContent className="space-y-5 pt-2">
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -197,15 +197,15 @@ export default function SpartaWebGIS() {
                 onClick={handleGPS}
                 className="w-full text-xs"
               >
-                <LocateFixed className="w-4 h-4 mr-2" /> Pakai GPS Saya
+                <LocateFixed className="mr-2 h-4 w-4" /> Pakai GPS Saya
               </Button>
             </div>
 
             {/* ... (Letakkan Slider Rating, Fasilitas, Harga di sini seperti kode sebelumnya) ... */}
             <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs">
+              <div className="flex items-center justify-between text-xs">
                 <span className="font-bold">Rating (Benefit)</span>
-                <span className="text-blue-600 font-bold">{bobot.rating}%</span>
+                <span className="font-bold text-blue-600">{bobot.rating}%</span>
               </div>
               <Slider
                 value={[bobot.rating]}
@@ -215,9 +215,9 @@ export default function SpartaWebGIS() {
               />
             </div>
             <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs">
+              <div className="flex items-center justify-between text-xs">
                 <span className="font-bold">Fasilitas (Benefit)</span>
-                <span className="text-blue-600 font-bold">
+                <span className="font-bold text-blue-600">
                   {bobot.fasilitas}%
                 </span>
               </div>
@@ -229,9 +229,9 @@ export default function SpartaWebGIS() {
               />
             </div>
             <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs">
+              <div className="flex items-center justify-between text-xs">
                 <span className="font-bold">Harga (Cost)</span>
-                <span className="text-blue-600 font-bold">{bobot.harga}%</span>
+                <span className="font-bold text-blue-600">{bobot.harga}%</span>
               </div>
               <Slider
                 value={[bobot.harga]}
@@ -242,9 +242,9 @@ export default function SpartaWebGIS() {
             </div>
             {/* Slider Baru: Jarak */}
             <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs">
+              <div className="flex items-center justify-between text-xs">
                 <span className="font-bold">Jarak Rute (Cost)</span>
-                <span className="text-blue-600 font-bold">{bobot.jarak}%</span>
+                <span className="font-bold text-blue-600">{bobot.jarak}%</span>
               </div>
               <Slider
                 value={[bobot.jarak]}
@@ -259,12 +259,12 @@ export default function SpartaWebGIS() {
             <Button
               onClick={handleKalkulasi}
               disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+              className="w-full bg-blue-600 font-semibold text-white hover:bg-blue-700"
             >
               {isLoading ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                <Calculator className="w-4 h-4 mr-2" />
+                <Calculator className="mr-2 h-4 w-4" />
               )}
               {isLoading ? "Menganalisis Rute..." : "Kalkulasi Rekomendasi"}
             </Button>
@@ -274,10 +274,10 @@ export default function SpartaWebGIS() {
 
       {/* FITUR 3: PANEL KANAN (LEADERBOARD) - Muncul otomatis jika ada features */}
       {geojsonData && geojsonData.features && (
-        <div className="absolute right-4 top-4 z-10 w-full max-w-xs bottom-4">
-          <Card className="h-full flex flex-col shadow-lg backdrop-blur-sm bg-white/95 border-slate-200">
-            <CardHeader className="pb-3 border-b">
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
+        <div className="absolute top-4 right-4 bottom-4 z-10 w-full max-w-xs">
+          <Card className="flex h-full flex-col border-slate-200 bg-white/95 shadow-lg backdrop-blur-sm">
+            <CardHeader className="border-b pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm font-bold">
                 <Trophy className="h-4 w-4 text-yellow-500" /> Top Rekomendasi
               </CardTitle>
             </CardHeader>
@@ -287,20 +287,19 @@ export default function SpartaWebGIS() {
                 .map((item: any, idx: number) => (
                   <div
                     key={item.properties.id}
-                    className="p-3 border-b flex items-start gap-3 hover:bg-slate-50 cursor-pointer transition-colors"
+                    className="flex cursor-pointer items-start gap-3 border-b p-3 transition-colors hover:bg-slate-50"
                     onClick={() => setSelectedWisata(item)}
                   >
                     <div
-                      className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold text-white shrink-0
-                    ${idx === 0 ? "bg-yellow-500" : idx === 1 ? "bg-slate-400" : idx === 2 ? "bg-amber-700" : "bg-blue-500"}`}
+                      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${idx === 0 ? "bg-yellow-500" : idx === 1 ? "bg-slate-400" : idx === 2 ? "bg-amber-700" : "bg-blue-500"}`}
                     >
                       {item.properties.rank}
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-sm font-bold text-slate-800 leading-tight">
+                      <h4 className="text-sm leading-tight font-bold text-slate-800">
                         {item.properties.nama}
                       </h4>
-                      <p className="text-[11px] text-slate-500 mt-1">
+                      <p className="mt-1 text-[11px] text-slate-500">
                         Skor: {item.properties.skor_saw}
                       </p>
                     </div>

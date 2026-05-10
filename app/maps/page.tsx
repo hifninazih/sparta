@@ -19,6 +19,7 @@ import {
   Map as MapIcon,
 } from "lucide-react";
 import { SearchInput } from "@/components/search-input";
+import { PreferensiDialog } from "@/components/preferensi-dialog";
 
 export default function Maps() {
   const {
@@ -169,8 +170,8 @@ export default function Maps() {
           PANEL ATAS
       ========================================= */}
       {/* Judul web */}
-      <div className="absolute select-none gap-5 items-end flex-col hidden sm:flex top-0 left-0 z-10 ">
-        <div className="items-center flex bg-primary border-b-4 border-r-2 gap-4 p-3 rounded-br-2xl">
+      <div className="absolute top-0 left-0 z-10 hidden flex-col items-end gap-5 select-none sm:flex">
+        <div className="bg-primary flex items-center gap-4 rounded-br-2xl border-r-2 border-b-4 p-3">
           <MapIcon />
           <div className="flex flex-col">
             <h1 className="font-bold">SPARTA</h1>
@@ -180,7 +181,7 @@ export default function Maps() {
       </div>
 
       {/* Input pencarian */}
-      <div className="absolute sm:block hidden left-1/2 top-5 z-10 w-full -translate-x-1/2 sm:max-w-md">
+      <div className="absolute top-5 left-1/2 z-10 hidden w-full -translate-x-1/2 sm:block sm:max-w-md">
         <SearchInput
           onSearch={handleSearchSubmit}
           // Bisa ditambahkan properti input standar lainnya
@@ -189,13 +190,13 @@ export default function Maps() {
       </div>
 
       {/* Tombol Login */}
-      <div className="absolute gap-5 items-end flex-col sm:flex right-4 top-5 z-10 hidden">
+      <div className="absolute top-5 right-4 z-10 hidden flex-col items-end gap-5 sm:flex">
         <Button variant={"primary"} size={"lg"} startIcon={<LogIn />}>
           <p>Login</p>
         </Button>
       </div>
 
-      <div className="absolute gap-5 items-end flex-col flex right-4 top-40 z-10 ">
+      <div className="absolute top-40 right-4 z-10 flex flex-col items-end gap-5">
         {(viewState.bearing !== 0 || viewState.pitch !== 0) && (
           <CompassButton
             onReset={handleResetCompass}
@@ -207,7 +208,7 @@ export default function Maps() {
       {/* =========================================
           PANEL ATAS MOBILE
       ========================================= */}
-      <div className="absolute gap-2 pt-4 px-3 items-center justify-between flex top-0 -translate-x-1/2 left-1/2 z-10 w-full sm:hidden">
+      <div className="absolute top-0 left-1/2 z-10 flex w-full -translate-x-1/2 items-center justify-between gap-2 px-3 pt-4 sm:hidden">
         <SearchInput
           onSearch={handleSearchSubmit}
           // Bisa ditambahkan properti input standar lainnya
@@ -224,15 +225,17 @@ export default function Maps() {
           PANEL BAWAH
       ========================================= */}
       {/* Tombol Rekomendasi Wisata */}
-      <div className="absolute gap-5 items-end flex-col flex left-4 bottom-10 z-10 ">
-        <Button variant={"gradient"} size={"lg"} startIcon={<MapPinSearch />}>
-          Rekomendasi Wisata
-        </Button>
+      <div className="absolute bottom-10 left-4 z-10 flex flex-col items-end gap-5">
+        <PreferensiDialog>
+          <Button variant={"gradient"} size={"lg"} startIcon={<MapPinSearch />}>
+            Rekomendasi Wisata
+          </Button>
+        </PreferensiDialog>
       </div>
 
       {/* Tombol Cari Lokasi dan Zoom */}
-      <div className="absolute gap-5 items-end flex-col flex right-4 bottom-32 sm:bottom-35 z-10 ">
-        <div className="flex gap-2 flex-col items-center">
+      <div className="absolute right-4 bottom-32 z-10 flex flex-col items-end gap-5 sm:bottom-35">
+        <div className="flex flex-col items-center gap-2">
           <Button
             variant={"primary"}
             size={"rect"}
@@ -247,7 +250,7 @@ export default function Maps() {
       </div>
 
       {/* Toggle Basemap */}
-      <div className="absolute gap-5 items-end flex-col flex right-4 bottom-10 z-10 ">
+      <div className="absolute right-4 bottom-10 z-10 flex flex-col items-end gap-5">
         <MapStyleToggle isSatellite={isSatellite} onToggle={toggleMapStyle} />
       </div>
     </div>
