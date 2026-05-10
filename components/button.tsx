@@ -12,9 +12,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-primary border-black border-1 border-b-3 border-r-2 active:border-b-1 active:border-r-1 text-primary-foreground",
+          "bg-primary border-black border-1 border-b-3 border-r-2 active:border-b-1  text-primary-foreground",
         gradient:
-          "bg-gradient-to-tr from-[#DCFFBC] to-[#6FD1D7] border-black border-1 border-b-3 border-r-2 active:border-b-1 active:border-r-1 text-primary-foreground",
+          "bg-gradient-to-tr from-[#DCFFBC] to-[#6FD1D7] border-black border-1 border-b-3 border-r-2 active:border-b-1 text-primary-foreground",
+        outline:
+          "border border-black border-1 border-b-3 border-r-2 active:border-b-1 bg-white text-primary-foreground",
       },
       size: {
         lg: "h-10 gap-2 px-5 py-6",
@@ -106,7 +108,7 @@ function ZoomButton({
   return (
     <div
       className={cn(
-        "flex flex-col overflow-hidden rounded-md border border-r-3 border-b-4 border-black shadow-md",
+        "flex flex-col overflow-hidden rounded-md border border-r-2 border-b-3 border-black shadow-md",
         bgClass,
         className,
       )}

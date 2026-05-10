@@ -1,17 +1,30 @@
 import { Slider } from "@/components/slider";
 
-export function BobotSlider() {
+interface BobotSliderProps {
+  leftLabel: string;
+  rightLabel: string;
+  value: number;
+  onChange: (val: number) => void;
+}
+
+export function BobotSlider({
+  leftLabel,
+  rightLabel,
+  value,
+  onChange,
+}: BobotSliderProps) {
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex justify-between px-4 font-medium">
-        <p>Kiri</p>
-        <p>Kanan</p>
+    <div className="flex w-full flex-col gap-5">
+      <div className="flex justify-between px-1 text-xs font-bold text-slate-800">
+        <p>{leftLabel}</p>
+        <p>{rightLabel}</p>
       </div>
       <Slider
-        defaultValue={[75]}
+        value={[value]}
+        onValueChange={(vals) => onChange(vals[0])}
         max={100}
         step={1}
-        className="mx-auto w-full max-w-sm"
+        className="w-full cursor-grab active:cursor-grabbing"
       />
     </div>
   );

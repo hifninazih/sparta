@@ -169,19 +169,9 @@ export default function Maps() {
       {/* =========================================
           PANEL ATAS
       ========================================= */}
-      {/* Judul web */}
-      <div className="absolute top-0 left-0 z-10 hidden flex-col items-end gap-5 select-none sm:flex">
-        <div className="bg-primary flex items-center gap-4 rounded-br-2xl border-r-2 border-b-4 p-3">
-          <MapIcon />
-          <div className="flex flex-col">
-            <h1 className="font-bold">SPARTA</h1>
-            <p className="text-sm">Sistem Pemetaan dan Rekomendasi Wisata</p>
-          </div>
-        </div>
-      </div>
 
       {/* Input pencarian */}
-      <div className="absolute top-5 left-1/2 z-10 hidden w-full -translate-x-1/2 sm:block sm:max-w-md">
+      <div className="absolute top-5 left-4 z-10 hidden w-full sm:block">
         <SearchInput
           onSearch={handleSearchSubmit}
           // Bisa ditambahkan properti input standar lainnya
