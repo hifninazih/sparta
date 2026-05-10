@@ -1,7 +1,11 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import Map, { MapRef, Marker } from "@vis.gl/react-maplibre";
+import Map, {
+  MapLayerMouseEvent,
+  MapRef,
+  Marker,
+} from "@vis.gl/react-maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import {
@@ -11,15 +15,10 @@ import {
   CompassButton,
 } from "@/components/button";
 import { useMapStore } from "@/store/useMapStore";
-import {
-  Locate,
-  LocateFixed,
-  LogIn,
-  MapPinSearch,
-  Map as MapIcon,
-} from "lucide-react";
+import { Locate, LocateFixed, LogIn, MapPin, MapPinSearch } from "lucide-react";
 import { SearchInput } from "@/components/search-input";
 import { PreferensiDialog } from "@/components/preferensi-dialog";
+import { useWizardStore } from "@/store/useWizardStore";
 
 export default function Maps() {
   const {
@@ -29,9 +28,13 @@ export default function Maps() {
     minZoom,
     userLocation,
     setUserLocation,
+    selectedLocation,
+    setSelectedLocation,
     isSatellite,
     toggleMapStyle,
   } = useMapStore();
+  const { isPickingLocation, setIsPickingLocation, setIsOpen, setStep } =
+    useWizardStore();
 
   const streetStyle =
     "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json";
@@ -145,6 +148,18 @@ export default function Maps() {
     // Di sini kamu bisa memanggil API pencarian atau filter data GeoJSON
   };
 
+  const handleMapClick = (event: MapLayerMouseEvent) => {
+    if (!isPickingLocation) return;
+
+    const { lng, lat } = event.lngLat;
+
+    setSelectedLocation([lng, lat]);
+
+    setIsPickingLocation(false);
+    setStep(1);
+    setIsOpen(true);
+  };
+
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-slate-100">
       <Map
@@ -155,12 +170,28 @@ export default function Maps() {
         onMove={(e) => setViewState(e.viewState)}
         style={{ width: "100%", height: "100%" }}
         mapStyle={currentMapStyle}
+        onClick={handleMapClick}
+        cursor={isPickingLocation ? "crosshair" : "grab"}
       >
+        {/* MARKER 1: LOKASI GPS ASLI (Biru Berdenyut) */}
         {userLocation && (
           <Marker longitude={userLocation[0]} latitude={userLocation[1]}>
-            <div className="relative flex items-center justify-center">
+            <div className="pointer-events-none relative flex items-center justify-center">
               <div className="absolute h-8 w-8 animate-ping rounded-full bg-blue-600 opacity-75"></div>
               <div className="relative h-4 w-4 rounded-full border-2 border-white bg-blue-600 shadow-md"></div>
+            </div>
+          </Marker>
+        )}
+
+        {/* MARKER 2: TITIK AWAL PERJALANAN (Pin Merah) */}
+        {selectedLocation && (
+          <Marker
+            longitude={selectedLocation[0]}
+            latitude={selectedLocation[1]}
+            anchor="bottom"
+          >
+            <div className="cursor-pointer text-red-600 drop-shadow-md transition-transform hover:scale-110">
+              <MapPin className="size-10 fill-red-100" strokeWidth={2} />
             </div>
           </Marker>
         )}
@@ -171,7 +202,7 @@ export default function Maps() {
       ========================================= */}
 
       {/* Input pencarian */}
-      <div className="absolute top-5 left-4 z-10 hidden w-full sm:block">
+      <div className="absolute top-5 left-4 z-10 hidden sm:block">
         <SearchInput
           onSearch={handleSearchSubmit}
           // Bisa ditambahkan properti input standar lainnya

@@ -1,3 +1,4 @@
+// components/bobot-slider.tsx
 import { Slider } from "@/components/slider";
 
 interface BobotSliderProps {

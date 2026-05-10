@@ -1,3 +1,4 @@
+// preferensi-dialog.tsx
 "use client"; // Pastikan ini ada karena kita menggunakan Zustand dan interaksi UI
 
 import { Button } from "@/components/button";
@@ -19,6 +20,8 @@ import {
   Search,
 } from "lucide-react";
 import { useWizardStore } from "@/store/useWizardStore";
+import { useMapStore } from "@/store/useMapStore";
+import { useState } from "react";
 
 // --- KONFIGURASI LANGKAH WIZARD ---
 const WIZARD_STEPS = [
@@ -64,11 +67,51 @@ export function PreferensiDialog({ children }: { children: React.ReactNode }) {
     nextStep,
     prevStep,
     setPreference,
+    setIsPickingLocation,
   } = useWizardStore();
+  const { setUserLocation, setSelectedLocation } = useMapStore();
+
+  const [isLoadingGPS, setIsLoadingGPS] = useState(false);
 
   const currentStepData = WIZARD_STEPS[step - 1];
   const isFirstStep = step === 1;
   const isLastStep = step === WIZARD_STEPS.length;
+
+  // --- FUNGSI 1: LOKASI SAYA (Titik Awal = GPS) ---
+  const handleMyLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Browser Anda tidak mendukung fitur lokasi.");
+      return;
+    }
+
+    setIsLoadingGPS(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { longitude, latitude } = position.coords;
+
+        // Simpan sebagai posisi GPS pengguna di peta
+        setUserLocation([longitude, latitude]);
+
+        // Simpan JUGA sebagai titik awal perjalanan untuk algoritma
+        setSelectedLocation([longitude, latitude]);
+
+        setIsLoadingGPS(false);
+        // nextStep(); // Lanjut ke step 2
+      },
+      (error) => {
+        console.error("Gagal:", error);
+        alert("Gagal mengakses lokasi.");
+        setIsLoadingGPS(false);
+      },
+      { enableHighAccuracy: true },
+    );
+  };
+
+  // --- FUNGSI 2: PILIH LOKASI MANUAL ---
+  const handlePickLocation = () => {
+    setIsOpen(false);
+    setIsPickingLocation(true);
+  };
 
   const handleKalkulasi = () => {
     console.log("Mulai Kalkulasi SAW dengan data:", {
@@ -94,10 +137,21 @@ export function PreferensiDialog({ children }: { children: React.ReactNode }) {
         <div className="flex min-h-40 flex-col items-center justify-center p-6 pt-4">
           {currentStepData.type === "location" && (
             <div className="flex w-fit justify-center gap-4">
-              <Button variant="primary" size="rect" endIcon={<MapPinPlus />}>
+              <Button
+                variant="primary"
+                size="rect"
+                endIcon={<MapPinPlus />}
+                onClick={handlePickLocation}
+              >
                 Pilih Lokasi
               </Button>
-              <Button variant="primary" size="rect" endIcon={<LocateFixed />}>
+              <Button
+                variant="primary"
+                size="rect"
+                endIcon={<LocateFixed />}
+                onClick={handleMyLocation}
+                disabled={isLoadingGPS}
+              >
                 Lokasi Saya
               </Button>
             </div>

@@ -1,3 +1,4 @@
+// useMapStore.ts
 import { create } from "zustand";
 import type { ViewState } from "@vis.gl/react-maplibre";
 
@@ -7,11 +8,15 @@ interface MapState {
   minZoom: number;
   maxZoom: number;
 
+  // 1. Lokasi GPS Asli (Titik Biru)
   userLocation: [number, number] | null;
-
   setUserLocation: (loc: [number, number] | null) => void;
-  setViewState: (viewState: ViewState) => void;
 
+  // 2. Lokasi Acuan Wisata (Titik Merah hasil Wizard)
+  selectedLocation: [number, number] | null;
+  setSelectedLocation: (loc: [number, number] | null) => void;
+
+  setViewState: (viewState: ViewState) => void;
   isSatellite: boolean;
   toggleMapStyle: () => void;
 }
@@ -29,10 +34,12 @@ export const useMapStore = create<MapState>((set) => ({
   maxZoom: 20,
 
   userLocation: null,
-
   setUserLocation: (loc) => set({ userLocation: loc }),
-  setViewState: (newViewState) => set({ viewState: newViewState }),
 
+  selectedLocation: null,
+  setSelectedLocation: (loc) => set({ selectedLocation: loc }),
+
+  setViewState: (newViewState) => set({ viewState: newViewState }),
   isSatellite: false,
   toggleMapStyle: () => set((state) => ({ isSatellite: !state.isSatellite })),
 }));
