@@ -11,7 +11,14 @@ import {
   CompassButton,
 } from "@/components/button";
 import { useMapStore } from "@/store/useMapStore";
-import { Locate, LocateFixed, LogIn, MapPinSearch } from "lucide-react";
+import {
+  Locate,
+  LocateFixed,
+  LogIn,
+  MapPinSearch,
+  Map as MapIcon,
+} from "lucide-react";
+import { SearchInput } from "@/components/search-input";
 
 export default function Maps() {
   const {
@@ -132,6 +139,11 @@ export default function Maps() {
     return <Locate />;
   };
 
+  const handleSearchSubmit = (keyword: string) => {
+    console.log("Mencari wisata dengan kata kunci:", keyword);
+    // Di sini kamu bisa memanggil API pencarian atau filter data GeoJSON
+  };
+
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-slate-100">
       <Map
@@ -153,15 +165,33 @@ export default function Maps() {
         )}
       </Map>
 
-      <div className="absolute gap-5 items-end flex-col flex left-4 top-5 z-10 ">
-        <Button variant={"gradient"} size={"lg"} startIcon={<MapPinSearch />}>
-          Rekomendasi Wisata
-        </Button>
+      {/* =========================================
+          PANEL ATAS
+      ========================================= */}
+      {/* Judul web */}
+      <div className="absolute select-none gap-5 items-end flex-col hidden sm:flex top-0 left-0 z-10 ">
+        <div className="items-center flex bg-primary border-b-4 border-r-2 gap-4 p-3 rounded-br-2xl">
+          <MapIcon />
+          <div className="flex flex-col">
+            <h1 className="font-bold">SPARTA</h1>
+            <p className="text-sm">Sistem Pemetaan dan Rekomendasi Wisata</p>
+          </div>
+        </div>
       </div>
 
-      <div className="absolute gap-5 items-end flex-col flex right-4 top-5 z-10 ">
+      {/* Input pencarian */}
+      <div className="absolute sm:block hidden left-1/2 top-5 z-10 w-full -translate-x-1/2 sm:max-w-md">
+        <SearchInput
+          onSearch={handleSearchSubmit}
+          // Bisa ditambahkan properti input standar lainnya
+          // onChange={(e) => console.log(e.target.value)}
+        />
+      </div>
+
+      {/* Tombol Login */}
+      <div className="absolute gap-5 items-end flex-col sm:flex right-4 top-5 z-10 hidden">
         <Button variant={"primary"} size={"lg"} startIcon={<LogIn />}>
-          Login
+          <p>Login</p>
         </Button>
       </div>
 
@@ -174,7 +204,34 @@ export default function Maps() {
         )}
       </div>
 
-      <div className="absolute gap-5 items-end flex-col flex right-4 bottom-35 z-10 ">
+      {/* =========================================
+          PANEL ATAS MOBILE
+      ========================================= */}
+      <div className="absolute gap-2 pt-4 px-3 items-center justify-between flex top-0 -translate-x-1/2 left-1/2 z-10 w-full sm:hidden">
+        <SearchInput
+          onSearch={handleSearchSubmit}
+          // Bisa ditambahkan properti input standar lainnya
+          // onChange={(e) => console.log(e.target.value)}
+        />
+        <Button
+          variant={"primary"}
+          size={"rect"}
+          startIcon={<LogIn />}
+        ></Button>
+      </div>
+
+      {/* =========================================
+          PANEL BAWAH
+      ========================================= */}
+      {/* Tombol Rekomendasi Wisata */}
+      <div className="absolute gap-5 items-end flex-col flex left-4 bottom-10 z-10 ">
+        <Button variant={"gradient"} size={"lg"} startIcon={<MapPinSearch />}>
+          Rekomendasi Wisata
+        </Button>
+      </div>
+
+      {/* Tombol Cari Lokasi dan Zoom */}
+      <div className="absolute gap-5 items-end flex-col flex right-4 bottom-32 sm:bottom-35 z-10 ">
         <div className="flex gap-2 flex-col items-center">
           <Button
             variant={"primary"}
@@ -189,6 +246,7 @@ export default function Maps() {
         </div>
       </div>
 
+      {/* Toggle Basemap */}
       <div className="absolute gap-5 items-end flex-col flex right-4 bottom-10 z-10 ">
         <MapStyleToggle isSatellite={isSatellite} onToggle={toggleMapStyle} />
       </div>

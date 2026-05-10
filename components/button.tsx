@@ -7,13 +7,14 @@ import { Minus, Plus } from "lucide-react";
 import compassIcon from "@/assets/compass.svg";
 
 const buttonVariants = cva(
-  "group/button hover:translate-y-[-1px] active:scale-[0.98] active:not-aria-[haspopup]:translate-y-[2px] hover:cursor-pointer inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-sm font-semibold whitespace-nowrap transition-all outline-none w-fit select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 shadow-md",
+  "group/button hover:translate-y-[-1px] active:scale-[0.99] active:not-aria-[haspopup]:translate-y-[1px] hover:cursor-pointer inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-sm font-semibold whitespace-nowrap transition-all outline-none w-fit select-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 shadow-md",
   {
     variants: {
       variant: {
-        primary: "bg-primary border-black border-2  text-primary-foreground",
+        primary:
+          "bg-primary border-black border-1 border-b-3 border-r-2 active:border-b-1 active:border-r-1 text-primary-foreground",
         gradient:
-          "bg-gradient-to-tr from-[#DCFFBC] to-[#6FD1D7] border-black border-2  text-primary-foreground",
+          "bg-gradient-to-tr from-[#DCFFBC] to-[#6FD1D7] border-black border-1 border-b-3 border-r-2 active:border-b-1 active:border-r-1 text-primary-foreground",
       },
       size: {
         lg: "h-10 gap-2 px-5 py-6",
@@ -105,7 +106,7 @@ function ZoomButton({
   return (
     <div
       className={cn(
-        "flex flex-col border-black border-2 rounded-md shadow-md overflow-hidden",
+        "flex flex-col border border-black border-b-4 border-r-3 rounded-md shadow-md overflow-hidden",
         bgClass,
         className,
       )}
@@ -155,7 +156,7 @@ function MapStyleToggle({
     ? "/images/street-basemap.png"
     : "/images/satellite-basemap.png";
 
-  const labelText = isSatellite ? "Map" : "Satelit";
+  const labelText = isSatellite ? "Peta" : "Satelit";
 
   return (
     <button
@@ -163,7 +164,7 @@ function MapStyleToggle({
       onClick={onToggle}
       title={`Ubah ke ${labelText}`}
       className={cn(
-        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-md border-2 border-black bg-white shadow-md outline-none transition-all",
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-r-2 border-b-3 border-black bg-white shadow-md outline-none transition-all",
         "size-18 sm:size-22",
         "hover:-translate-y-px hover:cursor-pointer active:translate-y-0.5 active:scale-[0.98]",
         className,
@@ -215,7 +216,7 @@ function CompassButton({
         <img
           src={compassIcon.src}
           alt="Compass"
-          className="size-6 sm:size-7 hover:cursor-pointer"
+          className="size-6 hover:cursor-pointer"
           style={{ transform: `rotate(${-bearing}deg)` }}
         />
       </span>
