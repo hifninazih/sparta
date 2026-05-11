@@ -18,6 +18,9 @@ import {
   MapPinPlus,
   LocateFixed,
   Search,
+  Trash2,
+  Loader2,
+  MapPinCheck,
 } from "lucide-react";
 import { useWizardStore } from "@/store/useWizardStore";
 import { useMapStore } from "@/store/useMapStore";
@@ -54,6 +57,14 @@ const WIZARD_STEPS = [
     leftLabel: "Biasa saja cukup",
     rightLabel: "Wajib lengkap",
   },
+  {
+    id: 5,
+    title: "Apakah rating wisata penting bagi Anda?",
+    type: "slider",
+    key: "rating",
+    leftLabel: "Tidak penting",
+    rightLabel: "Sangat penting",
+  },
 ] as const;
 
 export function PreferensiDialog({ children }: { children: React.ReactNode }) {
@@ -64,13 +75,14 @@ export function PreferensiDialog({ children }: { children: React.ReactNode }) {
     jarak,
     harga,
     fasilitas,
+    rating,
     nextStep,
     prevStep,
     setPreference,
     setIsPickingLocation,
   } = useWizardStore();
-  const { setUserLocation, setSelectedLocation } = useMapStore();
-
+  const { setUserLocation, selectedLocation, setSelectedLocation } =
+    useMapStore();
   const [isLoadingGPS, setIsLoadingGPS] = useState(false);
 
   const currentStepData = WIZARD_STEPS[step - 1];
@@ -113,11 +125,15 @@ export function PreferensiDialog({ children }: { children: React.ReactNode }) {
     setIsPickingLocation(true);
   };
 
+  const handleClearLocation = () => {
+    setSelectedLocation(null);
+  };
   const handleKalkulasi = () => {
     console.log("Mulai Kalkulasi SAW dengan data:", {
       jarak,
       harga,
       fasilitas,
+      rating,
     });
     setIsOpen(false);
   };
@@ -135,28 +151,70 @@ export function PreferensiDialog({ children }: { children: React.ReactNode }) {
 
         {/* --- AREA KONTEN DINAMIS --- */}
         <div className="flex min-h-40 flex-col items-center justify-center p-6 pt-4">
+          {/* =========================================
+              LOGIKA RENDER LANGKAH 1 (LOKASI)
+          ========================================= */}
           {currentStepData.type === "location" && (
-            <div className="flex w-fit justify-center gap-4">
-              <Button
-                variant="primary"
-                size="rect"
-                endIcon={<MapPinPlus />}
-                onClick={handlePickLocation}
-              >
-                Pilih Lokasi
-              </Button>
-              <Button
-                variant="primary"
-                size="rect"
-                endIcon={<LocateFixed />}
-                onClick={handleMyLocation}
-                disabled={isLoadingGPS}
-              >
-                Lokasi Saya
-              </Button>
+            <div className="flex w-full flex-col items-center justify-center">
+              {/* Jika Lokasi Sudah Terpilih */}
+              {selectedLocation ? (
+                <div className="flex w-full max-w-70 items-center justify-between rounded-md border-2 border-black bg-[#DCFFBC] p-3 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="rounded-full border border-black bg-white p-1.5">
+                      <MapPinCheck
+                        className="size-5 shrink-0 text-black"
+                        fill="#fff"
+                      />
+                    </div>
+                    <div className="flex flex-col font-mono text-[11px] leading-tight font-bold text-black sm:text-xs">
+                      <span>Lat: {selectedLocation[1].toFixed(5)}</span>
+                      <span>Lng: {selectedLocation[0].toFixed(5)}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleClearLocation}
+                    className="flex shrink-0 items-center justify-center rounded-md border-2 border-black bg-white p-2 transition-all hover:cursor-pointer hover:bg-red-400 hover:text-white active:translate-y-0.5 active:scale-95"
+                    title="Hapus lokasi"
+                  >
+                    <Trash2 className="size-4" strokeWidth={2.5} />
+                  </button>
+                </div>
+              ) : (
+                /* Jika Lokasi Belum Terpilih (Tombol Awal) */
+                <div className="flex w-fit justify-center gap-4">
+                  <Button
+                    variant="primary"
+                    size="rect"
+                    className="text-sm"
+                    endIcon={<MapPinPlus />}
+                    onClick={handlePickLocation}
+                  >
+                    Pilih di Peta
+                  </Button>
+                  <Button
+                    variant="primary"
+                    size="rect"
+                    className="text-sm"
+                    endIcon={
+                      isLoadingGPS ? (
+                        <Loader2 className="animate-spin" />
+                      ) : (
+                        <LocateFixed />
+                      )
+                    }
+                    onClick={handleMyLocation}
+                    disabled={isLoadingGPS}
+                  >
+                    {isLoadingGPS ? "Mencari..." : "Lokasi Saya"}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
+          {/* =========================================
+              LOGIKA RENDER LANGKAH 2-4 (SLIDER)
+          ========================================= */}
           {currentStepData.type === "slider" && (
             <BobotSlider
               leftLabel={currentStepData.leftLabel}
@@ -166,7 +224,9 @@ export function PreferensiDialog({ children }: { children: React.ReactNode }) {
                   ? jarak
                   : currentStepData.key === "harga"
                     ? harga
-                    : fasilitas
+                    : currentStepData.key === "fasilitas"
+                      ? fasilitas
+                      : rating
               }
               onChange={(val) => setPreference(currentStepData.key as any, val)}
             />
@@ -194,6 +254,7 @@ export function PreferensiDialog({ children }: { children: React.ReactNode }) {
               size={"rect"}
               endIcon={isLastStep ? <Search /> : <ArrowRight />}
               onClick={isLastStep ? handleKalkulasi : nextStep}
+              disabled={isFirstStep && !selectedLocation}
             >
               {isLastStep ? "Cari Wisata" : "Selanjutnya"}
             </Button>

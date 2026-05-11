@@ -8,13 +8,17 @@ interface WizardState {
   jarak: number;
   harga: number;
   fasilitas: number;
+  rating: number;
 
   setIsOpen: (open: boolean) => void;
   setStep: (step: number) => void;
   setIsPickingLocation: (val: boolean) => void; // TAMBAHAN: Aksi
   nextStep: () => void;
   prevStep: () => void;
-  setPreference: (key: "jarak" | "harga" | "fasilitas", value: number) => void;
+  setPreference: (
+    key: "jarak" | "harga" | "fasilitas" | "rating",
+    value: number,
+  ) => void;
   resetWizard: () => void;
 }
 
@@ -26,12 +30,13 @@ export const useWizardStore = create<WizardState>((set) => ({
   jarak: 50,
   harga: 50,
   fasilitas: 50,
+  rating: 50,
 
   setIsOpen: (open) => set({ isOpen: open }),
   setStep: (step) => set({ step }),
   setIsPickingLocation: (val) => set({ isPickingLocation: val }),
 
-  nextStep: () => set((state) => ({ step: Math.min(state.step + 1, 4) })),
+  nextStep: () => set((state) => ({ step: Math.min(state.step + 1, 5) })),
   prevStep: () => set((state) => ({ step: Math.max(state.step - 1, 1) })),
   setPreference: (key, value) => set({ [key]: value }),
 
@@ -41,6 +46,7 @@ export const useWizardStore = create<WizardState>((set) => ({
       jarak: 50,
       harga: 50,
       fasilitas: 50,
+      rating: 50,
       isPickingLocation: false,
     }),
 }));
