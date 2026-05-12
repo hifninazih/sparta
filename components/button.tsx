@@ -196,12 +196,14 @@ function MapStyleToggle({
 
 export interface CompassButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   bearing: number;
+  pitch: number; // 1. Tambahkan prop pitch
   onReset: () => void;
 }
 
 function CompassButton({
   className,
   bearing,
+  pitch,
   onReset,
   ...props
 }: CompassButtonProps) {
@@ -211,15 +213,24 @@ function CompassButton({
       onClick={onReset}
       className={cn(
         "bg-primary rounded-full border-2 border-black p-1 shadow-md transition-all outline-none",
+        className,
       )}
       {...props}
     >
-      <span className="flex items-center justify-center">
+      {/* 2. Tambahkan perspective agar efek 3D terlihat lebih nyata/punya kedalaman */}
+      <span
+        className="flex items-center justify-center"
+        style={{ perspective: "150px" }}
+      >
         <img
           src={compassIcon.src}
           alt="Compass"
           className="size-6 hover:cursor-pointer"
-          style={{ transform: `rotate(${-bearing}deg)` }}
+          // 3. Urutan transform SANGAT PENTING:
+          // Miringkan dulu ke belakang (rotateX), baru putar arah utaranya (rotate)
+          style={{
+            transform: `rotateX(${pitch}deg) rotate(${-bearing}deg)`,
+          }}
         />
       </span>
     </button>

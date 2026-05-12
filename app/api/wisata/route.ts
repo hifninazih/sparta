@@ -1,143 +1,87 @@
-import { NextResponse } from "next/server";
-import pool from "@/lib/db";
+import { NextRequest, NextResponse } from "next/server";
+import { pool } from "@/lib/db";
 
-export async function POST(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { bobot, userLocation } = body;
+    const searchParams = request.nextUrl.searchParams;
 
-    // Default ke Tugu Jogja jika user belum set lokasi
-    const lng = userLocation ? userLocation[0] : 110.367;
-    const lat = userLocation ? userLocation[1] : -7.7829;
+    const search = searchParams.get("s");
+    const kategori = searchParams.get("c");
 
-    // 1. QUERY GABUNGAN: POSTGIS LIMITER + PGROUTING DIJKSTRA
-    const dbQuery = `
-      WITH start_node AS (
-        -- Cari simpul jalan terdekat dari lokasi user
-        SELECT source AS id 
-        FROM roads_java_2po_4pgr 
-        ORDER BY geom_way <-> ST_SetSRID(ST_MakePoint($1, $2), 4326) 
-        LIMIT 1
-      ),
-      destinations AS (
-        -- Filter 50 wisata terdekat (jarak lurus) & cari simpul tujuannya
-        SELECT 
-          w.id as wisata_id, w.name, w.rating, w.price, w.jumlah_fasilitas, w.geom,
-          ST_AsGeoJSON(w.geom)::jsonb as geometry,
-          (
-            SELECT target AS id 
-            FROM roads_java_2po_4pgr 
-            ORDER BY geom_way <-> w.geom 
-            LIMIT 1
-          ) as target_node
-        FROM vw_wisata_diy w
-        ORDER BY w.geom <-> ST_SetSRID(ST_MakePoint($1, $2), 4326)
-        LIMIT 50
-      ),
-      routing AS (
-        -- Hitung rute jarak nyata ke 50 destinasi sekaligus
-        SELECT end_vid, agg_cost as jarak_nyata_km
-        FROM pgr_dijkstra(
-          'SELECT id, source, target, km AS cost, km AS reverse_cost FROM roads_java_2po_4pgr',
-          (SELECT id FROM start_node),
-          (SELECT array_agg(target_node) FROM destinations),
-          false 
-        )
-        WHERE node = end_vid
-      )
-      -- Gabungkan hasil & ubah KM ke Meter
-      SELECT 
-        d.wisata_id as id, d.name, d.rating, d.price, d.jumlah_fasilitas, 
-        d.geometry, COALESCE(r.jarak_nyata_km * 1000, 999999) as jarak_nyata
-      FROM destinations d
-      LEFT JOIN routing r ON d.target_node = r.end_vid;
-    `;
+    // 1. Ambil koordinat asal dari query params
+    const originLng = searchParams.get("lng");
+    const originLat = searchParams.get("lat");
 
-    const { rows } = await pool.query(dbQuery, [lng, lat]);
+    let whereClause = `WHERE 1=1`;
+    const values: any[] = [];
+    let paramIndex = 1;
 
-    if (rows.length === 0) {
-      return NextResponse.json(
-        { error: "Tidak ada data wisata di sekitar lokasi." },
-        { status: 404 },
-      );
+    // Tambahkan filter search & kategori seperti sebelumnya
+    if (search) {
+      whereClause += ` AND name ILIKE $${paramIndex}`;
+      values.push(`%${search}%`);
+      paramIndex++;
     }
 
-    // 2. TAHAP SAW: MENCARI NILAI MAX (BENEFIT) & MIN (COST)
-    const maxRating = Math.max(...rows.map((r) => Number(r.rating) || 0));
-    const maxFasilitas = Math.max(
-      ...rows.map((r) => Number(r.jumlah_fasilitas) || 0),
-    );
+    if (kategori) {
+      whereClause += ` AND category = $${paramIndex}`;
+      values.push(kategori);
+      paramIndex++;
+    }
 
-    // Untuk Cost (Harga & Jarak), abaikan nilai 0 agar tidak merusak perhitungan
-    const validPrices = rows.map((r) => Number(r.price)).filter((p) => p > 0);
-    const minPrice = validPrices.length > 0 ? Math.min(...validPrices) : 0;
+    // 2. Siapkan Query dengan Perhitungan Jarak PostGIS
+    // Kita gunakan ST_DistanceSphere untuk mendapatkan jarak dalam satuan METER
+    let distanceField = "NULL as distance_m"; // Default jika lng/lat tidak dikirim
+    let orderBy = "rating DESC"; // Default urutan berdasarkan rating
 
-    const validDistances = rows
-      .map((r) => Number(r.jarak_nyata))
-      .filter((j) => j > 0);
-    const minJarak =
-      validDistances.length > 0 ? Math.min(...validDistances) : 1;
+    if (originLng && originLat) {
+      const lon = parseFloat(originLng);
+      const lat = parseFloat(originLat);
 
-    // 3. TAHAP SAW: NORMALISASI MATRIKS & KALKULASI SKOR
-    const results = rows.map((row) => {
-      const cRating = Number(row.rating) || 0;
-      const cFasilitas = Number(row.jumlah_fasilitas) || 0;
-      const cPrice = Number(row.price) || 0;
-      const cJarak = Number(row.jarak_nyata);
+      // ST_DistanceSphere menghitung jarak antara titik asal dan kolom geom di DB
+      distanceField = `ST_DistanceSphere(geom, ST_MakePoint(${lon}, ${lat})) as distance_m`;
 
-      // Normalisasi
-      const normRating = maxRating === 0 ? 0 : cRating / maxRating; // Benefit
-      const normFasilitas = maxFasilitas === 0 ? 0 : cFasilitas / maxFasilitas; // Benefit
-      const normPrice = cPrice === 0 ? 1 : minPrice / cPrice; // Cost
-      const normJarak = cJarak === 0 ? 1 : minJarak / cJarak; // Cost
+      // Jika ada lokasi, kita bisa prioritaskan urutan berdasarkan yang terdekat
+      orderBy = `distance_m ASC`;
+    }
 
-      // Konversi bobot persen ke desimal (contoh: 30% jadi 0.3)
-      const wRating = bobot.rating / 100;
-      const wFasilitas = bobot.fasilitas / 100;
-      const wPrice = bobot.harga / 100;
-      const wJarak = bobot.jarak / 100;
+    const dataQuery = `
+      SELECT 
+        id, 
+        name, 
+        category, 
+        price, 
+        rating, 
+        reviews,
+        all_facility,
+        ST_X(geom) as lng, 
+        ST_Y(geom) as lat,
+        ${distanceField}
+      FROM wisata_diy 
+      ${whereClause}
+      ORDER BY ${orderBy}
+    `;
 
-      // Skor Akhir SAW
-      const finalScore =
-        normRating * wRating +
-        normFasilitas * wFasilitas +
-        normPrice * wPrice +
-        normJarak * wJarak;
+    const client = await pool.connect();
+    try {
+      const result = await client.query(dataQuery, values);
+      const countResult = await client.query(
+        `SELECT COUNT(*) FROM wisata_diy ${whereClause}`,
+        values,
+      );
 
-      return {
-        type: "Feature",
-        geometry: row.geometry,
-        properties: {
-          id: row.id,
-          nama: row.nama,
-          rating: cRating,
-          jarak_nyata_meter: Math.round(cJarak),
-          skor_saw: finalScore.toFixed(4),
-          rank: 0,
+      return NextResponse.json(result.rows, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "X-Total-Count": countResult.rows[0].count,
         },
-      };
-    });
-
-    // 4. URUTKAN BERDASARKAN SKOR TERTINGGI
-    results.sort(
-      (a, b) => Number(b.properties.skor_saw) - Number(a.properties.skor_saw),
-    );
-
-    // 5. INJEKSI RANKING (Untuk pewarnaan di Peta & Leaderboard)
-    results.forEach((fitur, index) => {
-      fitur.properties.rank = index + 1;
-    });
-
-    // Kembalikan dalam format GeoJSON FeatureCollection
-    return NextResponse.json({
-      type: "FeatureCollection",
-      features: results,
-    });
+      });
+    } finally {
+      client.release();
+    }
   } catch (error) {
-    console.error("API Route Error:", error);
-    return NextResponse.json(
-      { error: "Gagal melakukan kalkulasi SPK." },
-      { status: 500 },
-    );
+    console.error("API Error:", error);
+    return NextResponse.json({ success: false }, { status: 500 });
   }
 }

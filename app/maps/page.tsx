@@ -175,7 +175,12 @@ export default function Maps() {
       >
         {/* MARKER 1: LOKASI GPS ASLI (Biru Berdenyut) */}
         {userLocation && (
-          <Marker longitude={userLocation[0]} latitude={userLocation[1]}>
+          <Marker
+            longitude={userLocation[0]}
+            latitude={userLocation[1]}
+            pitchAlignment="map" // Menempel/rebah mengikuti kemiringan peta (pitch)
+            rotationAlignment="map" // Berputar mengikuti arah peta (bearing)
+          >
             <div className="pointer-events-none relative flex items-center justify-center">
               <div className="absolute h-8 w-8 animate-ping rounded-full bg-blue-600 opacity-75"></div>
               <div className="relative h-4 w-4 rounded-full border-2 border-white bg-blue-600 shadow-md"></div>
@@ -222,6 +227,7 @@ export default function Maps() {
           <CompassButton
             onReset={handleResetCompass}
             bearing={viewState.bearing}
+            pitch={viewState.pitch}
           />
         )}
       </div>
