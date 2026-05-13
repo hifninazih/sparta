@@ -178,13 +178,10 @@ export default function Maps() {
   };
 
   // Fungsi yang dipanggil ketika tombol diklik
-  const handleSearchThisArea = () => {
+  const handleSearchThisArea = async () => {
     if (!mapRef.current) return;
 
-    // Sembunyikan tombol
-    setShowSearchAreaBtn(false);
-
-    // Ambil batas koordinat layar saat ini (BBOX)
+    // Ambil batas BBOX dari peta
     const bounds = mapRef.current.getMap().getBounds();
     const bbox = {
       minLng: bounds.getWest(),
@@ -193,10 +190,11 @@ export default function Maps() {
       maxLat: bounds.getNorth(),
     };
 
-    console.log("Mencari di area:", bbox);
+    // 1. Jalankan pencarian dan tunggu (akan memicu isSearching = true di Zustand)
+    await executeSearch("", "", bbox);
 
-    // TODO: Kirim parameter BBOX ini ke API pencarianmu
-    executeSearch("", "", bbox);
+    // 2. SETELAH SELESAI mencari, baru sembunyikan state tombol
+    setShowSearchAreaBtn(false);
   };
 
   return (
@@ -207,14 +205,15 @@ export default function Maps() {
       <div
         className={cn(
           "absolute top-20 left-1/2 z-20 flex -translate-x-1/2 transition-all duration-300 sm:top-6",
-          showSearchAreaBtn && recommendations.length === 0
+          // UBAH LOGIKA DI SINI: Tetap tampilkan jika sedang loading (isSearching)
+          (showSearchAreaBtn || isSearching) && recommendations.length === 0
             ? "pointer-events-auto translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-10 opacity-0",
         )}
       >
         <button
           onClick={handleSearchThisArea}
-          disabled={isSearching} // Matikan interaksi klik saat sedang mencari
+          disabled={isSearching}
           className={cn(
             "group flex items-center gap-2 rounded-full border border-black bg-white px-5 py-2 text-sm font-bold text-black shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all",
             "hover:-translate-y-1 hover:bg-[#DCFFBC] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-[2px_2px_0px_rgba(0,0,0,1)]",
@@ -323,9 +322,7 @@ export default function Maps() {
         })}
 
         {/* 3. Render Marker Hasil Pencarian / "Telusuri Area Ini" */}
-        {/* Logika: Tampilkan hanya jika tidak sedang menampilkan hasil SAW agar peta tidak penuh */}
-        {!isSearching &&
-          recommendations.length === 0 &&
+        {recommendations.length === 0 &&
           results.map((wisata) => (
             <Marker
               key={`search-${wisata.id}`}

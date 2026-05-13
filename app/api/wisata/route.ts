@@ -3,6 +3,7 @@ import { pool } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   try {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     const searchParams = request.nextUrl.searchParams;
 
     // 1. Tangkap parameter standar (Keyword & Kategori)

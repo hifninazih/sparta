@@ -21,7 +21,6 @@ interface SearchState {
   setResults: (results: WisataSearchResult[]) => void;
   setIsSearching: (status: boolean) => void;
 
-  // Fungsi eksekusi pencarian ke API
   executeSearch: (
     keyword: string,
     category: string,
@@ -30,9 +29,9 @@ interface SearchState {
   clearSearch: () => void;
 }
 
-export const useSearchStore = create<SearchState>((set) => ({
+export const useSearchStore = create<SearchState>((set, get) => ({
   keyword: "",
-  category: "Semua", // Default tanpa filter
+  category: "Semua",
   results: [],
   isSearching: false,
 
@@ -42,13 +41,15 @@ export const useSearchStore = create<SearchState>((set) => ({
   setIsSearching: (status) => set({ isSearching: status }),
 
   executeSearch: async (keyword, category, bbox) => {
+    // 1. Set isSearching ke true, TAPI JANGAN ubah/hapus 'results'.
+    // Ini yang membuat marker lama tetap nongkrong di peta selama API loading.
     set({ isSearching: true });
+
     try {
       const params = new URLSearchParams();
       if (keyword) params.append("s", keyword);
       if (category !== "Semua") params.append("c", category);
 
-      // Jika BBOX dikirim (dari klik tombol "Telusuri area ini")
       if (bbox) {
         params.append("minLng", bbox.minLng.toString());
         params.append("minLat", bbox.minLat.toString());
@@ -57,11 +58,13 @@ export const useSearchStore = create<SearchState>((set) => ({
       }
 
       const response = await fetch(`/api/wisata?${params.toString()}`);
-      const data = await response.json();
+      const data: WisataSearchResult[] = await response.json();
 
+      // 2. TIMPA (Overwrite) data lama dengan data yang baru saja datang
       set({ results: data, isSearching: false });
     } catch (error) {
       console.error("Gagal mencari wisata", error);
+      // Tetap kembalikan state loading ke false jika gagal
       set({ isSearching: false });
     }
   },
