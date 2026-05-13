@@ -18,7 +18,10 @@ import { useMapStore } from "@/store/useMapStore";
 import { Locate, LocateFixed, LogIn, MapPin, MapPinSearch } from "lucide-react";
 import { SearchInput } from "@/components/search-input";
 import { PreferensiDialog } from "@/components/preferensi-dialog";
+import { RecommendationSidebar } from "@/components/recommendation-sidebar";
 import { useWizardStore } from "@/store/useWizardStore";
+import { useRecommendationStore } from "@/store/useRecommendationStore";
+import { cn } from "@/lib/utils";
 
 export default function Maps() {
   const {
@@ -35,6 +38,7 @@ export default function Maps() {
   } = useMapStore();
   const { isPickingLocation, setIsPickingLocation, setIsOpen, setStep } =
     useWizardStore();
+  const { recommendations, activeWisataId } = useRecommendationStore();
 
   const streetStyle =
     "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json";
@@ -200,7 +204,58 @@ export default function Maps() {
             </div>
           </Marker>
         )}
+        {/* MARKER REKOMENDASI WISATA */}
+        {recommendations.map((wisata, index) => {
+          const isActive = activeWisataId === wisata.id;
+          // Peringkat 1 warna emas, peringkat 2 perak, sisanya biru/primary
+          const pinColor =
+            index === 0
+              ? "bg-yellow-400"
+              : index === 1
+                ? "bg-slate-300"
+                : index === 2
+                  ? "bg-amber-600"
+                  : "bg-primary";
+
+          return (
+            <Marker
+              key={wisata.id}
+              longitude={wisata.lng}
+              latitude={wisata.lat}
+              anchor="bottom"
+            >
+              <div
+                className={cn(
+                  "relative flex cursor-pointer flex-col items-center justify-center transition-all duration-300",
+                  isActive ? "z-50 -translate-y-2 scale-125" : "z-10 scale-100",
+                )}
+              >
+                {/* Tooltip Nama Muncul saat Hover */}
+                {isActive && (
+                  <div className="absolute -top-8 rounded-md border-2 border-black bg-white px-2 py-1 text-xs font-bold whitespace-nowrap shadow-md">
+                    {wisata.name}
+                  </div>
+                )}
+
+                {/* Pin Shape Neo-brutalism */}
+                <div
+                  className={cn(
+                    "flex items-center justify-center rounded-full border-2 border-black px-2 py-1 text-xs font-black shadow-md",
+                    pinColor,
+                  )}
+                >
+                  #{index + 1}
+                </div>
+                <div className="h-3 w-0.5 bg-black"></div>
+                <div className="h-1.5 w-1.5 rounded-full bg-black"></div>
+              </div>
+            </Marker>
+          );
+        })}
       </Map>
+
+      {/* Sidebar Rekomendasi */}
+      <RecommendationSidebar />
 
       {/* =========================================
           PANEL ATAS

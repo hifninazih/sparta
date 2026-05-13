@@ -23,6 +23,7 @@ import {
   MapPinCheck,
 } from "lucide-react";
 import { useWizardStore } from "@/store/useWizardStore";
+import { useRecommendationStore } from "@/store/useRecommendationStore";
 import { useMapStore } from "@/store/useMapStore";
 import { useState } from "react";
 
@@ -83,6 +84,8 @@ export function PreferensiDialog({ children }: { children: React.ReactNode }) {
   } = useWizardStore();
   const { setUserLocation, selectedLocation, setSelectedLocation } =
     useMapStore();
+  const { setRecommendations, setIsLoading } = useRecommendationStore();
+
   const [isLoadingGPS, setIsLoadingGPS] = useState(false);
 
   const currentStepData = WIZARD_STEPS[step - 1];
@@ -128,14 +131,37 @@ export function PreferensiDialog({ children }: { children: React.ReactNode }) {
   const handleClearLocation = () => {
     setSelectedLocation(null);
   };
-  const handleKalkulasi = () => {
-    console.log("Mulai Kalkulasi SAW dengan data:", {
-      jarak,
-      harga,
-      fasilitas,
-      rating,
-    });
-    setIsOpen(false);
+  const handleKalkulasi = async () => {
+    if (!selectedLocation) return;
+
+    setIsOpen(false); // Tutup dialog wizard
+    setIsLoading(true); // Mulai loading di UI (misal: muncul spinner di peta)
+
+    try {
+      const response = await fetch("/api/saw", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lng: selectedLocation[0],
+          lat: selectedLocation[1],
+          w_jarak: jarak,
+          w_harga: harga,
+          w_fasilitas: fasilitas,
+          w_rating: rating,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setRecommendations(result.data); // Simpan hasil top 20 ke Zustand
+      }
+    } catch (error) {
+      console.error("Gagal mengambil rekomendasi", error);
+      alert("Terjadi kesalahan saat menghitung rekomendasi.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
