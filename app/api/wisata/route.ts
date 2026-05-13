@@ -5,46 +5,52 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
 
+    // 1. Tangkap parameter standar (Keyword & Kategori)
     const search = searchParams.get("s");
     const kategori = searchParams.get("c");
 
-    // 1. Ambil koordinat asal dari query params
-    const originLng = searchParams.get("lng");
-    const originLat = searchParams.get("lat");
+    // 2. Tangkap parameter Bounding Box (BBOX) dari batas layar peta
+    const minLng = searchParams.get("minLng");
+    const minLat = searchParams.get("minLat");
+    const maxLng = searchParams.get("maxLng");
+    const maxLat = searchParams.get("maxLat");
 
     let whereClause = `WHERE 1=1`;
     const values: any[] = [];
     let paramIndex = 1;
 
-    // Tambahkan filter search & kategori seperti sebelumnya
+    // --- FILTER PENCARIAN & KATEGORI ---
     if (search) {
       whereClause += ` AND name ILIKE $${paramIndex}`;
       values.push(`%${search}%`);
       paramIndex++;
     }
 
-    if (kategori) {
+    if (kategori && kategori !== "Semua") {
       whereClause += ` AND category = $${paramIndex}`;
       values.push(kategori);
       paramIndex++;
     }
 
-    // 2. Siapkan Query dengan Perhitungan Jarak PostGIS
-    // Kita gunakan ST_DistanceSphere untuk mendapatkan jarak dalam satuan METER
-    let distanceField = "NULL as distance_m"; // Default jika lng/lat tidak dikirim
-    let orderBy = "rating DESC"; // Default urutan berdasarkan rating
-
-    if (originLng && originLat) {
-      const lon = parseFloat(originLng);
-      const lat = parseFloat(originLat);
-
-      // ST_DistanceSphere menghitung jarak antara titik asal dan kolom geom di DB
-      distanceField = `ST_DistanceSphere(geom, ST_MakePoint(${lon}, ${lat})) as distance_m`;
-
-      // Jika ada lokasi, kita bisa prioritaskan urutan berdasarkan yang terdekat
-      orderBy = `distance_m ASC`;
+    // --- FILTER SPASIAL (BOUNDING BOX) ---
+    // Pastikan keempat titik sudut tersedia sebelum menjalankan query spasial
+    if (minLng && minLat && maxLng && maxLat) {
+      whereClause += ` 
+        AND ST_Contains(
+          ST_MakeEnvelope($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, 4326), 
+          geom
+        )
+      `;
+      values.push(
+        parseFloat(minLng),
+        parseFloat(minLat),
+        parseFloat(maxLng),
+        parseFloat(maxLat),
+      );
+      paramIndex += 4;
     }
 
+    // 3. Susun Query Utama
     const dataQuery = `
       SELECT 
         id, 
@@ -55,22 +61,23 @@ export async function GET(request: NextRequest) {
         reviews,
         all_facility,
         ST_X(geom) as lng, 
-        ST_Y(geom) as lat,
-        ${distanceField}
+        ST_Y(geom) as lat 
       FROM wisata_diy 
       ${whereClause}
-      ORDER BY ${orderBy}
+      ORDER BY rating DESC 
+      LIMIT 20 -- Batasi agar browser tidak hang jika menyeleksi area yang terlalu luas
     `;
+
+    const countQuery = `SELECT COUNT(*) FROM wisata_diy ${whereClause}`;
 
     const client = await pool.connect();
     try {
-      const result = await client.query(dataQuery, values);
-      const countResult = await client.query(
-        `SELECT COUNT(*) FROM wisata_diy ${whereClause}`,
-        values,
-      );
+      const [dataResult, countResult] = await Promise.all([
+        client.query(dataQuery, values),
+        client.query(countQuery, values),
+      ]);
 
-      return NextResponse.json(result.rows, {
+      return NextResponse.json(dataResult.rows, {
         status: 200,
         headers: {
           "Content-Type": "application/json",
@@ -82,6 +89,9 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     console.error("API Error:", error);
-    return NextResponse.json({ success: false }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: "Terjadi kesalahan pada server" },
+      { status: 500 },
+    );
   }
 }

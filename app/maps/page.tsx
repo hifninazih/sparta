@@ -15,15 +15,27 @@ import {
   CompassButton,
 } from "@/components/button";
 import { useMapStore } from "@/store/useMapStore";
-import { Locate, LocateFixed, LogIn, MapPin, MapPinSearch } from "lucide-react";
+import {
+  Loader2,
+  Locate,
+  LocateFixed,
+  LogIn,
+  MapPin,
+  MapPinSearch,
+  RotateCw,
+  Search,
+} from "lucide-react";
 import { SearchInput } from "@/components/search-input";
 import { PreferensiDialog } from "@/components/preferensi-dialog";
 import { RecommendationSidebar } from "@/components/recommendation-sidebar";
 import { useWizardStore } from "@/store/useWizardStore";
 import { useRecommendationStore } from "@/store/useRecommendationStore";
 import { cn } from "@/lib/utils";
+import { useSearchStore } from "@/store/useSearchStore";
 
 export default function Maps() {
+  const [showSearchAreaBtn, setShowSearchAreaBtn] = useState(false);
+
   const {
     viewState,
     setViewState,
@@ -39,6 +51,7 @@ export default function Maps() {
   const { isPickingLocation, setIsPickingLocation, setIsOpen, setStep } =
     useWizardStore();
   const { recommendations, activeWisataId } = useRecommendationStore();
+  const { executeSearch, results, isSearching } = useSearchStore();
 
   const streetStyle =
     "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json";
@@ -164,17 +177,73 @@ export default function Maps() {
     setIsOpen(true);
   };
 
+  // Fungsi yang dipanggil ketika tombol diklik
+  const handleSearchThisArea = () => {
+    if (!mapRef.current) return;
+
+    // Sembunyikan tombol
+    setShowSearchAreaBtn(false);
+
+    // Ambil batas koordinat layar saat ini (BBOX)
+    const bounds = mapRef.current.getMap().getBounds();
+    const bbox = {
+      minLng: bounds.getWest(),
+      minLat: bounds.getSouth(),
+      maxLng: bounds.getEast(),
+      maxLat: bounds.getNorth(),
+    };
+
+    console.log("Mencari di area:", bbox);
+
+    // TODO: Kirim parameter BBOX ini ke API pencarianmu
+    executeSearch("", "", bbox);
+  };
+
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-slate-100">
+      {/* =========================================
+          TOMBOL "TELUSURI DI AREA INI" (Top Center)
+      ========================================= */}
+      <div
+        className={cn(
+          "absolute top-20 left-1/2 z-20 flex -translate-x-1/2 transition-all duration-300 sm:top-6",
+          showSearchAreaBtn && recommendations.length === 0
+            ? "pointer-events-auto translate-y-0 opacity-100"
+            : "pointer-events-none -translate-y-10 opacity-0",
+        )}
+      >
+        <button
+          onClick={handleSearchThisArea}
+          disabled={isSearching} // Matikan interaksi klik saat sedang mencari
+          className={cn(
+            "group flex items-center gap-2 rounded-full border border-black bg-white px-5 py-2 text-sm font-bold text-black shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all",
+            "hover:-translate-y-1 hover:bg-[#DCFFBC] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-[2px_2px_0px_rgba(0,0,0,1)]",
+            "disabled:pointer-events-none disabled:bg-gray-100 disabled:opacity-70",
+          )}
+        >
+          {isSearching ? (
+            <Loader2 className="size-4 animate-spin" strokeWidth={2.5} />
+          ) : (
+            <RotateCw
+              className="size-4 transition-transform group-active:rotate-180 group-active:duration-500"
+              strokeWidth={2.5}
+            />
+          )}
+
+          {isSearching ? "Mencari area..." : "Telusuri area ini"}
+        </button>
+      </div>
       <Map
         ref={mapRef}
         initialViewState={viewState}
         maxZoom={maxZoom}
         minZoom={minZoom}
         onMove={(e) => setViewState(e.viewState)}
+        onClick={handleMapClick}
+        onDragStart={() => setShowSearchAreaBtn(true)}
+        onZoomStart={() => setShowSearchAreaBtn(true)}
         style={{ width: "100%", height: "100%" }}
         mapStyle={currentMapStyle}
-        onClick={handleMapClick}
         cursor={isPickingLocation ? "crosshair" : "grab"}
       >
         {/* MARKER 1: LOKASI GPS ASLI (Biru Berdenyut) */}
@@ -252,6 +321,34 @@ export default function Maps() {
             </Marker>
           );
         })}
+
+        {/* 3. Render Marker Hasil Pencarian / "Telusuri Area Ini" */}
+        {/* Logika: Tampilkan hanya jika tidak sedang menampilkan hasil SAW agar peta tidak penuh */}
+        {!isSearching &&
+          recommendations.length === 0 &&
+          results.map((wisata) => (
+            <Marker
+              key={`search-${wisata.id}`}
+              longitude={wisata.lng}
+              latitude={wisata.lat}
+              anchor="bottom"
+            >
+              <div className="group relative flex flex-col items-center">
+                {/* Tooltip Nama (Muncul saat Hover) */}
+                <div className="pointer-events-none absolute -top-10 z-50 scale-0 rounded-md border-2 border-black bg-white px-2 py-1 text-[10px] font-bold whitespace-nowrap shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all group-hover:scale-100">
+                  {wisata.name}
+                </div>
+
+                {/* Dot Marker Gaya Neo-brutalism */}
+                <div className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border-2 border-black bg-[#DCFFBC] shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-transform hover:scale-125 hover:bg-white active:scale-95">
+                  <div className="h-1.5 w-1.5 rounded-full bg-black"></div>
+                </div>
+
+                {/* Batang Pin Kecil */}
+                <div className="h-2 w-0.5 bg-black"></div>
+              </div>
+            </Marker>
+          ))}
       </Map>
 
       {/* Sidebar Rekomendasi */}
