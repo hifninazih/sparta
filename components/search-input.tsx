@@ -1,13 +1,15 @@
+// components/search-input.tsx
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react"; // Import X
 
 export interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onSearch?: (value: string) => void;
+  onClear?: () => void; // Tambahan prop onClear
 }
 
 const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
-  ({ className, onSearch, onKeyDown, ...props }, ref) => {
+  ({ className, onSearch, onClear, onKeyDown, value, ...props }, ref) => {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter" && onSearch) {
         onSearch(e.currentTarget.value);
@@ -20,30 +22,37 @@ const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
     return (
       <div
         className={cn(
-          // 1. BENTUK DASAR & ANIMASI (Deklarasikan transisi 1x saja)
-          "group relative flex h-12 w-full items-center overflow-hidden rounded-full bg-white px-4 shadow-md transition-all duration-300 ease-out sm:w-64",
-
-          // 2. BORDER NEO-BRUTALISM (Menggunakan arbitrary values agar valid)
-          "border border-r-2 border-b-3 border-gray-400",
-
-          // 3. EFEK INTERAKTIF (Hover & Focus)
-          "hover:bg-primary focus-within:bg-primary focus-within:border-black hover:border-black sm:focus-within:w-80",
-
+          "group relative flex h-12 w-full items-center overflow-hidden bg-white px-4 transition-all duration-300 ease-out",
+          "rounded-full border-2 border-black shadow-[2px_3px_0px_rgba(0,0,0,1)]",
+          "focus-within:translate-x-px focus-within:translate-y-px focus-within:bg-[#DCFFBC]/80 focus-within:shadow-[1px_2px_0px_rgba(0,0,0,1)]",
           className,
         )}
       >
+        <div className="absolute left-4 text-black transition-colors duration-200">
+          <Search className="size-5" strokeWidth={2.5} />
+        </div>
+
         <input
           type="text"
           ref={ref}
+          value={value}
           onKeyDown={handleKeyDown}
-          className="peer h-full w-full bg-transparent pl-8 text-sm font-semibold text-black outline-none placeholder:font-medium placeholder:text-gray-500"
-          placeholder="Cari tempat wisata..."
+          // Tambahkan pr-10 agar teks tidak menabrak tombol X
+          className="peer h-full w-full bg-transparent pr-10 pl-8 text-sm font-bold text-black outline-none placeholder:font-semibold placeholder:text-gray-500"
+          placeholder="Cari tempat atau wisata..."
           {...props}
         />
 
-        <div className="absolute left-4 text-gray-400 transition-colors duration-200 group-focus-within:text-black group-hover:text-black">
-          <Search className="size-5" strokeWidth={2} />
-        </div>
+        {/* Tombol Clear (Hanya muncul jika value ada isinya) */}
+        {value && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="absolute right-4 rounded-full p-1 text-gray-400 transition-all outline-none hover:bg-gray-100 hover:text-red-500 active:scale-90"
+          >
+            <X className="size-4" strokeWidth={3} />
+          </button>
+        )}
       </div>
     );
   },

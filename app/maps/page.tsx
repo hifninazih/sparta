@@ -1,3 +1,4 @@
+// maps/page.tsx
 "use client";
 
 import { useRef, useState, useEffect } from "react";
@@ -23,11 +24,14 @@ import {
   MapPin,
   MapPinSearch,
   RotateCw,
-  Search,
+  Star,
 } from "lucide-react";
-import { SearchInput } from "@/components/search-input";
 import { PreferensiDialog } from "@/components/preferensi-dialog";
 import { RecommendationSidebar } from "@/components/recommendation-sidebar";
+import { GlobalSearch } from "@/components/global-search";
+
+import { UnifiedSearchResult } from "@/app/api/search/route";
+
 import { useWizardStore } from "@/store/useWizardStore";
 import { useRecommendationStore } from "@/store/useRecommendationStore";
 import { cn } from "@/lib/utils";
@@ -35,6 +39,8 @@ import { useSearchStore } from "@/store/useSearchStore";
 
 export default function Maps() {
   const [showSearchAreaBtn, setShowSearchAreaBtn] = useState(false);
+  const [selectedPlace, setSelectedPlace] =
+    useState<UnifiedSearchResult | null>(null);
 
   const {
     viewState,
@@ -160,11 +166,6 @@ export default function Maps() {
     return <Locate />;
   };
 
-  const handleSearchSubmit = (keyword: string) => {
-    console.log("Mencari wisata dengan kata kunci:", keyword);
-    // Di sini kamu bisa memanggil API pencarian atau filter data GeoJSON
-  };
-
   const handleMapClick = (event: MapLayerMouseEvent) => {
     if (!isPickingLocation) return;
 
@@ -197,6 +198,25 @@ export default function Maps() {
     setShowSearchAreaBtn(false);
   };
 
+  // Fungsi untuk mengarahkan peta (Terbang / FlyTo)
+  const handleLocationSelect = (item: UnifiedSearchResult) => {
+    // 1. Simpan data untuk memunculkan Marker di peta
+    setSelectedPlace(item);
+
+    // 2. Gunakan mapRef untuk memicu animasi flyTo secara imperatif
+    mapRef.current?.getMap().flyTo({
+      center: [item.lng, item.lat],
+      zoom: 15,
+      duration: 1200, // 1.2 detik
+      essential: true, // Memaksa animasi tetap jalan meski mode hemat baterai/performa diaktifkan di browser
+    });
+  };
+
+  // Fungsi untuk menghapus pin saat X ditekan
+  const handleClearLocation = () => {
+    setSelectedPlace(null);
+  };
+
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-slate-100">
       {/* =========================================
@@ -204,8 +224,7 @@ export default function Maps() {
       ========================================= */}
       <div
         className={cn(
-          "absolute top-20 left-1/2 z-20 flex -translate-x-1/2 transition-all duration-300 sm:top-6",
-          // UBAH LOGIKA DI SINI: Tetap tampilkan jika sedang loading (isSearching)
+          "absolute top-20 left-1/2 z-10 flex -translate-x-1/2 transition-all duration-300 lg:top-6",
           (showSearchAreaBtn || isSearching) && recommendations.length === 0
             ? "pointer-events-auto translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-10 opacity-0",
@@ -215,8 +234,16 @@ export default function Maps() {
           onClick={handleSearchThisArea}
           disabled={isSearching}
           className={cn(
-            "group flex items-center gap-2 rounded-full border border-black bg-white px-5 py-2 text-sm font-bold text-black shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all",
-            "hover:-translate-y-1 hover:bg-[#DCFFBC] hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-0 active:shadow-[2px_2px_0px_rgba(0,0,0,1)]",
+            // Base style
+            "group flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-bold text-black outline-none",
+            "border-2 border-black transition-all duration-150 hover:cursor-pointer hover:bg-[#DCFFBC]",
+
+            // Fisika Soft Neo-Brutalism
+            "shadow-[1px_2px_0px_rgba(0,0,0,1)]",
+            "hover:-translate-x-px hover:-translate-y-0.5 hover:shadow-[2px_4px_0px_rgba(0,0,0,1)]",
+            "active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0px_rgba(0,0,0,1)]",
+
+            // Disabled style
             "disabled:pointer-events-none disabled:bg-gray-100 disabled:opacity-70",
           )}
         >
@@ -272,80 +299,143 @@ export default function Maps() {
             </div>
           </Marker>
         )}
-        {/* MARKER REKOMENDASI WISATA */}
+
+        {/* =========================================
+            MARKER 3: REKOMENDASI WISATA (SAW)
+        ========================================= */}
         {recommendations.map((wisata, index) => {
-          const isActive = activeWisataId === wisata.id;
-          // Peringkat 1 warna emas, peringkat 2 perak, sisanya biru/primary
+          const isZoomedIn = viewState.zoom >= 13;
+
+          // Peringkat 1 Emas, 2 Perak, 3 Perunggu, sisanya warna Primary
           const pinColor =
             index === 0
-              ? "bg-yellow-400"
+              ? "bg-[#FFD700]"
               : index === 1
-                ? "bg-slate-300"
+                ? "bg-[#E3E4E5]"
                 : index === 2
-                  ? "bg-amber-600"
+                  ? "bg-[#CD7F32]"
                   : "bg-primary";
 
           return (
             <Marker
-              key={wisata.id}
+              key={`saw-${wisata.id}`}
               longitude={wisata.lng}
               latitude={wisata.lat}
               anchor="bottom"
             >
-              <div
-                className={cn(
-                  "relative flex cursor-pointer flex-col items-center justify-center transition-all duration-300",
-                  isActive ? "z-50 -translate-y-2 scale-125" : "z-10 scale-100",
-                )}
-              >
-                {/* Tooltip Nama Muncul saat Hover */}
-                {isActive && (
-                  <div className="absolute -top-8 rounded-md border-2 border-black bg-white px-2 py-1 text-xs font-bold whitespace-nowrap shadow-md">
-                    {wisata.name}
+              <div className="relative z-10 flex flex-col items-center justify-center">
+                {isZoomedIn ? (
+                  /* --- TAMPILAN ZOOM DEKAT (TINGGI): Angka Rank + Nama --- */
+                  <div className="flex h-7 items-center overflow-hidden rounded-full border-2 border-black bg-white shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                    {/* Kotak Angka (kiri) */}
+                    <div
+                      className={cn(
+                        "flex h-full shrink-0 items-center justify-center border-r-2 border-black px-2 text-xs font-black",
+                        pinColor,
+                      )}
+                    >
+                      {index + 1}
+                    </div>
+                    {/* Teks Nama (kanan) */}
+                    <span className="max-w-40 truncate px-2 text-[12px] font-bold text-black">
+                      {wisata.name}
+                    </span>
+                  </div>
+                ) : (
+                  /* --- TAMPILAN ZOOM JAUH (RENDAH): Hanya Angka Rank --- */
+                  <div
+                    className={cn(
+                      "flex h-6 w-6 items-center justify-center rounded-full border-2 border-black text-xs font-black shadow-[2px_2px_0px_rgba(0,0,0,1)]",
+                      pinColor,
+                    )}
+                  >
+                    {index + 1}
                   </div>
                 )}
 
-                {/* Pin Shape Neo-brutalism */}
-                <div
-                  className={cn(
-                    "flex items-center justify-center rounded-full border-2 border-black px-2 py-1 text-xs font-black shadow-md",
-                    pinColor,
-                  )}
-                >
-                  #{index + 1}
-                </div>
-                <div className="h-3 w-0.5 bg-black"></div>
-                <div className="h-1.5 w-1.5 rounded-full bg-black"></div>
+                {/* Batang Pin Kecil (Tetap ada sebagai penunjuk koordinat tanah) */}
+                <div className="h-2 w-0.5 bg-black"></div>
+                <div className="h-1 w-1 rounded-full bg-black"></div>
               </div>
             </Marker>
           );
         })}
 
-        {/* 3. Render Marker Hasil Pencarian / "Telusuri Area Ini" */}
+        {/* =========================================
+            MARKER 4: HASIL PENCARIAN AREA
+        ========================================= */}
         {recommendations.length === 0 &&
-          results.map((wisata) => (
-            <Marker
-              key={`search-${wisata.id}`}
-              longitude={wisata.lng}
-              latitude={wisata.lat}
-              anchor="bottom"
-            >
-              <div className="group relative flex flex-col items-center">
-                {/* Tooltip Nama (Muncul saat Hover) */}
-                <div className="pointer-events-none absolute -top-10 z-50 scale-0 rounded-md border-2 border-black bg-white px-2 py-1 text-[10px] font-bold whitespace-nowrap shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all group-hover:scale-100">
-                  {wisata.name}
-                </div>
+          results.map((wisata) => {
+            const isZoomedIn = viewState.zoom >= 13;
 
-                {/* Dot Marker Gaya Neo-brutalism */}
-                <div className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border-2 border-black bg-[#DCFFBC] shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-transform hover:scale-125 hover:bg-white active:scale-95">
-                  <div className="h-1.5 w-1.5 rounded-full bg-black"></div>
-                </div>
+            return (
+              <Marker
+                key={`search-${wisata.id}`}
+                longitude={wisata.lng}
+                latitude={wisata.lat}
+                anchor="bottom"
+              >
+                <div className="relative z-10 flex flex-col items-center">
+                  {isZoomedIn ? (
+                    /* --- TAMPILAN ZOOM DEKAT (TINGGI): Hanya Nama --- */
+                    <div className="flex items-center rounded-full border-2 border-black bg-white px-2.5 py-1 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                      <span className="max-w-40 truncate text-[12px] font-bold text-black">
+                        {wisata.name}
+                      </span>
+                    </div>
+                  ) : (
+                    /* --- TAMPILAN ZOOM JAUH (RENDAH): Hanya Titik Lingkaran --- */
+                    <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-black bg-[#DCFFBC] shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                      <div className="h-1 w-1 rounded-full bg-black"></div>
+                    </div>
+                  )}
 
-                {/* Batang Pin Kecil */}
-                <div className="h-2 w-0.5 bg-black"></div>
+                  {/* Batang Pin Tipis */}
+                  <div className="h-1.5 w-0.5 bg-black"></div>
+                </div>
+              </Marker>
+            );
+          })}
+
+        {/* MARKER 5: Hasil search query */}
+        {selectedPlace && (
+          <Marker
+            longitude={selectedPlace.lng}
+            latitude={selectedPlace.lat}
+            anchor="bottom"
+          >
+            <div className="group animate-in fade-in slide-in-from-top-4 relative z-50 flex cursor-pointer flex-col items-center duration-300">
+              {/* Tooltip Nama yang Menempel (Selalu Muncul) */}
+              <div className="pointer-events-none absolute -top-12 z-50 rounded-lg border-2 border-black bg-white px-3 py-1.5 text-xs font-black whitespace-nowrap shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all">
+                {selectedPlace.name}
+                {/* Tandai jika ini dari OSM */}
+                {selectedPlace.type === "osm" && (
+                  <span className="ml-2 text-[12px] font-bold text-gray-500">
+                    (OSM)
+                  </span>
+                )}
               </div>
-            </Marker>
-          ))}
+
+              {/* Pin Shape Soft Neo-brutalism */}
+              {/* Menggunakan warna Oranye (#FF8038) agar mencolok dibandingkan marker lain */}
+              <div
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded-full border-2 border-black",
+                  "shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all",
+                  "hover:-translate-y-0.5 hover:shadow-[3px_4px_0px_rgba(0,0,0,1)]",
+                  "bg-[#FF8038]",
+                )}
+              >
+                <MapPinSearch className="size-5 text-black" strokeWidth={3} />
+              </div>
+
+              {/* Batang Pin */}
+              <div className="h-4 w-0.5 bg-black"></div>
+              {/* Titik Jangkar di Tanah */}
+              <div className="h-2 w-2 rounded-full bg-black"></div>
+            </div>
+          </Marker>
+        )}
       </Map>
 
       {/* Sidebar Rekomendasi */}
@@ -355,12 +445,11 @@ export default function Maps() {
           PANEL ATAS
       ========================================= */}
 
-      {/* Input pencarian */}
-      <div className="absolute top-5 left-4 z-10 hidden sm:block">
-        <SearchInput
-          onSearch={handleSearchSubmit}
-          // Bisa ditambahkan properti input standar lainnya
-          // onChange={(e) => console.log(e.target.value)}
+      {/* Input pencarian dengan fungsi baru */}
+      <div className="absolute top-5 left-4 z-10 hidden w-full max-w-sm sm:block sm:w-80">
+        <GlobalSearch
+          onSelectLocation={handleLocationSelect}
+          onClearLocation={handleClearLocation} // Hubungkan fungsi clear
         />
       </div>
 
@@ -385,11 +474,11 @@ export default function Maps() {
           PANEL ATAS MOBILE
       ========================================= */}
       <div className="absolute top-0 left-1/2 z-10 flex w-full -translate-x-1/2 items-center justify-between gap-2 px-3 pt-4 sm:hidden">
-        <SearchInput
-          onSearch={handleSearchSubmit}
-          // Bisa ditambahkan properti input standar lainnya
-          // onChange={(e) => console.log(e.target.value)}
+        <GlobalSearch
+          onSelectLocation={handleLocationSelect}
+          onClearLocation={handleClearLocation}
         />
+
         <Button
           variant={"primary"}
           size={"rect"}

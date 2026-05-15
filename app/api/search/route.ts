@@ -1,0 +1,77 @@
+import { NextRequest, NextResponse } from "next/server";
+import { pool } from "@/lib/db";
+
+// Format Data Standar agar Frontend tidak bingung
+export interface UnifiedSearchResult {
+  id: string;
+  name: string;
+  type: "wisata" | "osm"; // Untuk membedakan sumber data
+  category?: string; // Hanya ada di wisata
+  lng: number;
+  lat: number;
+  address?: string; // Nama alamat lengkap (untuk OSM)
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const query = request.nextUrl.searchParams.get("q");
+
+    if (!query || query.trim() === "") {
+      return NextResponse.json({ data: [] });
+    }
+
+    const keyword = query.trim();
+
+    // 1. QUERY LOKAL: Cari di Database (PostgreSQL)
+    const localQuery = `
+      SELECT id, name, category, ST_X(geom) as lng, ST_Y(geom) as lat 
+      FROM wisata_diy 
+      WHERE name ILIKE $1 
+      LIMIT 5
+    `;
+    const localDbPromise = pool.query(localQuery, [`%${keyword}%`]);
+
+    // 2. QUERY EKSTERNAL: Cari di Nominatim OSM
+    // Tambahkan countrycodes=id agar hanya mencari di Indonesia
+    const osmUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(keyword)}&format=jsonv2&countrycodes=id&limit=5`;
+    const osmPromise = fetch(osmUrl, {
+      // Nominatim mewajibkan User-Agent khusus, jika tidak akan diblokir (Error 403)
+      headers: { "User-Agent": "SPARTA-WebGIS-App/1.0" },
+    }).then((res) => res.json());
+
+    // 3. Eksekusi Keduanya Secara Bersamaan
+    const [localResult, osmResult] = await Promise.all([
+      localDbPromise,
+      osmPromise,
+    ]);
+
+    // 4. Standarisasi Format Data
+    const formattedLocal: UnifiedSearchResult[] = localResult.rows.map(
+      (row) => ({
+        id: `local-${row.id}`,
+        name: row.name,
+        type: "wisata",
+        category: row.category,
+        lng: row.lng,
+        lat: row.lat,
+      }),
+    );
+
+    const formattedOsm: UnifiedSearchResult[] = osmResult.map((item: any) => ({
+      id: `osm-${item.place_id}`,
+      name: item.name || item.display_name.split(",")[0], // Ambil nama utamanya saja
+      type: "osm",
+      lng: parseFloat(item.lon),
+      lat: parseFloat(item.lat),
+      address: item.display_name, // Alamat lengkapnya simpan di sini
+    }));
+
+    // 5. Gabungkan hasil (Prioritaskan DB Lokal di atas OSM)
+    const combinedResults = [...formattedLocal, ...formattedOsm];
+
+    return NextResponse.json({ success: true, data: combinedResults });
+  } catch (error) {
+    console.error("Search API Error:", error);
+    return NextResponse.json({ success: false, data: [] }, { status: 500 });
+  }
+}
