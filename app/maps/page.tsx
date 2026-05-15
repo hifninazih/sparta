@@ -20,11 +20,10 @@ import {
   Loader2,
   Locate,
   LocateFixed,
-  LogIn,
   MapPin,
   MapPinSearch,
   RotateCw,
-  Star,
+  CircleQuestionMark,
 } from "lucide-react";
 import { PreferensiDialog } from "@/components/preferensi-dialog";
 import { RecommendationSidebar } from "@/components/recommendation-sidebar";
@@ -277,8 +276,7 @@ export default function Maps() {
           <Marker
             longitude={userLocation[0]}
             latitude={userLocation[1]}
-            pitchAlignment="map" // Menempel/rebah mengikuti kemiringan peta (pitch)
-            rotationAlignment="map" // Berputar mengikuti arah peta (bearing)
+            rotationAlignment="map"
           >
             <div className="pointer-events-none relative flex items-center justify-center">
               <div className="absolute h-8 w-8 animate-ping rounded-full bg-blue-600 opacity-75"></div>
@@ -365,37 +363,44 @@ export default function Maps() {
             MARKER 4: HASIL PENCARIAN AREA
         ========================================= */}
         {recommendations.length === 0 &&
-          results.map((wisata) => {
-            const isZoomedIn = viewState.zoom >= 13;
+          results
+            // --- LOGIKA ANTI-DUPLIKAT (Hapus titik hijau jika sudah ada titik oranye) ---
+            .filter((wisata) => {
+              if (!selectedPlace) return true; // Jika tidak ada titik oranye, tampilkan semua
+              return selectedPlace.id !== `local-${wisata.id}`;
+            })
+            // ----------------------------------------------------------------------------
+            .map((wisata) => {
+              const isZoomedIn = viewState.zoom >= 13;
 
-            return (
-              <Marker
-                key={`search-${wisata.id}`}
-                longitude={wisata.lng}
-                latitude={wisata.lat}
-                anchor="bottom"
-              >
-                <div className="relative z-10 flex flex-col items-center">
-                  {isZoomedIn ? (
-                    /* --- TAMPILAN ZOOM DEKAT (TINGGI): Hanya Nama --- */
-                    <div className="flex items-center rounded-full border-2 border-black bg-white px-2.5 py-1 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                      <span className="max-w-40 truncate text-[12px] font-bold text-black">
-                        {wisata.name}
-                      </span>
-                    </div>
-                  ) : (
-                    /* --- TAMPILAN ZOOM JAUH (RENDAH): Hanya Titik Lingkaran --- */
-                    <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-black bg-[#DCFFBC] shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                      <div className="h-1 w-1 rounded-full bg-black"></div>
-                    </div>
-                  )}
+              return (
+                <Marker
+                  key={`search-${wisata.id}`}
+                  longitude={wisata.lng}
+                  latitude={wisata.lat}
+                  anchor="bottom"
+                >
+                  <div className="relative z-10 flex flex-col items-center">
+                    {isZoomedIn ? (
+                      /* --- TAMPILAN ZOOM DEKAT --- */
+                      <div className="flex items-center rounded-full border-2 border-black bg-white px-2.5 py-1 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                        <span className="max-w-30 truncate text-[12px] font-bold text-black">
+                          {wisata.name}
+                        </span>
+                      </div>
+                    ) : (
+                      /* --- TAMPILAN ZOOM JAUH --- */
+                      <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-black bg-[#DCFFBC] shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                        <div className="h-1 w-1 rounded-full bg-black"></div>
+                      </div>
+                    )}
 
-                  {/* Batang Pin Tipis */}
-                  <div className="h-1.5 w-0.5 bg-black"></div>
-                </div>
-              </Marker>
-            );
-          })}
+                    {/* Batang Pin Tipis */}
+                    <div className="h-1.5 w-0.5 bg-black"></div>
+                  </div>
+                </Marker>
+              );
+            })}
 
         {/* MARKER 5: Hasil search query */}
         {selectedPlace && (
@@ -453,10 +458,14 @@ export default function Maps() {
         />
       </div>
 
-      {/* Tombol Login */}
+      {/* Tombol Panduan */}
       <div className="absolute top-5 right-4 z-10 hidden flex-col items-end gap-5 sm:flex">
-        <Button variant={"primary"} size={"lg"} startIcon={<LogIn />}>
-          <p>Login</p>
+        <Button
+          variant={"primary"}
+          size={"lg"}
+          startIcon={<CircleQuestionMark />}
+        >
+          <p>Panduan</p>
         </Button>
       </div>
 
@@ -482,7 +491,7 @@ export default function Maps() {
         <Button
           variant={"primary"}
           size={"rect"}
-          startIcon={<LogIn />}
+          startIcon={<CircleQuestionMark />}
         ></Button>
       </div>
 
