@@ -16,6 +16,8 @@ interface Wisata {
 
 export async function POST(request: NextRequest) {
   try {
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+
     // 1. Tangkap parameter dari Body Request
     const body = await request.json();
     const {

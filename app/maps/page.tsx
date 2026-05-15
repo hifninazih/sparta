@@ -35,11 +35,14 @@ import { useWizardStore } from "@/store/useWizardStore";
 import { useRecommendationStore } from "@/store/useRecommendationStore";
 import { cn } from "@/lib/utils";
 import { useSearchStore } from "@/store/useSearchStore";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 export default function Maps() {
   const [showSearchAreaBtn, setShowSearchAreaBtn] = useState(false);
   const [selectedPlace, setSelectedPlace] =
     useState<UnifiedSearchResult | null>(null);
+
+  const isDesktop = useMediaQuery("(min-width: 640px)");
 
   const {
     viewState,
@@ -216,48 +219,23 @@ export default function Maps() {
     setSelectedPlace(null);
   };
 
+  // Fungsi untuk flyTo ke titik rekomendasi
+  const handleWisataSelect = (wisata: any) => {
+    if (!mapRef.current) return;
+
+    mapRef.current.getMap().flyTo({
+      center: [wisata.lng, wisata.lat],
+      zoom: 16,
+      duration: 1200,
+      essential: true,
+      padding: isDesktop
+        ? { left: 400, top: 0, bottom: 0, right: 0 } // Geser pusat ke kanan (karena ada sidebar kiri)
+        : { bottom: window.innerHeight * 0.3, top: 0, left: 0, right: 0 }, // Geser pusat ke atas (karena ada laci bawah)
+    });
+  };
+
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-slate-100">
-      {/* =========================================
-          TOMBOL "TELUSURI DI AREA INI" (Top Center)
-      ========================================= */}
-      <div
-        className={cn(
-          "absolute top-20 left-1/2 z-10 flex -translate-x-1/2 transition-all duration-300 lg:top-6",
-          (showSearchAreaBtn || isSearching) && recommendations.length === 0
-            ? "pointer-events-auto translate-y-0 opacity-100"
-            : "pointer-events-none -translate-y-10 opacity-0",
-        )}
-      >
-        <button
-          onClick={handleSearchThisArea}
-          disabled={isSearching}
-          className={cn(
-            // Base style
-            "group flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-bold text-black outline-none",
-            "border-2 border-black transition-all duration-150 hover:cursor-pointer hover:bg-[#DCFFBC]",
-
-            // Fisika Soft Neo-Brutalism
-            "shadow-[1px_2px_0px_rgba(0,0,0,1)]",
-            "hover:-translate-x-px hover:-translate-y-0.5 hover:shadow-[2px_4px_0px_rgba(0,0,0,1)]",
-            "active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0px_rgba(0,0,0,1)]",
-
-            // Disabled style
-            "disabled:pointer-events-none disabled:bg-gray-100 disabled:opacity-70",
-          )}
-        >
-          {isSearching ? (
-            <Loader2 className="size-4 animate-spin" strokeWidth={2.5} />
-          ) : (
-            <RotateCw
-              className="size-4 transition-transform group-active:rotate-180 group-active:duration-500"
-              strokeWidth={2.5}
-            />
-          )}
-
-          {isSearching ? "Mencari area..." : "Telusuri area ini"}
-        </button>
-      </div>
       <Map
         ref={mapRef}
         initialViewState={viewState}
@@ -451,11 +429,52 @@ export default function Maps() {
       </Map>
 
       {/* Sidebar Rekomendasi */}
-      <RecommendationSidebar />
+      <RecommendationSidebar onSelectWisata={handleWisataSelect} />
 
       {/* =========================================
           PANEL ATAS
       ========================================= */}
+
+      {/* =========================================
+          TOMBOL "TELUSURI DI AREA INI" (Top Center)
+      ========================================= */}
+      <div
+        className={cn(
+          "absolute top-20 left-1/2 z-10 flex -translate-x-1/2 transition-all duration-300 lg:top-6",
+          (showSearchAreaBtn || isSearching) && recommendations.length === 0
+            ? "pointer-events-auto translate-y-0 opacity-100"
+            : "pointer-events-none -translate-y-10 opacity-0",
+        )}
+      >
+        <button
+          onClick={handleSearchThisArea}
+          disabled={isSearching}
+          className={cn(
+            // Base style
+            "group flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-bold text-black outline-none",
+            "border-2 border-black transition-all duration-150 hover:cursor-pointer hover:bg-[#DCFFBC]",
+
+            // Fisika Soft Neo-Brutalism
+            "shadow-[1px_2px_0px_rgba(0,0,0,1)]",
+            "hover:-translate-x-px hover:-translate-y-0.5 hover:shadow-[2px_4px_0px_rgba(0,0,0,1)]",
+            "active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0px_rgba(0,0,0,1)]",
+
+            // Disabled style
+            "disabled:pointer-events-none disabled:bg-gray-100 disabled:opacity-70",
+          )}
+        >
+          {isSearching ? (
+            <Loader2 className="size-4 animate-spin" strokeWidth={2.5} />
+          ) : (
+            <RotateCw
+              className="size-4 transition-transform group-active:rotate-180 group-active:duration-500"
+              strokeWidth={2.5}
+            />
+          )}
+
+          {isSearching ? "Mencari tempat wisata..." : "Telusuri area ini"}
+        </button>
+      </div>
 
       {/* Input pencarian dengan fungsi baru */}
       <div className="absolute top-5 left-4 z-10 hidden w-full max-w-sm sm:block sm:w-80">
@@ -506,7 +525,9 @@ export default function Maps() {
           PANEL BAWAH
       ========================================= */}
       {/* Tombol Rekomendasi Wisata */}
-      <div className="absolute bottom-10 left-4 z-10 flex flex-col items-end gap-5">
+      <div
+        className={`absolute bottom-10 left-4 z-10 flex flex-col items-end gap-5 transition-all duration-300 ${recommendations.length !== 0 && !isDesktop ? "bottom-15" : "bottom-10"}`}
+      >
         <PreferensiDialog>
           <Button variant={"gradient"} size={"lg"} startIcon={<MapPinSearch />}>
             Rekomendasi Wisata
@@ -515,7 +536,9 @@ export default function Maps() {
       </div>
 
       {/* Tombol Cari Lokasi dan Zoom */}
-      <div className="absolute right-4 bottom-32 z-10 flex flex-col items-end gap-5 sm:bottom-35">
+      <div
+        className={`trasition-all absolute right-4 bottom-32 z-10 flex flex-col items-end gap-5 duration-300 sm:bottom-40 ${recommendations.length !== 0 && !isDesktop ? "bottom-37" : "bottom-32"}`}
+      >
         <div className="flex flex-col items-center gap-2">
           <Button
             variant={"primary"}
@@ -531,7 +554,9 @@ export default function Maps() {
       </div>
 
       {/* Toggle Basemap */}
-      <div className="absolute right-4 bottom-10 z-10 flex flex-col items-end gap-5">
+      <div
+        className={`absolute right-4 z-10 flex flex-col items-end gap-5 transition-all duration-300 ${recommendations.length !== 0 && !isDesktop ? "bottom-15" : "bottom-10"}`}
+      >
         <MapStyleToggle isSatellite={isSatellite} onToggle={toggleMapStyle} />
       </div>
     </div>
