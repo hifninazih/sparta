@@ -1,4 +1,3 @@
-// global-search.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -8,7 +7,7 @@ import { UnifiedSearchResult } from "@/app/api/search/route";
 
 interface GlobalSearchProps {
   onSelectLocation: (item: UnifiedSearchResult) => void;
-  onClearLocation: () => void; // Tambahan
+  onClearLocation: () => void;
 }
 
 export function GlobalSearch({
@@ -23,13 +22,22 @@ export function GlobalSearch({
     isSearching,
     clearResults,
   } = useAutosuggestStore();
+
   const [isOpen, setIsOpen] = useState(false);
+  const [isDebouncing, setIsDebouncing] = useState(false); // <-- 1. Tambahkan state ini
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // 2. Langsung tandai bahwa kita sedang "menahan" (debounce) saat user mengetik
+    if (query.trim() !== "") {
+      setIsDebouncing(true);
+    }
+
     const delayDebounceFn = setTimeout(() => {
-      fetchSuggestions(query);
+      setIsDebouncing(false); // Lepas penahan setelah 500ms
+      fetchSuggestions(query); // Eksekusi API
     }, 500);
+
     return () => clearTimeout(delayDebounceFn);
   }, [query]);
 
@@ -46,12 +54,14 @@ export function GlobalSearch({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fungsi saat tombol X ditekan
   const handleClear = () => {
-    clearResults(); // Bersihkan state Zustand
+    clearResults();
     setIsOpen(false);
-    onClearLocation(); // Hapus marker dari peta
+    onClearLocation();
   };
+
+  // 3. Gabungkan status loading agar lebih rapi
+  const isLoading = isSearching || isDebouncing;
 
   return (
     <div ref={containerRef} className="relative z-50 w-full sm:w-auto">
@@ -61,35 +71,46 @@ export function GlobalSearch({
           setQuery(e.target.value);
           setIsOpen(true);
         }}
-        onClear={handleClear} // Hubungkan fungsi ke SearchInput
+        onClear={handleClear}
       />
 
       {/* Dropdown Hasil Pencarian */}
       {isOpen && query.trim() !== "" && (
         <div className="absolute top-14 left-0 z-50 w-full overflow-hidden rounded-xl border-2 border-black bg-white shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-          {isSearching && (
-            <div className="p-3 text-center text-sm font-bold text-gray-500">
-              Mencari...
+          {/* SKELETON LOADER (Merespons langsung sejak ngetik huruf pertama) */}
+          {isLoading && (
+            <div className="flex flex-col">
+              {[1, 2, 3].map((item) => (
+                <div
+                  key={item}
+                  className="flex flex-col border-b border-gray-200 p-3 last:border-0"
+                >
+                  <div className="mb-2 flex items-center justify-between">
+                    <div className="h-4 w-1/2 animate-pulse rounded bg-gray-300"></div>
+                    <div className="h-4 w-12 animate-pulse rounded bg-gray-300"></div>
+                  </div>
+                  <div className="h-3 w-3/4 animate-pulse rounded bg-gray-200"></div>
+                </div>
+              ))}
             </div>
           )}
 
-          {!isSearching && results.length === 0 && (
+          {/* TIDAK ADA HASIL (Hanya muncul jika benar-benar selesai loading) */}
+          {!isLoading && results.length === 0 && (
             <div className="p-3 text-center text-sm font-bold text-gray-500">
               Tidak ada hasil
             </div>
           )}
 
-          {!isSearching && results.length > 0 && (
+          {/* LIST HASIL PENCARIAN */}
+          {!isLoading && results.length > 0 && (
             <ul className="flex max-h-60 flex-col overflow-y-auto">
               {results.map((item) => (
                 <li
                   key={item.id}
                   className="flex cursor-pointer flex-col border-b border-gray-200 p-3 transition-colors last:border-0 hover:bg-[#DCFFBC]"
                   onClick={() => {
-                    // Panggil fungsi ke peta
                     onSelectLocation(item);
-
-                    // Tutup dropdown dan jadikan nama tempat sebagai value input
                     setIsOpen(false);
                     setQuery(item.name);
                   }}

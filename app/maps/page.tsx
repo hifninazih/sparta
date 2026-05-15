@@ -271,7 +271,7 @@ export default function Maps() {
         mapStyle={currentMapStyle}
         cursor={isPickingLocation ? "crosshair" : "grab"}
       >
-        {/* MARKER 1: LOKASI GPS ASLI (Biru Berdenyut) */}
+        {/* MARKER 1: LOKASI GPS */}
         {userLocation && (
           <Marker
             longitude={userLocation[0]}
@@ -285,15 +285,28 @@ export default function Maps() {
           </Marker>
         )}
 
-        {/* MARKER 2: TITIK AWAL PERJALANAN (Pin Merah) */}
+        {/* MARKER 2: TITIK AWAL PERJALANAN */}
         {selectedLocation && (
           <Marker
             longitude={selectedLocation[0]}
             latitude={selectedLocation[1]}
             anchor="bottom"
           >
-            <div className="cursor-pointer text-red-600 drop-shadow-md transition-transform hover:scale-110">
-              <MapPin className="size-10 fill-red-100" strokeWidth={2} />
+            <div
+              tabIndex={0}
+              className="group relative z-20 flex cursor-pointer flex-col items-center transition-transform outline-none hover:scale-110 active:scale-95"
+            >
+              {/* Tooltip Keterangan */}
+              <div className="pointer-events-none absolute -top-10 flex origin-bottom scale-0 flex-col items-center rounded-md border-2 border-black bg-white px-3 py-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all duration-200 ease-out group-hover:scale-100 group-focus:scale-100">
+                <span className="text-xs font-bold whitespace-nowrap text-black">
+                  Titik Awal Perjalanan
+                </span>
+              </div>
+
+              {/* Ikon Pin Merah */}
+              <div className="text-red-600 drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
+                <MapPin className="size-10 fill-red-100" strokeWidth={2} />
+              </div>
             </div>
           </Marker>
         )}
@@ -413,12 +426,6 @@ export default function Maps() {
               {/* Tooltip Nama yang Menempel (Selalu Muncul) */}
               <div className="pointer-events-none absolute -top-12 z-50 rounded-lg border-2 border-black bg-white px-3 py-1.5 text-xs font-black whitespace-nowrap shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all">
                 {selectedPlace.name}
-                {/* Tandai jika ini dari OSM */}
-                {selectedPlace.type === "osm" && (
-                  <span className="ml-2 text-[12px] font-bold text-gray-500">
-                    (OSM)
-                  </span>
-                )}
               </div>
 
               {/* Pin Shape Soft Neo-brutalism */}
@@ -462,7 +469,7 @@ export default function Maps() {
       <div className="absolute top-5 right-4 z-10 hidden flex-col items-end gap-5 sm:flex">
         <Button
           variant={"primary"}
-          size={"lg"}
+          size={"rect"}
           startIcon={<CircleQuestionMark />}
         >
           <p>Panduan</p>

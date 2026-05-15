@@ -79,6 +79,7 @@ export function PreferensiDialog({ children }: { children: React.ReactNode }) {
     rating,
     nextStep,
     prevStep,
+    setStep,
     setPreference,
     setIsPickingLocation,
   } = useWizardStore();
@@ -156,6 +157,8 @@ export function PreferensiDialog({ children }: { children: React.ReactNode }) {
       if (result.success) {
         setRecommendations(result.data); // Simpan hasil top 20 ke Zustand
       }
+
+      setStep(1);
     } catch (error) {
       console.error("Gagal mengambil rekomendasi", error);
       alert("Terjadi kesalahan saat menghitung rekomendasi.");

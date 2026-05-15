@@ -32,10 +32,12 @@ export async function GET(request: NextRequest) {
     const localDbPromise = pool.query(localQuery, [`%${keyword}%`]);
 
     // 2. QUERY EKSTERNAL: Cari di Nominatim OSM
-    // Tambahkan countrycodes=id agar hanya mencari di Indonesia
-    const osmUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(keyword)}&format=jsonv2&countrycodes=id&limit=5`;
+    // Tambahkan viewbox dan bounded=1 untuk MENGUNCI pencarian HANYA di D.I. Yogyakarta
+    const jogjaViewbox = "110.00,-7.50,110.90,-8.20";
+
+    const osmUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(keyword)}&format=jsonv2&countrycodes=id&limit=5&viewbox=${jogjaViewbox}&bounded=1`;
+
     const osmPromise = fetch(osmUrl, {
-      // Nominatim mewajibkan User-Agent khusus, jika tidak akan diblokir (Error 403)
       headers: { "User-Agent": "SPARTA-WebGIS-App/1.0" },
     }).then((res) => res.json());
 
