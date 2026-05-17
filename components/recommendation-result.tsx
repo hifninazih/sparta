@@ -18,10 +18,6 @@ import {
 } from "@/components/drawer";
 import { useMap } from "@vis.gl/react-maplibre";
 
-interface SidebarProps {
-  onSelectWisata: (wisata: WisataRecommendation) => void;
-}
-
 export function RecommendationResult() {
   const {
     recommendations,
@@ -194,7 +190,9 @@ export function RecommendationResult() {
         </DrawerHeader>
 
         {/* 4. AREA SCROLL */}
-        <div className="overflow-y-auto p-4 pt-5 pb-10">{ContentList}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-none p-4 pt-5 pb-10">
+          {ContentList}
+        </div>
       </DrawerContent>
     </Drawer>
   );
