@@ -1,10 +1,9 @@
 // component/recommendation-result.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   useRecommendationStore,
-  WisataRecommendation,
 } from "@/store/useRecommendationStore";
 import { X, MapPin, Star, Ticket } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -18,6 +17,10 @@ import {
 } from "@/components/drawer";
 import { useMap } from "@vis.gl/react-maplibre";
 
+// Snap points yang konsisten: 25% (rendah), 60% (tengah), 90% (full)
+// Kita gunakan 0.25 agar header laci lebih terlihat jelas di semua device
+const SNAP_POINTS = [0.25, 0.6, 0.9];
+
 export function RecommendationResult() {
   const {
     recommendations,
@@ -25,22 +28,20 @@ export function RecommendationResult() {
     clearRecommendations,
     activeWisataId,
     setActiveWisataId,
+    mobileSnap,
+    setMobileSnap
   } = useRecommendationStore();
 
   const { "sparta-map": spartaMap } = useMap();
 
   const isDesktop = useMediaQuery("(min-width: 640px)");
 
-  // 1. VAUL SNAP POINTS: Gunakan Desimal [20%, 50%, 100%]
-  const snapPoints = [0.2, 0.6, 1];
-  const [snap, setSnap] = useState<number | string | null>(snapPoints[1]);
-
-  // Kembalikan snap ke tengah jika data baru masuk atau dikosongkan
+  // Kembalikan snap ke tengah jika data baru masuk
   useEffect(() => {
     if (recommendations.length > 0) {
-      setSnap(snapPoints[1]);
+      setMobileSnap(SNAP_POINTS[1]);
     }
-  }, [recommendations.length]);
+  }, [recommendations.length, setMobileSnap]);
 
   // Fungsi untuk flyTo ke titik rekomendasi
   const handleWisataSelect = (wisata: any) => {
@@ -52,8 +53,8 @@ export function RecommendationResult() {
       duration: 1200,
       essential: true,
       padding: isDesktop
-        ? { left: 400, top: 0, bottom: 0, right: 0 } // Geser pusat ke kanan (karena ada sidebar kiri)
-        : { bottom: window.innerHeight * 0.3, top: 0, left: 0, right: 0 }, // Geser pusat ke atas (karena ada laci bawah)
+        ? { left: 400, top: 0, bottom: 0, right: 0 } 
+        : { bottom: window.innerHeight * 0.3, top: 0, left: 0, right: 0 }, 
     });
   };
 
@@ -96,8 +97,7 @@ export function RecommendationResult() {
             handleWisataSelect(item);
 
             if (!isDesktop) {
-              // 2. TURUNKAN LACI KE 20% (Minimize)
-              setSnap(snapPoints[1]);
+              setMobileSnap(SNAP_POINTS[1]);
             }
           }}
           className={cn(
@@ -157,24 +157,33 @@ export function RecommendationResult() {
     );
   }
 
-  // =========================================
-  // RENDER LACI MOBILE
-  // =========================================
+  const getPaddingBottom = () => {
+    const snapValue = Number(mobileSnap) || 0;
+    // Drawer height is 85vh. Hidden portion is 85vh - (snapValue * 100)vh
+    const hiddenHeightVh = Math.max(0, 0.85 - snapValue) * 100;
+    // Berikan padding 120px agar item terakhir tidak tertutup safe area/ujung layar
+    return `calc(${hiddenHeightVh}vh + 120px)`; 
+  };
+
   return (
     <Drawer
       open={recommendations.length > 0}
       onOpenChange={(open) => {
         if (!open) clearRecommendations();
       }}
-      snapPoints={snapPoints}
-      activeSnapPoint={snap}
-      setActiveSnapPoint={setSnap}
-      modal={false} // Peta tetap interaktif di belakangnya
-      dismissible={false} // Laci tidak bisa di-swipe habis (harus ditutup lewat tombol X)
+      snapPoints={SNAP_POINTS}
+      activeSnapPoint={mobileSnap}
+      setActiveSnapPoint={setMobileSnap}
+      modal={false}
+      dismissible={false}
     >
-      {/* 3. KUNCI KETINGGIAN LACI (h-[85vh]) AGAR FISIKA SNAP VAUL BEKERJA */}
-      <DrawerContent className="h-[85vh] shadow-[0px_-4px_0px_rgba(0,0,0,1)]">
-        <DrawerHeader className="flex flex-row items-center justify-between pb-2 text-left">
+      <DrawerContent 
+        className="h-[85vh] shadow-[0px_-4px_0px_rgba(0,0,0,1)]"
+        // Cegah drawer menangkap interaksi klik/sentuh yang seharusnya ke input search di luar
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
+        <DrawerHeader className="flex touch-none flex-row items-center justify-between pb-4 text-left">
           <div>
             <DrawerTitle>Top Rekomendasi</DrawerTitle>
             <DrawerDescription>
@@ -189,8 +198,11 @@ export function RecommendationResult() {
           </button>
         </DrawerHeader>
 
-        {/* 4. AREA SCROLL */}
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-none p-4 pt-5 pb-10">
+        {/* AREA SCROLL DENGAN PADDING DINAMIS */}
+        <div
+          className="min-h-0 flex-1 overflow-y-auto overscroll-y-none p-4"
+          style={{ paddingBottom: getPaddingBottom() }}
+        >
           {ContentList}
         </div>
       </DrawerContent>

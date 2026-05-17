@@ -73,8 +73,8 @@ function DrawerContent({
         )}
         {...props}
       >
-        {/* Gagang Tarik (Handle) - Diubah jadi abu-abu gelap agar kontras */}
-        <div className="mx-auto mt-4 hidden h-1.5 w-12 shrink-0 rounded-full bg-black/30 group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
+        {/* Menggunakan DrawerPrimitive.Handle resmi untuk mencegah anomali bar ganda */}
+        <DrawerPrimitive.Handle className="mx-auto mt-4 h-1.5 w-12 shrink-0 rounded-full bg-black/30 group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
         {children}
       </DrawerPrimitive.Content>
     </DrawerPortal>
