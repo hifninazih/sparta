@@ -5,7 +5,7 @@ import { Search, X } from "lucide-react"; // Import X
 
 export interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   onSearch?: (value: string) => void;
-  onClear?: () => void; // Tambahan prop onClear
+  onClear?: () => void;
 }
 
 const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(

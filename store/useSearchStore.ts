@@ -15,11 +15,13 @@ interface SearchState {
   category: string;
   results: WisataSearchResult[];
   isSearching: boolean;
+  showSearchAreaBtn: boolean;
 
   setKeyword: (keyword: string) => void;
   setCategory: (category: string) => void;
   setResults: (results: WisataSearchResult[]) => void;
   setIsSearching: (status: boolean) => void;
+  setShowSearchAreaBtn: (status: boolean) => void;
 
   executeSearch: (
     keyword: string,
@@ -34,11 +36,13 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   category: "Semua",
   results: [],
   isSearching: false,
+  showSearchAreaBtn: false,
 
   setKeyword: (keyword) => set({ keyword }),
   setCategory: (category) => set({ category }),
   setResults: (results) => set({ results }),
   setIsSearching: (status) => set({ isSearching: status }),
+  setShowSearchAreaBtn: (status) => set({ showSearchAreaBtn: status }),
 
   executeSearch: async (keyword, category, bbox) => {
     // 1. Set isSearching ke true, TAPI JANGAN ubah/hapus 'results'.

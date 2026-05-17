@@ -1,3 +1,4 @@
+// component/recommendation-result.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -15,12 +16,13 @@ import {
   DrawerTitle,
   DrawerDescription,
 } from "@/components/drawer";
+import { useMap } from "@vis.gl/react-maplibre";
 
 interface SidebarProps {
   onSelectWisata: (wisata: WisataRecommendation) => void;
 }
 
-export function RecommendationSidebar({ onSelectWisata }: SidebarProps) {
+export function RecommendationResult() {
   const {
     recommendations,
     isLoading,
@@ -28,6 +30,8 @@ export function RecommendationSidebar({ onSelectWisata }: SidebarProps) {
     activeWisataId,
     setActiveWisataId,
   } = useRecommendationStore();
+
+  const { "sparta-map": spartaMap } = useMap();
 
   const isDesktop = useMediaQuery("(min-width: 640px)");
 
@@ -41,6 +45,21 @@ export function RecommendationSidebar({ onSelectWisata }: SidebarProps) {
       setSnap(snapPoints[1]);
     }
   }, [recommendations.length]);
+
+  // Fungsi untuk flyTo ke titik rekomendasi
+  const handleWisataSelect = (wisata: any) => {
+    if (!spartaMap) return;
+
+    spartaMap.getMap().flyTo({
+      center: [wisata.lng, wisata.lat],
+      zoom: 16,
+      duration: 1200,
+      essential: true,
+      padding: isDesktop
+        ? { left: 400, top: 0, bottom: 0, right: 0 } // Geser pusat ke kanan (karena ada sidebar kiri)
+        : { bottom: window.innerHeight * 0.3, top: 0, left: 0, right: 0 }, // Geser pusat ke atas (karena ada laci bawah)
+    });
+  };
 
   const formatRp = (price: number) => {
     if (price === 0) return "Gratis";
@@ -78,7 +97,7 @@ export function RecommendationSidebar({ onSelectWisata }: SidebarProps) {
           onMouseLeave={() => isDesktop && setActiveWisataId(null)}
           onClick={() => {
             setActiveWisataId(item.id);
-            onSelectWisata(item);
+            handleWisataSelect(item);
 
             if (!isDesktop) {
               // 2. TURUNKAN LACI KE 20% (Minimize)

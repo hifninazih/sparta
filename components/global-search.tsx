@@ -4,16 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { SearchInput } from "./search-input";
 import { useAutosuggestStore } from "@/store/useAutosuggestStore";
 import { UnifiedSearchResult } from "@/app/api/search/route";
+import { useMap } from "@vis.gl/react-maplibre";
 
-interface GlobalSearchProps {
-  onSelectLocation: (item: UnifiedSearchResult) => void;
-  onClearLocation: () => void;
-}
-
-export function GlobalSearch({
-  onSelectLocation,
-  onClearLocation,
-}: GlobalSearchProps) {
+export default function GlobalSearch() {
   const {
     query,
     setQuery,
@@ -21,7 +14,10 @@ export function GlobalSearch({
     results,
     isSearching,
     clearResults,
+    setSelectedPlace,
   } = useAutosuggestStore();
+
+  const { "sparta-map": spartaMap } = useMap();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isDebouncing, setIsDebouncing] = useState(false); // <-- 1. Tambahkan state ini
@@ -57,7 +53,21 @@ export function GlobalSearch({
   const handleClear = () => {
     clearResults();
     setIsOpen(false);
-    onClearLocation();
+  };
+
+  // Fungsi untuk mengarahkan peta (Terbang / FlyTo)
+  const handleLocationSelect = (item: UnifiedSearchResult) => {
+    setSelectedPlace(item);
+
+    spartaMap?.getMap().flyTo({
+      center: [item.lng, item.lat],
+      zoom: 15,
+      duration: 1200, // 1.2 detik
+      essential: true, // Memaksa animasi tetap jalan meski mode hemat baterai/performa diaktifkan di browser
+    });
+
+    setIsOpen(false);
+    setQuery(item.name);
   };
 
   // 3. Gabungkan status loading agar lebih rapi
@@ -109,11 +119,7 @@ export function GlobalSearch({
                 <li
                   key={item.id}
                   className="flex cursor-pointer flex-col border-b border-gray-200 p-3 transition-colors last:border-0 hover:bg-[#DCFFBC]"
-                  onClick={() => {
-                    onSelectLocation(item);
-                    setIsOpen(false);
-                    setQuery(item.name);
-                  }}
+                  onClick={() => handleLocationSelect(item)}
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-bold">{item.name}</span>

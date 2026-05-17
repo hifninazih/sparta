@@ -21,6 +21,7 @@ import {
   Trash2,
   Loader2,
   MapPinCheck,
+  MapPinSearch,
 } from "lucide-react";
 import { useWizardStore } from "@/store/useWizardStore";
 import { useRecommendationStore } from "@/store/useRecommendationStore";
@@ -68,7 +69,7 @@ const WIZARD_STEPS = [
   },
 ] as const;
 
-export function PreferensiDialog({ children }: { children: React.ReactNode }) {
+export function PreferensiDialog() {
   const {
     isOpen,
     setIsOpen,
@@ -169,7 +170,11 @@ export function PreferensiDialog({ children }: { children: React.ReactNode }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogTrigger asChild>
+        <Button variant={"gradient"} size={"lg"} startIcon={<MapPinSearch />}>
+          Rekomendasi Wisata
+        </Button>
+      </DialogTrigger>
       <DialogContent className="gap-0 overflow-hidden border-2 border-black p-0 sm:max-w-md">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle className="text-center text-lg leading-tight font-bold">

@@ -209,7 +209,7 @@ export interface CompassButtonProps extends React.ButtonHTMLAttributes<HTMLButto
   onReset: () => void;
 }
 
-function CompassButton({
+function CompassButtonComponent({
   className,
   bearing,
   pitch,
@@ -248,4 +248,10 @@ function CompassButton({
   );
 }
 
-export { Button, ZoomButton, MapStyleToggle, buttonVariants, CompassButton };
+export {
+  Button,
+  ZoomButton,
+  MapStyleToggle,
+  buttonVariants,
+  CompassButtonComponent,
+};
