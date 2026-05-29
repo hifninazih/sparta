@@ -158,7 +158,15 @@ export default function UserManagementPage() {
         description="Kelola akun admin dan hak akses sistem SPARTA."
         icon={<Users className="h-8 w-8 text-purple-600" />}
       >
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <Dialog 
+          open={isAddDialogOpen} 
+          onOpenChange={(open) => {
+            setIsAddDialogOpen(open);
+            if (!open) {
+              setFormData({ username: "", full_name: "", password: "", role: "admin" });
+            }
+          }}
+        >
           <DialogTrigger asChild>
             <Button variant="primary" size="lg" className="font-bold" startIcon={<UserPlus />}>
               Tambah Admin

@@ -22,7 +22,7 @@ export function SearchSection({
 }: SearchSectionProps) {
   return (
     <div className={cn(
-      "p-4 border-2 border-black rounded-xl bg-[#f8fafc] flex flex-col sm:flex-row gap-4 justify-between items-center shadow-[4px_4px_0px_rgba(0,0,0,1)] mb-8",
+      "p-4 border-2 border-black rounded-xl bg-white flex flex-col sm:flex-row gap-4 justify-between items-center shadow-[2px_2px_0px_rgba(0,0,0,1)] mb-8",
       className
     )}>
       <Input 
@@ -38,8 +38,10 @@ export function SearchSection({
         onClick={onRefresh} 
         disabled={isLoading}
         title="Refresh Data"
+        className="px-4"
       >
-        <RefreshCw className={cn("h-4 w-4", isLoading && "animate-spin")} />
+        <RefreshCw className={cn("h-4 w-4 sm:mr-2", isLoading && "animate-spin")} />
+        <span className="hidden sm:inline">Refresh</span>
       </Button>
     </div>
   );

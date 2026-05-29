@@ -12,7 +12,7 @@ function Input({ className, containerClassName, type, startIcon, endIcon, ...pro
   return (
     <div 
       className={cn(
-        "group/input relative flex w-full transition-all duration-200 focus-within:-translate-x-0.5 focus-within:-translate-y-0.5",
+        "group/input relative flex w-full",
         containerClassName
       )}
     >
@@ -28,7 +28,7 @@ function Input({ className, containerClassName, type, startIcon, endIcon, ...pro
           // Base classes
           "flex h-10 w-full min-w-0 rounded-md border-2 border-black bg-white px-3 py-2 text-sm font-bold ring-offset-background transition-all outline-none",
           // Neo-Brutalism Shadow
-          "shadow-[2px_2px_0px_rgba(0,0,0,1)] focus-visible:shadow-[4px_4px_0px_rgba(0,0,0,1)]",
+          "shadow-[2px_2px_0px_rgba(0,0,0,1)] focus-visible:shadow-[1px_1px_0px_rgba(0,0,0,1)] focus-visible:translate-x-[1px] focus-visible:translate-y-[1px]",
           // Icon Padding
           startIcon && "pl-10",
           endIcon && "pr-10",

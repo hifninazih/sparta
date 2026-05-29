@@ -1,6 +1,12 @@
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Users, MapPin, ArrowRight, Compass, LayoutDashboard } from "lucide-react";
+import {
+  Users,
+  MapPin,
+  ArrowRight,
+  Compass,
+  LayoutDashboard,
+} from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/core/button";
 import { PageHeader } from "@/components/admin/PageHeader";
@@ -30,7 +36,7 @@ export default async function AdminDashboardPage() {
           title="Lihat Peta"
           description="Buka antarmuka peta publik untuk melihat hasil rekomendasi dan sebaran wisata secara langsung."
           icon={<Compass className="h-6 w-6" />}
-          variant="secondary"
+          variant="white"
           asActionCard
         >
           <Link href="/maps" target="_blank">

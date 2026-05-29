@@ -29,32 +29,42 @@ export function NeoCard({
   return (
     <div
       className={cn(
-        "group rounded-2xl border-2 border-black p-6 transition-all",
+        "group rounded-xl border-2 border-black p-6 transition-all duration-150",
         bgColors[variant],
-        asActionCard 
-          ? "shadow-[2px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[4px_8px_0px_rgba(0,0,0,1)]" 
-          : "shadow-[4px_4px_0px_rgba(0,0,0,1)]",
-        className
+        asActionCard
+          ? "shadow-[1px_2px_0px_rgba(0,0,0,1)]"
+          : "shadow-[2px_2px_0px_rgba(0,0,0,1)]",
+        className,
       )}
     >
       {(title || icon) && (
-        <div className="flex items-center justify-between mb-4">
-          {title && <h3 className="text-xl font-black text-black">{title}</h3>}
+        <div className="mb-4 flex items-center justify-between">
+          {title && (
+            <h3 className="text-xl font-black tracking-tight text-black">
+              {title}
+            </h3>
+          )}
           {icon && (
-            <div className={cn(
-              "p-3 rounded-xl border-2 border-black",
-              variant === "primary" ? "bg-white text-black" : "bg-blue-50 text-blue-600"
-            )}>
+            <div
+              className={cn(
+                "rounded-lg border-2 border-black p-2.5 shadow-[1px_1px_0px_rgba(0,0,0,1)]",
+                variant === "primary"
+                  ? "bg-white text-black"
+                  : "bg-primary text-black",
+              )}
+            >
               {icon}
             </div>
           )}
         </div>
       )}
       {description && (
-        <p className={cn(
-          "text-sm font-bold mb-6 leading-relaxed",
-          variant === "primary" ? "text-black/60" : "text-slate-500"
-        )}>
+        <p
+          className={cn(
+            "mb-6 text-sm leading-relaxed font-bold",
+            variant === "primary" ? "text-black/80" : "text-slate-600",
+          )}
+        >
           {description}
         </p>
       )}

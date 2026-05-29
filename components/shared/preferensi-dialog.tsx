@@ -176,7 +176,7 @@ export function PreferensiDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent className="gap-0 overflow-hidden border-2 border-black p-0 sm:max-w-md">
-        <DialogHeader className="p-6 pb-2">
+        <DialogHeader className="p-6 pb-2 pr-8">
           <DialogTitle className="text-center text-lg leading-tight font-bold">
             {currentStepData.title}
           </DialogTitle>
@@ -219,16 +219,16 @@ export function PreferensiDialog() {
                   <Button
                     variant="primary"
                     size="rect"
-                    className="text-sm"
+                    className="text-sm font-bold"
                     endIcon={<MapPinPlus />}
                     onClick={handlePickLocation}
                   >
                     Pilih di Peta
                   </Button>
                   <Button
-                    variant="primary"
+                    variant="outline"
                     size="rect"
-                    className="text-sm"
+                    className="text-sm font-bold"
                     endIcon={
                       isLoadingGPS ? (
                         <Loader2 className="animate-spin" />
@@ -250,20 +250,22 @@ export function PreferensiDialog() {
               LOGIKA RENDER LANGKAH 2-4 (SLIDER)
           ========================================= */}
           {currentStepData.type === "slider" && (
-            <BobotSlider
-              leftLabel={currentStepData.leftLabel}
-              rightLabel={currentStepData.rightLabel}
-              value={
-                currentStepData.key === "jarak"
-                  ? jarak
-                  : currentStepData.key === "harga"
-                    ? harga
-                    : currentStepData.key === "fasilitas"
-                      ? fasilitas
-                      : rating
-              }
-              onChange={(val) => setPreference(currentStepData.key as any, val)}
-            />
+            <div className="w-full max-w-sm">
+              <BobotSlider
+                leftLabel={currentStepData.leftLabel}
+                rightLabel={currentStepData.rightLabel}
+                value={
+                  currentStepData.key === "jarak"
+                    ? jarak
+                    : currentStepData.key === "harga"
+                      ? harga
+                      : currentStepData.key === "fasilitas"
+                        ? fasilitas
+                        : rating
+                }
+                onChange={(val) => setPreference(currentStepData.key as any, val)}
+              />
+            </div>
           )}
         </div>
 
@@ -276,6 +278,7 @@ export function PreferensiDialog() {
               <Button
                 variant="outline"
                 size={"rect"}
+                className="font-bold"
                 startIcon={<ArrowLeft />}
                 onClick={prevStep}
               >
@@ -286,6 +289,7 @@ export function PreferensiDialog() {
             <Button
               variant="gradient"
               size={"rect"}
+              className="font-bold"
               endIcon={isLastStep ? <Search /> : <ArrowRight />}
               onClick={isLastStep ? handleKalkulasi : nextStep}
               disabled={isFirstStep && !selectedLocation}

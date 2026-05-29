@@ -39,10 +39,10 @@ export function ActionButtons({
   }
 
   return (
-    <div className="flex items-center justify-end space-x-2">
+    <div className="flex items-center justify-end space-x-3">
       <button
         type="button"
-        className="rounded-md p-2 text-blue-600 transition-colors hover:cursor-pointer hover:bg-blue-50"
+        className="rounded-lg border-2 border-black p-2 text-black shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all hover:cursor-pointer hover:-translate-y-0.5 hover:-translate-x-0.5 hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] hover:bg-[#DCFFBC] active:translate-y-0 active:translate-x-0 active:shadow-none"
         onClick={onEdit}
         title="Edit"
       >
@@ -53,7 +53,7 @@ export function ActionButtons({
         <AlertDialogTrigger asChild>
           <button
             type="button"
-            className="rounded-md p-2 text-red-600 transition-colors hover:cursor-pointer hover:bg-red-50"
+            className="rounded-lg border-2 border-black p-2 text-black shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all hover:cursor-pointer hover:-translate-y-0.5 hover:-translate-x-0.5 hover:shadow-[3px_3px_0px_rgba(0,0,0,1)] hover:bg-red-400 hover:text-white active:translate-y-0 active:translate-x-0 active:shadow-none"
             title="Hapus"
           >
             <Trash2 className="h-4 w-4" />

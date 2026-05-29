@@ -255,7 +255,24 @@ export default function WisataManagementPage() {
       </Table>
 
       {/* Form Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog 
+        open={isDialogOpen} 
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) {
+            setSelectedItem(null);
+            setFormData({
+              name: "",
+              category: "",
+              price: 0,
+              rating: 4.5,
+              all_facility: "",
+              lng: 110.3695,
+              lat: -7.7956,
+            });
+          }
+        }}
+      >
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-bold text-xl">{selectedItem ? "Edit Wisata" : "Tambah Wisata Baru"}</DialogTitle>

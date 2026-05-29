@@ -43,7 +43,6 @@ export default function AdminLayout({
     null,
   );
 
-  // ... rest of state
   useEffect(() => {
     fetch("/api/auth/me")
       .then((res) => {
@@ -75,7 +74,6 @@ export default function AdminLayout({
   };
 
   const menuItems = [
-    // ... menu items
     {
       title: "Dashboard",
       href: "/admin/dashboard",
@@ -107,11 +105,10 @@ export default function AdminLayout({
   return (
     <div className="flex min-h-screen bg-[#f8fafc] font-sans selection:bg-[#DCFFBC]">
       {/* MOBILE HEADER */}
-      {/* ... mobile header */}
       <div className="fixed top-0 right-0 left-0 z-30 flex h-16 items-center justify-between border-b-2 border-black bg-white px-4 shadow-[0px_2px_0px_rgba(0,0,0,1)] lg:hidden">
         <Link href="/admin" className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-black bg-blue-600 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-            <Compass className="h-6 w-6 text-white" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-black bg-linear-to-tr from-[#DCFFBC] to-[#6FD1D7] text-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+            <Compass className="h-6 w-6" />
           </div>
           <span className="text-xl font-black tracking-tighter text-black">
             SPARTA
@@ -120,6 +117,7 @@ export default function AdminLayout({
         <Button
           variant="outline"
           size="rect"
+          className="h-10 w-10 border-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
           {isSidebarOpen ? (
@@ -131,7 +129,6 @@ export default function AdminLayout({
       </div>
 
       {/* SIDEBAR OVERLAY */}
-      {/* ... sidebar overlay */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
@@ -148,16 +145,16 @@ export default function AdminLayout({
       >
         <div className="flex h-full flex-col">
           {/* Logo Section */}
-          <div className="flex h-24 items-center border-b-2 border-black/5 px-8">
-            <Link href="/admin" className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-black bg-blue-600 shadow-[2px_4px_0px_rgba(0,0,0,1)]">
-                <Compass className="h-8 w-8 text-white" />
+          <div className="flex h-24 items-center border-b-2 border-black px-6">
+            <Link href="/admin" className="group flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-black bg-linear-to-tr from-[#DCFFBC] to-[#6FD1D7] text-black shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 group-hover:shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+                <Compass className="h-7 w-7" />
               </div>
               <div className="flex flex-col">
-                <span className="text-2xl leading-none font-black tracking-tighter text-black">
+                <span className="text-2xl leading-none font-black tracking-tighter text-black drop-shadow-sm">
                   SPARTA
                 </span>
-                <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                <span className="mt-1 text-[10px] font-black tracking-widest text-slate-800 uppercase">
                   Admin Panel
                 </span>
               </div>
@@ -165,7 +162,7 @@ export default function AdminLayout({
           </div>
 
           {/* Navigation Links */}
-          <nav className="flex-1 space-y-3 p-6">
+          <nav className="flex-1 space-y-2 overflow-y-auto p-4">
             {menuItems.map((item) => {
               if (item.role === "superadmin" && user.role !== "superadmin")
                 return null;
@@ -181,15 +178,18 @@ export default function AdminLayout({
                   href={item.href}
                   onClick={() => setIsSidebarOpen(false)}
                   className={cn(
-                    "flex items-center justify-between rounded-xl border-2 px-4 py-3 text-sm font-black transition-all",
+                    "group flex items-center justify-between rounded-lg border-2 px-4 py-3 text-sm font-bold transition-all",
                     isActive
-                      ? "-translate-y-0.5 border-black bg-[#DCFFBC] text-black shadow-[2px_4px_0px_rgba(0,0,0,1)]"
-                      : "border-transparent text-slate-500 hover:-translate-y-0.5 hover:border-black hover:bg-slate-50 hover:text-black hover:shadow-[2px_4px_0px_rgba(0,0,0,1)]",
+                      ? "-translate-y-0.5 border-black bg-linear-to-tr from-[#DCFFBC] to-[#6FD1D7] text-black shadow-[2px_3px_0px_rgba(0,0,0,1)]"
+                      : "border-transparent text-slate-600 hover:-translate-y-0.5 hover:border-black/50 hover:shadow-[2px_3px_0px_rgba(0,0,0,0.5)]",
                   )}
                 >
                   <div className="flex items-center gap-3">
                     <span
-                      className={cn(isActive ? "text-black" : "text-slate-400")}
+                      className={cn(
+                        isActive ? "text-black" : "text-slate-500",
+                        "group-hover:text-slate-500",
+                      )}
                     >
                       {item.icon}
                     </span>
@@ -202,15 +202,15 @@ export default function AdminLayout({
           </nav>
 
           {/* User Profile & Logout Section */}
-          <div className="mt-auto border-t-2 border-black bg-slate-50 p-6">
+          <div className="mt-auto border-t-2 border-black bg-slate-100 p-4">
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
                   variant="destructive"
-                  className="w-full hover:bg-red-600"
-                  startIcon={<LogOut className="h-5 w-5" />}
+                  className="h-12 w-full border-2 text-sm font-bold shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)]"
+                  startIcon={<LogOut className="mr-2 h-4 w-4" />}
                 >
-                  Keluar
+                  Keluar Sistem
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>

@@ -69,9 +69,9 @@ export async function proxy(request: NextRequest) {
   // 4. LANDING PAGE REDIRECT (If applicable)
   // If "/" should go to landing page, keep it as is.
   // If "/" should redirect to maps, uncomment below:
-  if (pathname === "/") {
-    return NextResponse.redirect(new URL("/maps", request.url));
-  }
+  // if (pathname === "/") {
+  //   return NextResponse.redirect(new URL("/maps", request.url));
+  // }
 
   return NextResponse.next();
 }
