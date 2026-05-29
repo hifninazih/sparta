@@ -4,7 +4,8 @@
 import { useMap } from "@vis.gl/react-maplibre";
 import { useMapStore } from "@/store/useMapStore";
 import { Compass } from "lucide-react";
-import { Button, CompassButtonComponent } from "@/components/core/button";
+import { Button } from "@/components/core/button";
+import { CompassButton } from "@/components/map/MapControls";
 
 import { cn } from "@/lib/utils";
 
@@ -31,7 +32,7 @@ export default function MapCompass() {
 
   return (
     <>
-      <CompassButtonComponent
+      <CompassButton
         bearing={bearing}
         pitch={pitch}
         onReset={handleResetCompass}

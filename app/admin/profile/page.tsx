@@ -167,7 +167,9 @@ export default function AdminProfilePage() {
                     </Label>
                     <Input
                       id="pass"
+                      name="sparta-new-password"
                       type="password"
+                      autoComplete="new-password"
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={(e) =>
@@ -181,7 +183,9 @@ export default function AdminProfilePage() {
                     </Label>
                     <Input
                       id="confirm"
+                      name="sparta-confirm-password"
                       type="password"
+                      autoComplete="new-password"
                       placeholder="••••••••"
                       value={formData.confirmPassword}
                       onChange={(e) =>
@@ -208,6 +212,7 @@ export default function AdminProfilePage() {
               </div>
               <Input
                 id="current"
+                name="sparta-current-password-verify"
                 type="password"
                 placeholder="Konfirmasi identitas Anda"
                 value={formData.currentPassword}

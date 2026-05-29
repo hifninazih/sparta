@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { pool } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { generateId } from "@/lib/utils";
 
 export async function GET(request: NextRequest) {
+  // ... existing code
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -20,7 +22,7 @@ export async function GET(request: NextRequest) {
           ST_X(geom) as lng, ST_Y(geom) as lat
         FROM wisata_diy
         WHERE name ILIKE $1 OR category ILIKE $1
-        ORDER BY id DESC
+        ORDER BY name ASC
         LIMIT 100
       `;
       const result = await client.query(query, [`%${search}%`]);
@@ -42,23 +44,39 @@ export async function POST(request: NextRequest) {
 
   try {
     const { name, category, price, rating, all_facility, lng, lat } = await request.json();
+    
+    if (!name || !category || lng === undefined || lat === undefined) {
+      return NextResponse.json({ message: "Field wajib (nama, kategori, koordinat) tidak boleh kosong" }, { status: 400 });
+    }
+
+    const id = generateId();
+    
+    // Parse comma-separated string into a JSON array
+    const facilityArray = typeof all_facility === 'string' 
+      ? all_facility.split(",").map(f => f.trim()).filter(Boolean) 
+      : (Array.isArray(all_facility) ? all_facility : []);
 
     const client = await pool.connect();
     try {
       const query = `
-        INSERT INTO wisata_diy (name, category, price, rating, all_facility, geom)
-        VALUES ($1, $2, $3, $4, $5, ST_SetSRID(ST_MakePoint($6, $7), 4326))
+        INSERT INTO wisata_diy (id, name, category, price, rating, all_facility, geom)
+        VALUES ($1, $2, $3, $4, $5, $6, ST_SetSRID(ST_MakePoint($7, $8), 4326))
         RETURNING id, name, category, price, rating, all_facility, ST_X(geom) as lng, ST_Y(geom) as lat
       `;
       const result = await client.query(query, [
-        name, category, price, rating, all_facility, lng, lat
+        id, name, category, price, rating, JSON.stringify(facilityArray), lng, lat
       ]);
       return NextResponse.json(result.rows[0]);
     } finally {
       client.release();
     }
-  } catch (error) {
-    console.error("Create Wisata Error:", error);
-    return NextResponse.json({ message: "Error creating wisata" }, { status: 500 });
+  } catch (error: any) {
+    console.error("CREATE WISATA ERROR:", error);
+    if (error.code === '22P02') {
+      return NextResponse.json({ 
+        message: "Database Error: Kolom ID masih bertipe Integer atau syntax JSON salah." 
+      }, { status: 500 });
+    }
+    return NextResponse.json({ message: "Error creating wisata: " + error.message }, { status: 500 });
   }
 }

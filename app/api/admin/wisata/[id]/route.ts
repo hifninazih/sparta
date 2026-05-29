@@ -16,22 +16,21 @@ export async function PATCH(
   try {
     const { name, category, price, rating, all_facility, lng, lat } = await request.json();
 
+    // Parse comma-separated string into a JSON array
+    const facilityArray = typeof all_facility === 'string' 
+      ? all_facility.split(",").map((f: string) => f.trim()).filter(Boolean) 
+      : (Array.isArray(all_facility) ? all_facility : []);
+
     const client = await pool.connect();
     try {
       const query = `
-        UPDATE wisata_diy
-        SET 
-          name = $1, 
-          category = $2, 
-          price = $3, 
-          rating = $4, 
-          all_facility = $5, 
-          geom = ST_SetSRID(ST_MakePoint($6, $7), 4326)
+        UPDATE wisata_diy 
+        SET name = $1, category = $2, price = $3, rating = $4, all_facility = $5, geom = ST_SetSRID(ST_MakePoint($6, $7), 4326)
         WHERE id = $8
         RETURNING id, name, category, price, rating, all_facility, ST_X(geom) as lng, ST_Y(geom) as lat
       `;
       const result = await client.query(query, [
-        name, category, price, rating, all_facility, lng, lat, id
+        name, category, price, rating, JSON.stringify(facilityArray), lng, lat, id
       ]);
 
       if (result.rowCount === 0) {
@@ -62,8 +61,6 @@ export async function DELETE(
   try {
     const client = await pool.connect();
     try {
-      await client.query("DELETE FROM users WHERE id = $1", [id]); // ERROR in my previous logic, should be wisata_diy
-      // Fix:
       await client.query("DELETE FROM wisata_diy WHERE id = $1", [id]);
       return NextResponse.json({ message: "Wisata deleted successfully" });
     } finally {

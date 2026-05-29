@@ -1,4 +1,4 @@
-import { MapStyleToggle } from "@/components/core/button";
+import { MapStyleToggle } from "@/components/map/MapControls";
 import { useMapStore } from "@/store/useMapStore";
 
 export default function BasemapsToggle() {

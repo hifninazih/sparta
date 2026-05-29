@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export interface WisataRecommendation {
-  id: number;
+  id: string;
   name: string;
   category: string;
   price: number;
@@ -16,12 +16,12 @@ export interface WisataRecommendation {
 interface RecommendationState {
   recommendations: WisataRecommendation[];
   isLoading: boolean;
-  activeWisataId: number | null; // Untuk efek highlight saat di-hover
+  activeWisataId: string | null; // Untuk efek highlight saat di-hover
   mobileSnap: number | string | null; // Track posisi drawer mobile
 
   setRecommendations: (data: WisataRecommendation[]) => void;
   setIsLoading: (loading: boolean) => void;
-  setActiveWisataId: (id: number | null) => void;
+  setActiveWisataId: (id: string | null) => void;
   setMobileSnap: (snap: number | string | null) => void;
   clearRecommendations: () => void;
 }

@@ -4,12 +4,12 @@ import { calculateSAW } from "@/lib/saw";
 
 // Interface untuk tipe data wisata dari database
 interface Wisata {
-  id: number;
+  id: string;
   name: string;
   category: string;
   price: number;
   rating: number;
-  all_facility: string | string[];
+  all_facility: string;
   lng: number;
   lat: number;
   distance_m: number;

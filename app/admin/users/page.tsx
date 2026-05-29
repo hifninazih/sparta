@@ -17,7 +17,7 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogTrigger 
-} from "@/components/core/dialog-neo";
+} from "@/components/core/dialog";
 import {
   Select,
   SelectContent,
@@ -43,7 +43,7 @@ import { ActionButtons } from "@/components/admin/ActionButtons";
 import { FormField } from "@/components/core/form-field";
 
 interface User {
-  id: number;
+  id: string;
   username: string;
   full_name: string;
   role: "admin" | "superadmin";
@@ -130,7 +130,7 @@ export default function UserManagementPage() {
     }
   };
 
-  const handleDeleteUser = async (id: number) => {
+  const handleDeleteUser = async (id: string) => {
     try {
       const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -194,6 +194,7 @@ export default function UserManagementPage() {
                 <Input 
                   id="password" 
                   type="password" 
+                  autoComplete="new-password"
                   required 
                   value={formData.password}
                   onChange={e => setFormData({...formData, password: e.target.value})}
@@ -325,6 +326,7 @@ export default function UserManagementPage() {
               <Input 
                 id="edit_password" 
                 type="password" 
+                autoComplete="new-password"
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={e => setFormData({...formData, password: e.target.value})}

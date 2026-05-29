@@ -17,7 +17,7 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogTrigger 
-} from "@/components/core/dialog-neo";
+} from "@/components/core/dialog";
 import { Button } from "@/components/core/button"; 
 import { Input } from "@/components/core/input";
 import { Label } from "@/components/core/label";
@@ -44,7 +44,7 @@ import { ActionButtons } from "@/components/admin/ActionButtons";
 import { FormField } from "@/components/core/form-field";
 
 interface Wisata {
-  id: number;
+  id: string;
   name: string;
   category: string;
   price: number;
@@ -149,7 +149,7 @@ export default function WisataManagementPage() {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
       const res = await fetch(`/api/admin/wisata/${id}`, { method: "DELETE" });
       if (res.ok) {

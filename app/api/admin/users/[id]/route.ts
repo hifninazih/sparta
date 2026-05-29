@@ -57,7 +57,7 @@ export async function DELETE(
   }
 
   // Prevent superadmin from deleting themselves if they are the only one (optional but safe)
-  if (parseInt(id) === session.user.id) {
+  if (id === session.user.id) {
     return NextResponse.json({ message: "Cannot delete yourself" }, { status: 400 });
   }
 

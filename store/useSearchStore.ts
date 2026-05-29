@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export interface WisataSearchResult {
-  id: number;
+  id: string;
   name: string;
   category: string;
   price: number;

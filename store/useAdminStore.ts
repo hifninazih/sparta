@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 interface User {
-  id: number;
+  id: string;
   username: string;
   full_name: string;
   role: "admin" | "superadmin";
@@ -9,7 +9,7 @@ interface User {
 }
 
 interface Wisata {
-  id: number;
+  id: string;
   name: string;
   category: string;
   price: number;
@@ -35,11 +35,11 @@ interface AdminState {
   // Actions to mutate specific items without refetching everything
   addUser: (user: User) => void;
   updateUser: (user: User) => void;
-  removeUser: (id: number) => void;
+  removeUser: (id: string) => void;
   
   addWisata: (wisata: Wisata) => void;
   updateWisata: (wisata: Wisata) => void;
-  removeWisata: (id: number) => void;
+  removeWisata: (id: string) => void;
 
   clearStore: () => void; // Call this on logout
 }
