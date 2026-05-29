@@ -70,7 +70,7 @@ export default function UserManagementPage() {
     username: "",
     full_name: "",
     password: "",
-    role: "admin" as const,
+    role: "admin" as "admin" | "superadmin",
   });
 
   useEffect(() => {
@@ -239,7 +239,7 @@ export default function UserManagementPage() {
             onChange={e => setSearchQuery(e.target.value)}
           />
         </div>
-        <Button variant="outline" size="rect" onClick={fetchUsers} disabled={isLoading}>
+        <Button variant="outline" size="rect" onClick={() => fetchUsers(true)} disabled={isLoading}>
           <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
         </Button>
       </div>
