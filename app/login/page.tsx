@@ -5,12 +5,20 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/button";
 import { Input } from "@/components/input";
 import { Label } from "@/components/label";
-import { Compass, Loader2, AlertCircle } from "lucide-react";
+import {
+  Compass,
+  Loader2,
+  MapPin,
+  Mountain,
+  Palmtree,
+  Map,
+  Navigation,
+} from "lucide-react";
+import { toast } from "sonner";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -19,7 +27,6 @@ export default function AdminLoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
 
     try {
       const res = await fetch("/api/auth/login", {
@@ -31,38 +38,58 @@ export default function AdminLoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        router.push("/admin/dashboard");
+        toast.success("Login berhasil! Selamat datang kembali.");
+        router.push("/admin");
         router.refresh();
       } else {
-        setError(
+        toast.error(
           data.message || "Gagal masuk. Periksa kembali username dan password.",
         );
       }
     } catch (err) {
-      setError("Terjadi kesalahan sistem. Coba lagi nanti.");
+      toast.error("Terjadi kesalahan sistem. Coba lagi nanti.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] px-4 font-sans selection:bg-[#DCFFBC]">
-      <div className="w-full max-w-sm">
+    <div className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-[#f8fafc] px-4 font-sans selection:bg-[#DCFFBC]">
+      {/* Background Patterns & Decorative Elements */}
+      <div
+        className="absolute inset-0 z-0 opacity-40"
+        style={{
+          backgroundImage: "radial-gradient(#000 1px, transparent 1px)",
+          backgroundSize: "30px 30px",
+        }}
+      ></div>
+
+      {/* Floating Decorative Icons */}
+      <div className="pointer-events-none absolute inset-0 z-0">
+        <MapPin className="absolute top-[10%] left-[10%] h-12 w-12 -rotate-12 text-blue-500 opacity-20" />
+        <Mountain className="absolute top-[20%] right-[15%] h-16 w-16 rotate-12 text-green-500 opacity-20" />
+        <Palmtree className="absolute bottom-[15%] left-[12%] h-20 w-20 -rotate-6 text-orange-400 opacity-20" />
+        <Map className="absolute right-[10%] bottom-[20%] h-14 w-14 rotate-6 text-purple-500 opacity-20" />
+        <Navigation className="absolute top-[60%] left-[5%] h-10 w-10 rotate-45 text-red-400 opacity-20" />
+        <Compass className="absolute top-[40%] right-[5%] h-24 w-24 -rotate-12 text-slate-800 opacity-10" />
+      </div>
+
+      <div className="relative z-10 w-full max-w-sm">
         {/* Header / Logo */}
         <div className="mb-8 flex flex-col items-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl border-2 border-black bg-blue-600 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-            <Compass className="h-8 w-8 text-white" />
+          <div className="flex h-16 w-16 items-center justify-center rounded-xl border-4 border-black bg-blue-600 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+            <Compass className="h-10 w-10 text-white" />
           </div>
-          <h1 className="mt-6 text-3xl font-black tracking-tight text-black">
-            SPARTA ADMIN
+          <h1 className="mt-6 text-4xl font-black tracking-tight text-black">
+            SPARTA <span className="text-blue-600">ADMIN</span>
           </h1>
-          <p className="mt-1 text-sm font-bold text-slate-500">
-            Sistem Pemetaan dan Rekomendasi Wisata
-          </p>
+          <div className="mt-2 rounded-full border-2 border-black bg-[#DCFFBC] px-3 py-1 text-xs font-black tracking-wider text-black uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+            Sistem Pemetaan & Rekomendasi
+          </div>
         </div>
 
         {/* Neo-Brutalism Card */}
-        <div className="rounded-xl border-2 border-black bg-white p-6 shadow-[8px_8px_0px_rgba(0,0,0,1)] sm:p-8">
+        <div className="rounded-2xl border-4 border-black bg-white p-6 shadow-[12px_12px_0px_rgba(0,0,0,1)] sm:p-8">
           <div className="mb-6">
             <h2 className="text-xl font-black text-black">Login Akses</h2>
             <p className="mt-1 text-sm font-medium text-slate-500">
@@ -71,13 +98,6 @@ export default function AdminLoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
-              <div className="flex items-center gap-3 rounded-md border-2 border-black bg-red-100 p-3 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                <AlertCircle className="h-5 w-5 shrink-0 text-red-600" />
-                <p className="text-sm font-bold text-red-800">{error}</p>
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label
                 htmlFor="username"

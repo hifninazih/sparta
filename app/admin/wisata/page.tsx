@@ -38,6 +38,8 @@ import { toast } from "sonner";
 import { MapPicker } from "@/components/MapPicker";
 
 import { useAdminStore } from "@/store/useAdminStore";
+import { PageHeader } from "@/components/admin/PageHeader";
+import { SearchSection } from "@/components/admin/SearchSection";
 
 interface Wisata {
   id: number;
@@ -80,6 +82,7 @@ export default function WisataManagementPage() {
     fetchWisata();
   }, [fetchWisata]);
 
+  // ... rest of methods
   const handleOpenAdd = () => {
     setSelectedItem(null);
     setFormData({
@@ -168,14 +171,11 @@ export default function WisataManagementPage() {
 
   return (
     <div className="p-6 sm:p-10 space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-black tracking-tight text-slate-800 flex items-center gap-3">
-            <MapPin className="h-8 w-8 text-blue-600" /> Data Wisata DIY
-          </h1>
-          <p className="text-slate-500 font-medium">Kelola titik lokasi dan kriteria SAW untuk setiap destinasi.</p>
-        </div>
-        
+      <PageHeader 
+        title="Data Wisata DIY" 
+        description="Kelola titik lokasi dan kriteria SAW untuk setiap destinasi."
+        icon={<MapPin className="h-8 w-8" />}
+      >
         <Button 
           variant="primary" 
           size="lg" 
@@ -185,22 +185,15 @@ export default function WisataManagementPage() {
         >
           Tambah Wisata
         </Button>
-      </div>
+      </PageHeader>
 
-      <div className="p-4 border-2 border-black rounded-xl bg-[#f8fafc] flex flex-col sm:flex-row gap-4 justify-between items-center shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-        <div className="relative w-full sm:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <Input 
-            placeholder="Cari nama wisata atau kategori..." 
-            className="pl-10"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <Button variant="outline" size="rect" onClick={() => fetchWisata(true)} disabled={isLoading}>
-          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-        </Button>
-      </div>
+      <SearchSection 
+        placeholder="Cari nama wisata atau kategori..."
+        value={searchQuery}
+        onChange={setSearchQuery}
+        onRefresh={() => fetchWisata(true)}
+        isLoading={isLoading}
+      />
 
       <Table>
         <TableHeader>

@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
       await login({
         id: user.id,
         username: user.username,
+        full_name: user.full_name,
         role: user.role,
       });
 

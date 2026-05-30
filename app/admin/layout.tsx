@@ -1,34 +1,72 @@
-import { getSession } from "@/lib/auth";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  Compass, 
-  LayoutDashboard, 
-  MapPin, 
+import { usePathname } from "next/navigation";
+import {
+  Compass,
+  LayoutDashboard,
+  MapPin,
   Users, 
   LogOut,
   ChevronRight,
-  User as UserIcon
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+  User as UserIcon,
+  Menu,
+  X
+  } from "lucide-react";
+import { Button } from "@/components/button";
+import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-export default async function AdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [user, setUser] = useState<{ username: string; role: string } | null>(
+    null,
+  );
 
-  if (!session) {
-    redirect("/login");
-  }
+  // ... (rest of code)
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => {
+        if (res.status === 401) {
+          window.location.href = "/login";
+          return;
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data) setUser(data);
+      })
+      .catch(() => {
+        window.location.href = "/login";
+      });
+  }, []);
 
-  const { user } = session;
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (res.ok) {
+        toast.success("Berhasil keluar sistem. Sampai jumpa!");
+        router.push("/login");
+        router.refresh();
+      }
+    } catch (error) {
+      toast.error("Gagal keluar. Silakan coba lagi.");
+    }
+  };
 
   const menuItems = [
     {
       title: "Dashboard",
-      href: "/admin",
+      href: "/admin/dashboard",
       icon: <LayoutDashboard className="h-5 w-5" />,
       role: "all",
     },
@@ -44,77 +82,128 @@ export default async function AdminLayout({
       icon: <Users className="h-5 w-5" />,
       role: "superadmin",
     },
+    {
+      title: "Profil Saya",
+      href: "/admin/profile",
+      icon: <UserIcon className="h-5 w-5" />,
+      role: "all",
+    },
   ];
 
+  if (!user) return null;
+
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-[#f8fafc] font-sans selection:bg-[#DCFFBC]">
+      {/* MOBILE HEADER */}
+      <div className="fixed top-0 right-0 left-0 z-30 flex h-16 items-center justify-between border-b-2 border-black bg-white px-4 shadow-[0px_2px_0px_rgba(0,0,0,1)] lg:hidden">
+        <Link href="/admin" className="flex items-center gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-black bg-blue-600 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+            <Compass className="h-6 w-6 text-white" />
+          </div>
+          <span className="text-xl font-black tracking-tighter text-black">
+            SPARTA
+          </span>
+        </Link>
+        <Button
+          variant="outline"
+          size="rect"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        >
+          {isSidebarOpen ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
+        </Button>
+      </div>
+
+      {/* SIDEBAR OVERLAY */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* SIDEBAR */}
-      <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-slate-200 bg-white">
+      <aside
+        className={cn(
+          "fixed top-0 left-0 z-40 h-screen w-72 border-r-2 border-black bg-white transition-transform lg:translate-x-0",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full",
+        )}
+      >
         <div className="flex h-full flex-col">
           {/* Logo Section */}
-          <div className="flex h-20 items-center border-b border-slate-100 px-6">
-            <Link href="/admin" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-md shadow-blue-100">
-                <Compass className="h-6 w-6 text-white" />
+          <div className="flex h-24 items-center border-b-2 border-black/5 px-8">
+            <Link href="/admin" className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl border-2 border-black bg-blue-600 shadow-[2px_4px_0px_rgba(0,0,0,1)]">
+                <Compass className="h-8 w-8 text-white" />
               </div>
-              <span className="text-xl font-black tracking-tighter text-slate-800">SPARTA</span>
+              <div className="flex flex-col">
+                <span className="text-2xl leading-none font-black tracking-tighter text-black">
+                  SPARTA
+                </span>
+                <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  Admin Panel
+                </span>
+              </div>
             </Link>
           </div>
 
           {/* Navigation Links */}
-          <nav className="flex-1 space-y-1 p-4">
+          <nav className="flex-1 space-y-3 p-6">
             {menuItems.map((item) => {
-              // Hide menu if user doesn't have the required role
-              if (item.role === "superadmin" && user.role !== "superadmin") {
+              if (item.role === "superadmin" && user.role !== "superadmin")
                 return null;
-              }
+
+              const isActive =
+                item.href === "/admin"
+                  ? pathname === "/admin"
+                  : pathname.startsWith(item.href);
 
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="flex items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-blue-600"
+                  onClick={() => setIsSidebarOpen(false)}
+                  className={cn(
+                    "flex items-center justify-between rounded-xl border-2 px-4 py-3 text-sm font-black transition-all",
+                    isActive
+                      ? "-translate-y-0.5 border-black bg-[#DCFFBC] text-black shadow-[2px_4px_0px_rgba(0,0,0,1)]"
+                      : "border-transparent text-slate-500 hover:-translate-y-0.5 hover:border-black hover:bg-slate-50 hover:text-black hover:shadow-[2px_4px_0px_rgba(0,0,0,1)]",
+                  )}
                 >
                   <div className="flex items-center gap-3">
-                    {item.icon}
+                    <span
+                      className={cn(isActive ? "text-black" : "text-slate-400")}
+                    >
+                      {item.icon}
+                    </span>
                     {item.title}
                   </div>
-                  <ChevronRight className="h-4 w-4 opacity-30" />
+                  {isActive && <ChevronRight className="h-4 w-4" />}
                 </Link>
               );
             })}
           </nav>
 
           {/* User Profile & Logout Section */}
-          <div className="border-t border-slate-100 p-4">
-            <div className="mb-4 flex items-center gap-3 rounded-xl bg-slate-50 p-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                <UserIcon className="h-5 w-5" />
-              </div>
-              <div className="flex flex-col overflow-hidden">
-                <span className="truncate text-sm font-bold text-slate-800">{user.username}</span>
-                <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">{user.role}</span>
-              </div>
-            </div>
-            
-            <form action="/api/auth/logout" method="POST">
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700 font-bold"
-              >
-                <LogOut className="mr-3 h-5 w-5" />
-                Keluar
-              </Button>
-            </form>
+          <div className="mt-auto border-t-2 border-black bg-slate-50 p-6">
+            <Button
+              variant="outline"
+              className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
+              startIcon={<LogOut className="mr-3 h-5 w-5" />}
+              onClick={handleLogout}
+            >
+              Keluar
+            </Button>
           </div>
         </div>
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <main className="ml-64 flex-1">
-        <div className="min-h-screen">
-          {children}
-        </div>
+      <main className="flex-1 lg:ml-72">
+        <div className="min-h-screen pt-24 lg:pt-0">{children}</div>
       </main>
     </div>
   );

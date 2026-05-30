@@ -21,6 +21,8 @@ export const viewport: Viewport = {
   userScalable: false, // Mematikan kemampuan pinch-to-zoom di HP
 };
 
+import { Toaster } from "@/components/ui/sonner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,7 +30,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className={cn("h-full", "antialiased", poppins.variable)}>
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+      <body className="min-h-full flex flex-col font-sans">
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }

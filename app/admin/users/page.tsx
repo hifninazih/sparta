@@ -33,13 +33,12 @@ import {
   UserPlus, 
   Pencil, 
   Trash2, 
-  Loader2, 
-  Search,
-  RefreshCw
+  Loader2
 } from "lucide-react";
 import { toast } from "sonner";
-
 import { useAdminStore } from "@/store/useAdminStore";
+import { PageHeader } from "@/components/admin/PageHeader";
+import { SearchSection } from "@/components/admin/SearchSection";
 
 interface User {
   id: number;
@@ -152,14 +151,11 @@ export default function UserManagementPage() {
 
   return (
     <div className="p-6 sm:p-10 space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-black tracking-tight text-slate-800 flex items-center gap-3">
-            <Users className="h-8 w-8 text-purple-600" /> Manajemen User
-          </h1>
-          <p className="text-slate-500">Kelola akun admin dan hak akses sistem SPARTA.</p>
-        </div>
-        
+      <PageHeader 
+        title="Manajemen User" 
+        description="Kelola akun admin dan hak akses sistem SPARTA."
+        icon={<Users className="h-8 w-8 text-purple-600" />}
+      >
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button variant="primary" size="lg" className="font-bold" startIcon={<UserPlus />}>
@@ -227,22 +223,15 @@ export default function UserManagementPage() {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageHeader>
 
-      <div className="p-4 border-2 border-black rounded-xl bg-[#f8fafc] flex flex-col sm:flex-row gap-4 justify-between items-center shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-        <div className="relative w-full sm:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <Input 
-            placeholder="Cari username atau nama..." 
-            className="pl-10"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <Button variant="outline" size="rect" onClick={() => fetchUsers(true)} disabled={isLoading}>
-          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-        </Button>
-      </div>
+      <SearchSection 
+        placeholder="Cari username atau nama..."
+        value={searchQuery}
+        onChange={setSearchQuery}
+        onRefresh={() => fetchUsers(true)}
+        isLoading={isLoading}
+      />
 
       <Table>
         <TableHeader>
