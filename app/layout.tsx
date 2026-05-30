@@ -21,7 +21,7 @@ export const viewport: Viewport = {
   userScalable: false, // Mematikan kemampuan pinch-to-zoom di HP
 };
 
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/components/core/sonner";
 
 export default function RootLayout({
   children,

@@ -10,22 +10,22 @@ import { cn } from "@/lib/utils";
 import { satelliteStyle, streetStyle } from "@/lib/basemaps";
 
 // UI Component
-import { Button } from "@/components/button";
-import { PreferensiDialog } from "@/components/preferensi-dialog";
-import { RecommendationResult } from "@/components/recommendation-result";
+import { Button } from "@/components/core/button";
+import { PreferensiDialog } from "@/components/shared/preferensi-dialog";
+import { RecommendationResult } from "@/components/shared/recommendation-result";
 
 // Komponen jadi
-import BasemapsToggle from "@/components/BasemapsToggle";
-import MapControlPanel from "@/components/MapControlPanel";
-import SearchThisAreaButton from "@/components/SearchThisAreaButton";
-import GlobalSearch from "@/components/global-search";
+import BasemapsToggle from "@/components/map/BasemapsToggle";
+import MapControlPanel from "@/components/map/MapControlPanel";
+import SearchThisAreaButton from "@/components/map/SearchThisAreaButton";
+import GlobalSearch from "@/components/search/global-search";
 
 // Marker komponen
-import MarkerGPS from "@/components/marker/GPSMarker";
-import InitialMarker from "@/components/marker/InitialMarker";
-import RecommendationMarker from "@/components/marker/RecommendationMarker";
-import SearchAreaResultMarker from "@/components/marker/SearchAreaResultMarker";
-import SelectedSuggestionMarker from "@/components/marker/SelectedSuggestionMarker";
+import MarkerGPS from "@/components/map/markers/GPSMarker";
+import InitialMarker from "@/components/map/markers/InitialMarker";
+import RecommendationMarker from "@/components/map/markers/RecommendationMarker";
+import SearchAreaResultMarker from "@/components/map/markers/SearchAreaResultMarker";
+import SelectedSuggestionMarker from "@/components/map/markers/SelectedSuggestionMarker";
 
 // Store
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -33,7 +33,7 @@ import { useMapStore } from "@/store/useMapStore";
 import { useWizardStore } from "@/store/useWizardStore";
 import { useRecommendationStore } from "@/store/useRecommendationStore";
 import { useSearchStore } from "@/store/useSearchStore";
-import MapCompass from "@/components/MapCompass";
+import MapCompass from "@/components/map/MapCompass";
 
 export default function Maps() {
   const isDesktop = useMediaQuery("(min-width: 640px)");

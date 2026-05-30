@@ -1,5 +1,5 @@
 // components/bobot-slider.tsx
-import { Slider } from "@/components/slider";
+import { Slider } from "@/components/shared/slider";
 
 interface BobotSliderProps {
   leftLabel: string;

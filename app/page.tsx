@@ -11,7 +11,7 @@ import {
   Star,
   Globe
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/core/button";
 
 export default function LandingPage() {
   return (

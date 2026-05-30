@@ -2,7 +2,7 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Users, MapPin, ArrowRight, Compass, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/button";
+import { Button } from "@/components/core/button";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { NeoCard } from "@/components/admin/NeoCard";
 

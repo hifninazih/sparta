@@ -1,7 +1,7 @@
 // preferensi-dialog.tsx
 "use client"; // Pastikan ini ada karena kita menggunakan Zustand dan interaksi UI
 
-import { Button } from "@/components/button";
+import { Button } from "@/components/core/button";
 import {
   Dialog,
   DialogContent,
@@ -10,8 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/dialog";
-import { BobotSlider } from "@/components/bobot-slider"; // Pastikan path ini sesuai dengan shadcn milikmu
+} from "@/components/core/dialog";
+import { BobotSlider } from "@/components/shared/bobot-slider"; // Pastikan path ini sesuai dengan shadcn milikmu
 import {
   ArrowRight,
   ArrowLeft,

@@ -7,18 +7,29 @@ import {
   Compass,
   LayoutDashboard,
   MapPin,
-  Users, 
+  Users,
   LogOut,
   ChevronRight,
   User as UserIcon,
   Menu,
-  X
-  } from "lucide-react";
-import { Button } from "@/components/button";
+  X,
+} from "lucide-react";
+import { Button } from "@/components/core/button";
 import { cn } from "@/lib/utils";
-import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/core/alert-dialog";
 
 export default function AdminLayout({
   children,
@@ -32,7 +43,7 @@ export default function AdminLayout({
     null,
   );
 
-  // ... (rest of code)
+  // ... rest of state
   useEffect(() => {
     fetch("/api/auth/me")
       .then((res) => {
@@ -64,6 +75,7 @@ export default function AdminLayout({
   };
 
   const menuItems = [
+    // ... menu items
     {
       title: "Dashboard",
       href: "/admin/dashboard",
@@ -95,6 +107,7 @@ export default function AdminLayout({
   return (
     <div className="flex min-h-screen bg-[#f8fafc] font-sans selection:bg-[#DCFFBC]">
       {/* MOBILE HEADER */}
+      {/* ... mobile header */}
       <div className="fixed top-0 right-0 left-0 z-30 flex h-16 items-center justify-between border-b-2 border-black bg-white px-4 shadow-[0px_2px_0px_rgba(0,0,0,1)] lg:hidden">
         <Link href="/admin" className="flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-black bg-blue-600 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
@@ -118,6 +131,7 @@ export default function AdminLayout({
       </div>
 
       {/* SIDEBAR OVERLAY */}
+      {/* ... sidebar overlay */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
@@ -189,14 +203,35 @@ export default function AdminLayout({
 
           {/* User Profile & Logout Section */}
           <div className="mt-auto border-t-2 border-black bg-slate-50 p-6">
-            <Button
-              variant="outline"
-              className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
-              startIcon={<LogOut className="mr-3 h-5 w-5" />}
-              onClick={handleLogout}
-            >
-              Keluar
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  className="w-full hover:bg-red-600"
+                  startIcon={<LogOut className="h-5 w-5" />}
+                >
+                  Keluar
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Konfirmasi Keluar</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Apakah Anda yakin ingin keluar dari sistem SPARTA? Sesi Anda
+                    akan berakhir.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Batal</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleLogout}
+                    className="bg-red-500 text-white hover:bg-red-600"
+                  >
+                    Ya, Keluar
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </aside>

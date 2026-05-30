@@ -2,7 +2,7 @@
 "use client";
 
 import { useMap } from "@vis.gl/react-maplibre";
-import { Button, ZoomButton } from "@/components/button";
+import { Button, ZoomButton } from "@/components/core/button";
 import { Locate, LocateFixed } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMapStore } from "@/store/useMapStore";

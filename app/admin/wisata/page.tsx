@@ -8,7 +8,7 @@ import {
   TableHead, 
   TableHeader, 
   TableRow 
-} from "@/components/table";
+} from "@/components/core/table";
 import { 
   Dialog, 
   DialogContent, 
@@ -17,11 +17,11 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogTrigger 
-} from "@/components/dialog-neo";
-import { Button } from "@/components/button"; 
-import { Input } from "@/components/input";
-import { Label } from "@/components/label";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/components/core/dialog-neo";
+import { Button } from "@/components/core/button"; 
+import { Input } from "@/components/core/input";
+import { Label } from "@/components/core/label";
+import { Textarea } from "@/components/core/textarea";
 import { 
   MapPin, 
   Plus, 
@@ -35,11 +35,13 @@ import {
   Navigation
 } from "lucide-react";
 import { toast } from "sonner";
-import { MapPicker } from "@/components/MapPicker";
+import { MapPicker } from "@/components/map/MapPicker";
 
 import { useAdminStore } from "@/store/useAdminStore";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { SearchSection } from "@/components/admin/SearchSection";
+import { ActionButtons } from "@/components/admin/ActionButtons";
+import { FormField } from "@/components/core/form-field";
 
 interface Wisata {
   id: number;
@@ -62,7 +64,7 @@ export default function WisataManagementPage() {
     updateWisata, 
     removeWisata 
   } = useAdminStore();
-  
+
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -82,7 +84,7 @@ export default function WisataManagementPage() {
     fetchWisata();
   }, [fetchWisata]);
 
-  // ... rest of methods
+  // ... rest of handlers
   const handleOpenAdd = () => {
     setSelectedItem(null);
     setFormData({
@@ -114,7 +116,7 @@ export default function WisataManagementPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitLoading(true);
-    
+
     const url = selectedItem 
       ? `/api/admin/wisata/${selectedItem.id}` 
       : "/api/admin/wisata";
@@ -148,7 +150,6 @@ export default function WisataManagementPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Hapus data wisata ini?")) return;
     try {
       const res = await fetch(`/api/admin/wisata/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -161,6 +162,7 @@ export default function WisataManagementPage() {
       toast.error("Kesalahan sistem");
     }
   };
+
 
   // Client-side filtering for blazing fast search
   const filteredData = wisata.filter(item => 
@@ -238,19 +240,13 @@ export default function WisataManagementPage() {
                     <Star className="h-3 w-3 fill-amber-500" /> {item.rating}
                   </div>
                 </TableCell>
-                <TableCell className="text-right space-x-2">
-                  <button 
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                    onClick={() => handleOpenEdit(item)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button 
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                    onClick={() => handleDelete(item.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                <TableCell className="text-right">
+                  <ActionButtons 
+                    onEdit={() => handleOpenEdit(item)}
+                    onDelete={() => handleDelete(item.id)}
+                    deleteTitle="Hapus Destinasi?"
+                    deleteDescription={`Apakah Anda yakin ingin menghapus ${item.name}? Data ini akan hilang permanen dari sistem.`}
+                  />
                 </TableCell>
               </TableRow>
             ))
@@ -267,22 +263,20 @@ export default function WisataManagementPage() {
               Lengkapi detail wisata dan tentukan koordinat lokasi di peta.
             </DialogDescription>
           </DialogHeader>
-          
+
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
             {/* Kiri: Atribut Data */}
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nama Destinasi</Label>
+              <FormField id="name" label="Nama Destinasi">
                 <Input 
                   id="name" 
                   required 
                   value={formData.name}
                   onChange={e => setFormData({...formData, name: e.target.value})}
                 />
-              </div>
+              </FormField>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="category">Kategori</Label>
+                <FormField id="category" label="Kategori">
                   <Input 
                     id="category" 
                     placeholder="Alam, Budaya, dll"
@@ -290,41 +284,32 @@ export default function WisataManagementPage() {
                     value={formData.category}
                     onChange={e => setFormData({...formData, category: e.target.value})}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="rating">Rating (1-5)</Label>
-                  <div className="relative">
-                    <Star className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-amber-500" />
-                    <Input 
-                      id="rating" 
-                      type="number" 
-                      step="0.1" 
-                      min="1" 
-                      max="5"
-                      className="pl-10"
-                      required 
-                      value={formData.rating}
-                      onChange={e => setFormData({...formData, rating: parseFloat(e.target.value)})}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="price">Harga Tiket (Rp)</Label>
-                <div className="relative">
-                  <Banknote className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-green-600" />
+                </FormField>
+                <FormField id="rating" label="Rating (1-5)">
                   <Input 
-                    id="price" 
+                    id="rating" 
                     type="number" 
-                    className="pl-10"
+                    step="0.1" 
+                    min="1" 
+                    max="5"
+                    startIcon={<Star className="h-4 w-4 text-amber-500" />}
                     required 
-                    value={formData.price}
-                    onChange={e => setFormData({...formData, price: parseInt(e.target.value)})}
+                    value={formData.rating}
+                    onChange={e => setFormData({...formData, rating: parseFloat(e.target.value)})}
                   />
-                </div>
+                </FormField>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="facilities">Fasilitas (Pisahkan dengan koma)</Label>
+              <FormField id="price" label="Harga Tiket (Rp)">
+                <Input 
+                  id="price" 
+                  type="number" 
+                  startIcon={<Banknote className="h-4 w-4 text-green-600" />}
+                  required 
+                  value={formData.price}
+                  onChange={e => setFormData({...formData, price: parseInt(e.target.value)})}
+                />
+              </FormField>
+              <FormField id="facilities" label="Fasilitas (Pisahkan dengan koma)">
                 <Textarea 
                   id="facilities" 
                   placeholder="Toilet, Parkir, Mushola, dll"
@@ -332,15 +317,15 @@ export default function WisataManagementPage() {
                   value={formData.all_facility}
                   onChange={e => setFormData({...formData, all_facility: e.target.value})}
                 />
-              </div>
+              </FormField>
             </div>
 
             {/* Kanan: Lokasi / Peta */}
             <div className="space-y-4">
-              <Label className="flex items-center gap-2 font-bold text-black">
+              <Label className="flex items-center gap-2 font-bold text-black border-none shadow-none">
                 <Navigation className="h-4 w-4 text-blue-600" /> Lokasi Geografis
               </Label>
-              
+
               <MapPicker 
                 lng={formData.lng} 
                 lat={formData.lat} 
@@ -348,8 +333,7 @@ export default function WisataManagementPage() {
               />
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase text-slate-400 font-black tracking-widest">Longitude</Label>
+                <FormField id="lng" label="Longitude">
                   <Input 
                     type="number" 
                     step="any" 
@@ -357,9 +341,8 @@ export default function WisataManagementPage() {
                     onChange={e => setFormData({...formData, lng: parseFloat(e.target.value)})}
                     className="h-8 text-xs font-mono"
                   />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] uppercase text-slate-400 font-black tracking-widest">Latitude</Label>
+                </FormField>
+                <FormField id="lat" label="Latitude">
                   <Input 
                     type="number" 
                     step="any" 
@@ -367,7 +350,7 @@ export default function WisataManagementPage() {
                     onChange={e => setFormData({...formData, lat: parseFloat(e.target.value)})}
                     className="h-8 text-xs font-mono"
                   />
-                </div>
+                </FormField>
               </div>
             </div>
 

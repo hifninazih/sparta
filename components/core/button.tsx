@@ -20,10 +20,13 @@ const buttonVariants = cva(
         // Hapus efek shadow spesifik di dalam variant, karena sudah kita satukan di base class atas
         gradient: "bg-gradient-to-tr from-[#DCFFBC] to-[#6FD1D7] text-black",
         outline: "bg-white text-black",
+        destructive: "bg-red-500 text-white",
+        ghost: "border-transparent bg-transparent text-slate-600 shadow-none hover:bg-slate-100 hover:text-black hover:shadow-none hover:translate-y-0 hover:translate-x-0 active:translate-y-0 active:translate-x-0",
       },
       size: {
         lg: "h-10 gap-2 px-5 py-6",
         rect: "h-10 gap-2 p-2.5",
+        "icon-sm": "h-8 w-8 p-0",
       },
     },
     defaultVariants: {

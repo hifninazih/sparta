@@ -8,7 +8,7 @@ import {
   TableHead, 
   TableHeader, 
   TableRow 
-} from "@/components/table";
+} from "@/components/core/table";
 import { 
   Dialog, 
   DialogContent, 
@@ -17,17 +17,17 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogTrigger 
-} from "@/components/dialog-neo";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Button } from "@/components/button"; 
-import { Input } from "@/components/input";
-import { Label } from "@/components/label";
+} from "@/components/core/dialog-neo";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/core/select";
+import { Button } from "@/components/core/button"; 
+import { Input } from "@/components/core/input";
+import { Label } from "@/components/core/label";
 import { 
   Users, 
   UserPlus, 
@@ -39,6 +39,8 @@ import { toast } from "sonner";
 import { useAdminStore } from "@/store/useAdminStore";
 import { PageHeader } from "@/components/admin/PageHeader";
 import { SearchSection } from "@/components/admin/SearchSection";
+import { ActionButtons } from "@/components/admin/ActionButtons";
+import { FormField } from "@/components/core/form-field";
 
 interface User {
   id: number;
@@ -49,6 +51,7 @@ interface User {
 }
 
 export default function UserManagementPage() {
+  // ... state logic
   const { 
     users, 
     isUsersLoaded, 
@@ -128,7 +131,6 @@ export default function UserManagementPage() {
   };
 
   const handleDeleteUser = async (id: number) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus user ini?")) return;
     try {
       const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
       if (res.ok) {
@@ -170,8 +172,7 @@ export default function UserManagementPage() {
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleAddUser} className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+              <FormField id="username" label="Username">
                 <Input 
                   id="username" 
                   placeholder="admin_wisata" 
@@ -179,9 +180,8 @@ export default function UserManagementPage() {
                   value={formData.username}
                   onChange={e => setFormData({...formData, username: e.target.value})}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="full_name">Nama Lengkap</Label>
+              </FormField>
+              <FormField id="full_name" label="Nama Lengkap">
                 <Input 
                   id="full_name" 
                   placeholder="Budi Santoso" 
@@ -189,9 +189,8 @@ export default function UserManagementPage() {
                   value={formData.full_name}
                   onChange={e => setFormData({...formData, full_name: e.target.value})}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+              </FormField>
+              <FormField id="password" label="Password">
                 <Input 
                   id="password" 
                   type="password" 
@@ -199,9 +198,8 @@ export default function UserManagementPage() {
                   value={formData.password}
                   onChange={e => setFormData({...formData, password: e.target.value})}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label>Role</Label>
+              </FormField>
+              <FormField id="role" label="Role">
                 <Select 
                   value={formData.role} 
                   onValueChange={(v: any) => setFormData({...formData, role: v})}
@@ -214,7 +212,7 @@ export default function UserManagementPage() {
                     <SelectItem value="superadmin">Super Admin</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+              </FormField>
               <DialogFooter className="pt-4">
                 <Button variant="gradient" className="w-full font-bold" disabled={isSubmitLoading}>
                   {isSubmitLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Simpan Akun"}
@@ -273,10 +271,9 @@ export default function UserManagementPage() {
                     day: 'numeric', month: 'short', year: 'numeric'
                   })}
                 </TableCell>
-                <TableCell className="text-right space-x-2">
-                  <button 
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                    onClick={() => {
+                <TableCell className="text-right">
+                  <ActionButtons 
+                    onEdit={() => {
                       setSelectedUser(user);
                       setFormData({
                         username: user.username,
@@ -286,15 +283,11 @@ export default function UserManagementPage() {
                       });
                       setIsEditDialogOpen(true);
                     }}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button 
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                    onClick={() => handleDeleteUser(user.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                    onDelete={() => handleDeleteUser(user.id)}
+                    isProtected={user.role === "superadmin"}
+                    deleteTitle="Hapus Pengguna?"
+                    deleteDescription={`Apakah Anda yakin ingin menghapus ${user.full_name}? Tindakan ini tidak dapat dibatalkan.`}
+                  />
                 </TableCell>
               </TableRow>
             ))
@@ -312,36 +305,32 @@ export default function UserManagementPage() {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEditUser} className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit_username">Username</Label>
+            <FormField id="edit_username" label="Username">
               <Input 
                 id="edit_username" 
                 required 
                 value={formData.username}
                 onChange={e => setFormData({...formData, username: e.target.value})}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit_full_name">Nama Lengkap</Label>
+            </FormField>
+            <FormField id="edit_full_name" label="Nama Lengkap">
               <Input 
                 id="edit_full_name" 
                 required 
                 value={formData.full_name}
                 onChange={e => setFormData({...formData, full_name: e.target.value})}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit_password">Password Baru (Opsional)</Label>
+            </FormField>
+            <FormField id="edit_password" label="Password Baru (Opsional)" description="Isi jika ingin ganti password">
               <Input 
                 id="edit_password" 
                 type="password" 
-                placeholder="Isi jika ingin ganti password"
+                placeholder="••••••••"
                 value={formData.password}
                 onChange={e => setFormData({...formData, password: e.target.value})}
               />
-            </div>
-            <div className="space-y-2">
-              <Label>Role</Label>
+            </FormField>
+            <FormField id="edit_role" label="Role">
               <Select 
                 value={formData.role} 
                 onValueChange={(v: any) => setFormData({...formData, role: v})}
@@ -354,7 +343,7 @@ export default function UserManagementPage() {
                   <SelectItem value="superadmin">Super Admin</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </FormField>
             <DialogFooter className="pt-4">
               <Button variant="primary" className="w-full font-bold" disabled={isSubmitLoading}>
                 {isSubmitLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Perbarui Akun"}

@@ -4,7 +4,7 @@
 import { useMap } from "@vis.gl/react-maplibre";
 import { useMapStore } from "@/store/useMapStore";
 import { Compass } from "lucide-react";
-import { Button, CompassButtonComponent } from "@/components/button";
+import { Button, CompassButtonComponent } from "@/components/core/button";
 
 import { cn } from "@/lib/utils";
 

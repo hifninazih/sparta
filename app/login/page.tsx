@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/button";
-import { Input } from "@/components/input";
-import { Label } from "@/components/label";
+import { Button } from "@/components/core/button";
+import { Input } from "@/components/core/input";
+import { Label } from "@/components/core/label";
 import {
   Compass,
   Loader2,
