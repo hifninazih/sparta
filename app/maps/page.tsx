@@ -46,6 +46,8 @@ export default function Maps() {
     minZoom,
     setSelectedLocation,
     isSatellite,
+    activeWisata,
+    setActiveWisata,
   } = useMapStore();
   const { isPickingLocation, setIsPickingLocation, setIsOpen, setStep } =
     useWizardStore();
@@ -62,6 +64,10 @@ export default function Maps() {
   };
 
   const handleMapClick = (event: MapLayerMouseEvent) => {
+    if (activeWisata) {
+      setActiveWisata(null);
+    }
+
     if (!isPickingLocation) return;
 
     const { lng, lat } = event.lngLat;

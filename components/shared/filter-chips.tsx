@@ -12,19 +12,11 @@ interface FilterChipsProps {
 }
 
 export function FilterChips({ value, onChange, className }: FilterChipsProps) {
-  const isAllSelected = value.length === 0;
-
   const handleClick = (cat: WisataCategory) => {
-    if (cat === "Semua") {
-      // Klik "Semua" → reset semua pilihan
-      onChange([]);
-      return;
-    }
-
     const isCurrentlySelected = value.includes(cat);
 
     if (isCurrentlySelected) {
-      // Deselect — jika setelah dilepas tidak ada yang dipilih, otomatis kembali ke "Semua"
+      // Deselect
       onChange(value.filter((c) => c !== cat));
     } else {
       // Select — tambahkan ke array
@@ -32,10 +24,7 @@ export function FilterChips({ value, onChange, className }: FilterChipsProps) {
     }
   };
 
-  const isActive = (cat: WisataCategory) => {
-    if (cat === "Semua") return isAllSelected;
-    return value.includes(cat);
-  };
+  const isActive = (cat: WisataCategory) => value.includes(cat);
 
   return (
     <div className={cn("flex flex-wrap gap-1.5", className)}>

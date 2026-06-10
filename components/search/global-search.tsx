@@ -147,9 +147,19 @@ export default function GlobalSearch() {
             "animate-in fade-in slide-in-from-top-1 duration-150",
           )}
         >
-          <p className="mb-2 text-[10px] font-black uppercase tracking-widest text-gray-400">
-            Filter Kategori
-          </p>
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
+              Filter Kategori
+            </p>
+            {selectedCategories.length > 0 && (
+              <button 
+                onClick={() => setSelectedCategories([])}
+                className="text-[10px] font-black uppercase tracking-wider text-red-500 hover:underline"
+              >
+                Clear Filter
+              </button>
+            )}
+          </div>
           <FilterChips
             value={selectedCategories}
             onChange={setSelectedCategories}

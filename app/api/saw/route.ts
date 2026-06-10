@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     // categories adalah array string dari client, misal: ["Alam", "Budaya"]
     // Jika kosong → tidak ada filter (semua kategori diikutsertakan)
     const categoryList: string[] = Array.isArray(categories)
-      ? categories.filter((c: unknown) => typeof c === "string" && c !== "Semua")
+      ? categories.filter((c: unknown) => typeof c === "string")
       : [];
 
     const hasCategoryFilter = categoryList.length > 0;
@@ -63,12 +63,16 @@ export async function POST(request: NextRequest) {
 
     const dataQuery = `
       SELECT 
-        gid, 
+        gid::text, 
         name, 
         category, 
         price, 
         rating, 
         reviews,
+        address,
+        phone,
+        link,
+        maps_link,
         ST_X(geom) as lng, 
         ST_Y(geom) as lat,
         ST_DistanceSphere(geom, ST_MakePoint($1, $2)) as distance_m

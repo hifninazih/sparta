@@ -129,3 +129,18 @@
     @apply font-sans;
   }
 }
+
+/* MapLibre Popup Overrides for Neo-Brutalism */
+.sparta-popup .maplibregl-popup-content {
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.sparta-popup .maplibregl-popup-tip {
+  border-top-color: black !important;
+  border-width: 10px !important;
+  margin-top: -2px !important;
+}

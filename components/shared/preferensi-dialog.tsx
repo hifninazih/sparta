@@ -27,6 +27,7 @@ import {
 import { useWizardStore } from "@/store/useWizardStore";
 import { useRecommendationStore } from "@/store/useRecommendationStore";
 import { useMapStore } from "@/store/useMapStore";
+import { useSearchStore } from "@/store/useSearchStore";
 import { useState } from "react";
 import { toast } from "sonner";
 import { WisataCategory } from "@/lib/wisata-categories";
@@ -36,45 +37,45 @@ import { WisataCategory } from "@/lib/wisata-categories";
 const WIZARD_STEPS = [
   {
     id: 1,
-    title: "Dari mana Anda akan memulai perjalanan?",
+    title: "Tentukan lokasi awal keberangkatan Anda",
     type: "location" as const,
   },
   {
     id: 2,
-    title: "Kategori wisata apa yang Anda minati?",
+    title: "Kategori wisata apa yang ingin Anda kunjungi?",
     type: "category" as const,
   },
   {
     id: 3,
-    title: "Seberapa jauh Anda rela bepergian?",
+    title: "Seberapa penting faktor jarak dalam memilih destinasi wisata?",
     type: "slider" as const,
     key: "jarak" as const,
-    leftLabel: "Jauh gak masalah",
-    rightLabel: "Harus dekat",
+    leftLabel: "Jarak tidak masalah",
+    rightLabel: "Utamakan lokasi terdekat",
   },
   {
     id: 4,
-    title: "Bagaimana dengan budget tiket masuk?",
+    title: "Seberapa penting faktor harga tiket masuk bagi Anda?",
     type: "slider" as const,
     key: "harga" as const,
-    leftLabel: "Harga tiket bebas",
-    rightLabel: "Utamakan yang murah",
+    leftLabel: "Harga tidak masalah",
+    rightLabel: "Utamakan yang terjangkau",
   },
   {
     id: 5,
-    title: "Seberapa berpengaruh jumlah ulasan (reviews) bagi Anda?",
+    title: "Seberapa penting faktor kepopuleran tempat wisata?",
     type: "slider" as const,
     key: "reviews" as const,
-    leftLabel: "Tidak masalah",
-    rightLabel: "Utamakan yang populer",
+    leftLabel: "Tidak harus populer",
+    rightLabel: "Utamakan yang terpopuler",
   },
   {
     id: 6,
-    title: "Apakah rating wisata penting bagi Anda?",
+    title: "Seberapa penting penilaian (rating) pengunjung sebelumnya?",
     type: "slider" as const,
     key: "rating" as const,
-    leftLabel: "Tidak penting",
-    rightLabel: "Sangat penting",
+    leftLabel: "Penilaian tidak masalah",
+    rightLabel: "Utamakan penilaian terbaik",
   },
 ];
 
@@ -92,9 +93,8 @@ export function PreferensiDialog() {
     setStep,
     setPreference,
     setIsPickingLocation,
-    selectedCategories,
-    setSelectedCategories,
   } = useWizardStore();
+  const { selectedCategories, setSelectedCategories } = useSearchStore();
   const { setUserLocation, selectedLocation, setSelectedLocation } =
     useMapStore();
   const { setRecommendations, setIsLoading } = useRecommendationStore();
@@ -208,7 +208,7 @@ export function PreferensiDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent className="gap-0 overflow-hidden border-2 border-black p-0 sm:max-w-md">
-        <DialogHeader className="p-6 pb-2 pr-8">
+        <DialogHeader className="p-6 pr-8 pb-2">
           <DialogTitle className="text-center text-lg leading-tight font-bold">
             {currentStepData.title}
           </DialogTitle>
@@ -217,7 +217,6 @@ export function PreferensiDialog() {
 
         {/* --- AREA KONTEN DINAMIS --- */}
         <div className="flex min-h-44 flex-col items-center justify-center p-6 pt-4">
-
           {/* =========================================
               LANGKAH 1: LOKASI
           ========================================= */}
@@ -227,7 +226,10 @@ export function PreferensiDialog() {
                 <div className="flex w-full max-w-70 items-center justify-between rounded-md border-2 border-black bg-[#DCFFBC] p-3 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                   <div className="flex items-center gap-3 overflow-hidden">
                     <div className="rounded-full border border-black bg-white p-1.5">
-                      <MapPinCheck className="size-5 shrink-0 text-black" fill="#fff" />
+                      <MapPinCheck
+                        className="size-5 shrink-0 text-black"
+                        fill="#fff"
+                      />
                     </div>
                     <div className="flex flex-col font-mono text-[11px] leading-tight font-bold text-black sm:text-xs">
                       <span>Lat: {selectedLocation[1].toFixed(5)}</span>
@@ -257,7 +259,13 @@ export function PreferensiDialog() {
                     variant="outline"
                     size="rect"
                     className="text-sm font-bold"
-                    endIcon={isLoadingGPS ? <Loader2 className="animate-spin" /> : <LocateFixed />}
+                    endIcon={
+                      isLoadingGPS ? (
+                        <Loader2 className="animate-spin" />
+                      ) : (
+                        <LocateFixed />
+                      )
+                    }
                     onClick={handleMyLocation}
                     disabled={isLoadingGPS}
                   >
@@ -272,12 +280,20 @@ export function PreferensiDialog() {
               LANGKAH 2: KATEGORI (Multi-select)
           ========================================= */}
           {currentStepData.type === "category" && (
-            <div className="flex w-full flex-col items-center gap-4">
+            <div className="flex w-full flex-col items-center gap-6">
               <FilterChips
                 value={selectedCategories}
                 onChange={setSelectedCategories}
                 className="justify-center"
               />
+              {selectedCategories.length > 0 && (
+                <button
+                  onClick={() => setSelectedCategories([])}
+                  className="text-[11px] font-black uppercase tracking-wider text-red-500 hover:underline"
+                >
+                  ✖ Hapus Pilihan
+                </button>
+              )}
             </div>
           )}
 
@@ -314,7 +330,9 @@ export function PreferensiDialog() {
 
         {/* --- FOOTER NAVIGASI --- */}
         <DialogFooter className="flex-row items-center border-t-2 border-black bg-slate-100 p-4 sm:justify-between">
-          <div className={`flex w-full ${isFirstStep ? "justify-end" : "justify-between"}`}>
+          <div
+            className={`flex w-full ${isFirstStep ? "justify-end" : "justify-between"}`}
+          >
             {!isFirstStep && (
               <Button
                 variant="outline"

@@ -42,8 +42,8 @@ import { ActionButtons } from "@/components/admin/ActionButtons";
 import { FormField } from "@/components/core/form-field";
 import { WISATA_CATEGORIES } from "@/lib/wisata-categories";
 
-// Opsi kategori untuk dropdown — hilangkan "Semua" karena tidak valid sebagai nilai data
-const KATEGORI_OPTIONS = WISATA_CATEGORIES.filter((k) => k !== "Semua");
+// Opsi kategori untuk dropdown
+const KATEGORI_OPTIONS = WISATA_CATEGORIES;
 
 
 interface Wisata {
@@ -83,7 +83,19 @@ export default function WisataManagementPage() {
     setCurrentPage(1);
   }, [searchQuery]);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    category: string;
+    price: number | string;
+    rating: number | string;
+    reviews: number | string;
+    address: string;
+    phone: string;
+    link: string;
+    maps_link: string;
+    lng: number;
+    lat: number;
+  }>({
     name: "",
     category: "",
     price: 0,
@@ -146,11 +158,18 @@ export default function WisataManagementPage() {
       : "/api/admin/wisata";
     const method = selectedItem ? "PATCH" : "POST";
 
+    const payload = {
+      ...formData,
+      price: Number(formData.price) || 0,
+      rating: Number(formData.rating) || 0,
+      reviews: Number(formData.reviews) || 0,
+    };
+
     try {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
@@ -359,10 +378,7 @@ export default function WisataManagementPage() {
                       startIcon={<Star className="h-4 w-4 text-amber-500" />}
                       required 
                       value={formData.rating}
-                      onChange={e => {
-                        const val = parseFloat(e.target.value);
-                        setFormData({...formData, rating: isNaN(val) ? 0 : Math.round(val * 10) / 10});
-                      }}
+                      onChange={e => setFormData({...formData, rating: e.target.value})}
                     />
                   </FormField>
                   <FormField id="reviews" label="Jumlah Ulasan">
@@ -371,7 +387,7 @@ export default function WisataManagementPage() {
                       type="number" 
                       required 
                       value={formData.reviews}
-                      onChange={e => setFormData({...formData, reviews: parseInt(e.target.value)})}
+                      onChange={e => setFormData({...formData, reviews: e.target.value})}
                     />
                   </FormField>
                 </div>
@@ -382,7 +398,7 @@ export default function WisataManagementPage() {
                     startIcon={<Banknote className="h-4 w-4 text-green-600" />}
                     required 
                     value={formData.price}
-                    onChange={e => setFormData({...formData, price: parseInt(e.target.value)})}
+                    onChange={e => setFormData({...formData, price: e.target.value})}
                   />
                 </FormField>
                 <FormField id="address" label="Alamat">

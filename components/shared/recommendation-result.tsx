@@ -2,7 +2,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRecommendationStore, WisataRecommendation } from "@/store/useRecommendationStore";
+import {
+  useRecommendationStore,
+  WisataRecommendation,
+} from "@/store/useRecommendationStore";
 import { X, MapPin, Star, Ticket } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -51,7 +54,12 @@ export function RecommendationResult() {
       essential: true,
       padding: isDesktop
         ? { left: 384, top: 0, bottom: 0, right: 0 }
-        : { bottom: window.innerHeight * (Number(mobileSnap) || 0.6), top: 80, left: 0, right: 0 },
+        : {
+            bottom: window.innerHeight * (Number(mobileSnap) || 0.6),
+            top: 80,
+            left: 0,
+            right: 0,
+          },
     });
   };
 
@@ -71,7 +79,7 @@ export function RecommendationResult() {
 
   const formatRating = (rating: number | string) => {
     const val = parseFloat(String(rating));
-    return isNaN(val) ? "0.00" : val.toFixed(2);
+    return isNaN(val) ? "0.00" : val.toFixed(1);
   };
 
   if (isLoading) {

@@ -19,6 +19,9 @@ interface MapState {
   setViewState: (viewState: ViewState) => void;
   isSatellite: boolean;
   toggleMapStyle: () => void;
+
+  activeWisata: any | null;
+  setActiveWisata: (wisata: any | null) => void;
 }
 
 export const useMapStore = create<MapState>((set) => ({
@@ -42,4 +45,7 @@ export const useMapStore = create<MapState>((set) => ({
   setViewState: (newViewState) => set({ viewState: newViewState }),
   isSatellite: false,
   toggleMapStyle: () => set((state) => ({ isSatellite: !state.isSatellite })),
+
+  activeWisata: null,
+  setActiveWisata: (wisata) => set({ activeWisata: wisata }),
 }));

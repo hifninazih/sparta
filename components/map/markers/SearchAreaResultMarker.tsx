@@ -6,10 +6,12 @@ import { useMapStore } from "@/store/useMapStore";
 import { useRecommendationStore } from "@/store/useRecommendationStore";
 import { useSearchStore } from "@/store/useSearchStore";
 import { Marker } from "@vis.gl/react-maplibre";
+import { WisataMarkerPopover } from "../WisataPopup";
+import { getCategoryColor } from "@/lib/wisata-categories";
 
 export default function SearchAreaResultMarker() {
   const { recommendations } = useRecommendationStore();
-  const { viewState } = useMapStore();
+  const { viewState, activeWisata, setActiveWisata } = useMapStore();
   const { results } = useSearchStore();
   const { selectedPlace } = useAutosuggestStore();
 
@@ -28,6 +30,7 @@ export default function SearchAreaResultMarker() {
         })
         .map((wisata) => {
           const isZoomedIn = viewState.zoom >= 13;
+          const isOpen = activeWisata?.gid === wisata.gid;
 
           return (
             <Marker
@@ -35,18 +38,34 @@ export default function SearchAreaResultMarker() {
               longitude={wisata.lng}
               latitude={wisata.lat}
               anchor="bottom"
+              style={{ zIndex: isOpen ? 100 : 1 }}
             >
-              <div className="relative z-10 flex flex-col items-center">
+              <WisataMarkerPopover
+                wisata={wisata}
+                isOpen={isOpen}
+                onOpenChange={(open) => setActiveWisata(open ? wisata : null)}
+              >
+                <div 
+                  className="relative z-10 flex cursor-pointer flex-col items-center hover:scale-110 transition-transform"
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                >
                 {isZoomedIn ? (
                   /* --- TAMPILAN ZOOM DEKAT --- */
-                  <div className="flex items-center rounded-full border-2 border-black bg-white px-2.5 py-1 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                  <div 
+                    className="flex items-center rounded-full border-2 border-black px-2.5 py-1 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                    style={{ backgroundColor: getCategoryColor(wisata.category) }}
+                  >
                     <span className="max-w-30 truncate text-[12px] font-bold text-black">
                       {wisata.name}
                     </span>
                   </div>
                 ) : (
                   /* --- TAMPILAN ZOOM JAUH --- */
-                  <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-black bg-[#DCFFBC] shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                  <div 
+                    className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                    style={{ backgroundColor: getCategoryColor(wisata.category) }}
+                  >
                     <div className="h-1 w-1 rounded-full bg-black"></div>
                   </div>
                 )}
@@ -54,6 +73,7 @@ export default function SearchAreaResultMarker() {
                 {/* Batang Pin Tipis */}
                 <div className="h-1.5 w-0.5 bg-black"></div>
               </div>
+              </WisataMarkerPopover>
             </Marker>
           );
         })}

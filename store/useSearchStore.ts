@@ -7,6 +7,11 @@ export interface WisataSearchResult {
   category: string;
   price: number;
   rating: number;
+  reviews: number;
+  address?: string;
+  phone?: string;
+  link?: string;
+  maps_link?: string;
   lng: number;
   lat: number;
 }
@@ -54,9 +59,8 @@ export const useSearchStore = create<SearchState>((set) => ({
       if (keyword) params.append("s", keyword);
 
       // Kirim setiap kategori sebagai param "c" yang diulang
-      // (kecuali kosong = Semua)
       categories.forEach((cat) => {
-        if (cat !== "Semua") params.append("c", cat);
+        params.append("c", cat);
       });
 
       if (bbox) {

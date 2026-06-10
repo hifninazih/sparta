@@ -9,7 +9,13 @@ export interface UnifiedSearchResult {
   category?: string; // Hanya ada di wisata
   lng: number;
   lat: number;
-  address?: string; // Nama alamat lengkap (untuk OSM)
+  address?: string; // Nama alamat lengkap (untuk OSM/lokal)
+  price?: number;
+  rating?: number;
+  reviews?: number;
+  phone?: string;
+  link?: string;
+  maps_link?: string;
 }
 
 // Tipe respons dari Nominatim OSM API
@@ -33,7 +39,10 @@ export async function GET(request: NextRequest) {
 
     // 1. QUERY LOKAL: Cari di Database (PostgreSQL)
     const localQuery = `
-      SELECT gid, name, category, ST_X(geom) as lng, ST_Y(geom) as lat 
+      SELECT 
+        gid::text, name, category, 
+        price, rating, reviews, address, phone, link, maps_link,
+        ST_X(geom) as lng, ST_Y(geom) as lat 
       FROM wisata 
       WHERE name ILIKE $1 
       LIMIT 5
@@ -65,6 +74,13 @@ export async function GET(request: NextRequest) {
         category: row.category,
         lng: row.lng,
         lat: row.lat,
+        price: row.price,
+        rating: row.rating,
+        reviews: row.reviews,
+        address: row.address,
+        phone: row.phone,
+        link: row.link,
+        maps_link: row.maps_link,
       }),
     );
 

@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("s");
 
     // 2. Tangkap parameter kategori — bisa multi-value: ?c=Alam&c=Budaya
-    const kategoriList = searchParams.getAll("c").filter((k) => k !== "Semua");
+    const kategoriList = searchParams.getAll("c");
 
     // 3. Tangkap parameter Bounding Box
     const minLng = searchParams.get("minLng");
@@ -55,12 +55,16 @@ export async function GET(request: NextRequest) {
     // 4. Query Utama
     const dataQuery = `
       SELECT 
-        gid, 
+        gid::text, 
         name, 
         category, 
         price, 
         rating, 
         reviews,
+        address,
+        phone,
+        link,
+        maps_link,
         ST_X(geom) as lng, 
         ST_Y(geom) as lat 
       FROM wisata 
