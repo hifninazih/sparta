@@ -17,7 +17,7 @@ function Input({ className, containerClassName, type, startIcon, endIcon, ...pro
       )}
     >
       {startIcon && (
-        <div className="absolute left-3 top-1/2 z-10 -translate-y-1/2 text-slate-400 transition-colors group-focus-within/input:text-black">
+        <div className="absolute left-3 top-1/2 z-10 -translate-y-1/2 text-slate-400 transition-all group-focus-within/input:text-black group-focus-within/input:translate-x-[1px] group-focus-within/input:translate-y-[calc(-50%+1px)]">
           {startIcon}
         </div>
       )}
@@ -41,7 +41,7 @@ function Input({ className, containerClassName, type, startIcon, endIcon, ...pro
         {...props}
       />
       {endIcon && (
-        <div className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-slate-400 transition-colors group-focus-within/input:text-black">
+        <div className="absolute right-3 top-1/2 z-10 -translate-y-1/2 text-slate-400 transition-all group-focus-within/input:text-black group-focus-within/input:translate-x-[1px] group-focus-within/input:translate-y-[calc(-50%+1px)]">
           {endIcon}
         </div>
       )}

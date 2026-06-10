@@ -22,7 +22,7 @@ export async function PATCH(
     try {
       const query = `
         UPDATE wisata 
-        SET name = $1, category = $2, price = $3, rating = $4, reviews = $5, address = $6, phone = $7, link = $8, maps_link = $9, latitude = $10, longitude = $11, geom = ST_SetSRID(ST_MakePoint($11, $10), 4326)
+        SET name = $1, category = $2, price = $3, rating = $4, reviews = $5, address = $6, phone = $7, link = $8, maps_link = $9, geom = ST_SetSRID(ST_MakePoint($11::float8, $10::float8), 4326)
         WHERE gid = $12
         RETURNING gid, name, category, price, rating, reviews, address, phone, link, maps_link, ST_X(geom) as lng, ST_Y(geom) as lat
       `;

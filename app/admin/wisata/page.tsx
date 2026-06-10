@@ -28,7 +28,9 @@ import {
   Loader2, 
   Star,
   Banknote,
-  Navigation
+  Navigation,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { toast } from "sonner";
 import { MapPicker } from "@/components/map/MapPicker";
@@ -74,6 +76,13 @@ export default function WisataManagementPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Wisata | null>(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -116,7 +125,7 @@ export default function WisataManagementPage() {
       name: item.name,
       category: item.category,
       price: item.price,
-      rating: item.rating,
+      rating: Math.round(item.rating * 10) / 10,
       reviews: item.reviews,
       address: item.address || "",
       phone: item.phone || "",
@@ -183,6 +192,9 @@ export default function WisataManagementPage() {
     item.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
+  const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   return (
     <div className="p-6 sm:p-10 space-y-6">
       <PageHeader 
@@ -226,14 +238,14 @@ export default function WisataManagementPage() {
                 <Loader2 className="h-6 w-6 animate-spin mx-auto text-blue-600" />
               </TableCell>
             </TableRow>
-          ) : filteredData.length === 0 ? (
+          ) : paginatedData.length === 0 ? (
             <TableRow>
               <TableCell colSpan={5} className="h-24 text-center text-slate-500 font-bold">
                 Tidak ada data wisata.
               </TableCell>
             </TableRow>
           ) : (
-            filteredData.map((item) => (
+            paginatedData.map((item) => (
               <TableRow key={item.gid}>
                 <TableCell>
                   <div className="font-bold text-slate-800">{item.name}</div>
@@ -266,6 +278,34 @@ export default function WisataManagementPage() {
         </TableBody>
       </Table>
 
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-4">
+          <div className="text-sm font-bold text-slate-500">
+            Halaman {currentPage} dari {totalPages} <span className="font-normal">({filteredData.length} total data)</span>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="rect" 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3"
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" /> Prev
+            </Button>
+            <Button 
+              variant="outline" 
+              size="rect" 
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3"
+            >
+              Next <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       <Dialog 
         open={isDialogOpen} 
         onOpenChange={(open) => {
@@ -275,144 +315,149 @@ export default function WisataManagementPage() {
           }
         }}
       >
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+          <DialogHeader className="p-6 pb-4 border-b-2 border-black">
             <DialogTitle className="font-bold text-xl">{selectedItem ? "Edit Wisata" : "Tambah Wisata Baru"}</DialogTitle>
             <DialogDescription>
               Lengkapi detail wisata dan tentukan koordinat lokasi di peta.
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-            <div className="space-y-4">
-              <FormField id="name" label="Nama Destinasi">
-                <Input 
-                  id="name" 
-                  required 
-                  value={formData.name}
-                  onChange={e => setFormData({...formData, name: e.target.value})}
-                />
-              </FormField>
-              <FormField id="category" label="Kategori">
-                <select
-                  id="category"
-                  required
-                  value={formData.category}
-                  onChange={e => setFormData({...formData, category: e.target.value})}
-                  className="w-full rounded-md border-2 border-black bg-white px-3 py-2 text-sm font-semibold outline-none transition-shadow focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]"
-                >
-                  <option value="" disabled>Pilih kategori...</option>
-                  {KATEGORI_OPTIONS.map((k) => (
-                    <option key={k} value={k}>{k}</option>
-                  ))}
-                </select>
-              </FormField>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField id="rating" label="Rating (1-5)">
+          <div className="flex-1 overflow-y-auto p-6">
+            <form id="wisata-form" onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <FormField id="name" label="Nama Destinasi">
                   <Input 
-                    id="rating" 
-                    type="number" 
-                    step="0.1" 
-                    min="1" 
-                    max="5"
-                    startIcon={<Star className="h-4 w-4 text-amber-500" />}
+                    id="name" 
                     required 
-                    value={formData.rating}
-                    onChange={e => setFormData({...formData, rating: parseFloat(e.target.value)})}
+                    value={formData.name}
+                    onChange={e => setFormData({...formData, name: e.target.value})}
                   />
                 </FormField>
-                <FormField id="reviews" label="Jumlah Ulasan">
+                <FormField id="category" label="Kategori">
+                  <select
+                    id="category"
+                    required
+                    value={formData.category}
+                    onChange={e => setFormData({...formData, category: e.target.value})}
+                    className="flex h-10 w-full min-w-0 rounded-md border-2 border-black bg-white px-3 py-2 text-sm font-bold ring-offset-background transition-all outline-none shadow-[2px_2px_0px_rgba(0,0,0,1)] focus-visible:shadow-[1px_1px_0px_rgba(0,0,0,1)] focus-visible:translate-x-[1px] focus-visible:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="" disabled>Pilih kategori...</option>
+                    {KATEGORI_OPTIONS.map((k) => (
+                      <option key={k} value={k}>{k}</option>
+                    ))}
+                  </select>
+                </FormField>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField id="rating" label="Rating (1-5)">
+                    <Input 
+                      id="rating" 
+                      type="number" 
+                      step="0.1" 
+                      min="1" 
+                      max="5"
+                      startIcon={<Star className="h-4 w-4 text-amber-500" />}
+                      required 
+                      value={formData.rating}
+                      onChange={e => {
+                        const val = parseFloat(e.target.value);
+                        setFormData({...formData, rating: isNaN(val) ? 0 : Math.round(val * 10) / 10});
+                      }}
+                    />
+                  </FormField>
+                  <FormField id="reviews" label="Jumlah Ulasan">
+                    <Input 
+                      id="reviews" 
+                      type="number" 
+                      required 
+                      value={formData.reviews}
+                      onChange={e => setFormData({...formData, reviews: parseInt(e.target.value)})}
+                    />
+                  </FormField>
+                </div>
+                <FormField id="price" label="Harga Tiket (Rp)">
                   <Input 
-                    id="reviews" 
+                    id="price" 
                     type="number" 
+                    startIcon={<Banknote className="h-4 w-4 text-green-600" />}
                     required 
-                    value={formData.reviews}
-                    onChange={e => setFormData({...formData, reviews: parseInt(e.target.value)})}
+                    value={formData.price}
+                    onChange={e => setFormData({...formData, price: parseInt(e.target.value)})}
+                  />
+                </FormField>
+                <FormField id="address" label="Alamat">
+                  <Textarea 
+                    id="address" 
+                    rows={2}
+                    value={formData.address}
+                    onChange={e => setFormData({...formData, address: e.target.value})}
+                  />
+                </FormField>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField id="phone" label="No. Telepon">
+                    <Input 
+                      id="phone" 
+                      value={formData.phone}
+                      onChange={e => setFormData({...formData, phone: e.target.value})}
+                    />
+                  </FormField>
+                  <FormField id="link" label="Website/Link">
+                    <Input 
+                      id="link" 
+                      value={formData.link}
+                      onChange={e => setFormData({...formData, link: e.target.value})}
+                    />
+                  </FormField>
+                </div>
+                <FormField id="maps_link" label="Link Google Maps">
+                  <Input 
+                    id="maps_link" 
+                    value={formData.maps_link}
+                    onChange={e => setFormData({...formData, maps_link: e.target.value})}
                   />
                 </FormField>
               </div>
-              <FormField id="price" label="Harga Tiket (Rp)">
-                <Input 
-                  id="price" 
-                  type="number" 
-                  startIcon={<Banknote className="h-4 w-4 text-green-600" />}
-                  required 
-                  value={formData.price}
-                  onChange={e => setFormData({...formData, price: parseInt(e.target.value)})}
+
+              <div className="space-y-4">
+                <Label className="flex items-center gap-2 font-bold text-black border-none shadow-none">
+                  <Navigation className="h-4 w-4 text-blue-600" /> Lokasi Geografis
+                </Label>
+
+                <MapPicker 
+                  lng={formData.lng} 
+                  lat={formData.lat} 
+                  onChange={(lng, lat) => setFormData({...formData, lng, lat})}
                 />
-              </FormField>
-              <FormField id="address" label="Alamat">
-                <Textarea 
-                  id="address" 
-                  rows={2}
-                  value={formData.address}
-                  onChange={e => setFormData({...formData, address: e.target.value})}
-                />
-              </FormField>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField id="phone" label="No. Telepon">
-                  <Input 
-                    id="phone" 
-                    value={formData.phone}
-                    onChange={e => setFormData({...formData, phone: e.target.value})}
-                  />
-                </FormField>
-                <FormField id="link" label="Website/Link">
-                  <Input 
-                    id="link" 
-                    value={formData.link}
-                    onChange={e => setFormData({...formData, link: e.target.value})}
-                  />
-                </FormField>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField id="lng" label="Longitude">
+                    <Input 
+                      type="number" 
+                      step="any" 
+                      value={formData.lng} 
+                      onChange={e => setFormData({...formData, lng: parseFloat(e.target.value)})}
+                      className="h-8 text-xs font-mono"
+                    />
+                  </FormField>
+                  <FormField id="lat" label="Latitude">
+                    <Input 
+                      type="number" 
+                      step="any" 
+                      value={formData.lat} 
+                      onChange={e => setFormData({...formData, lat: parseFloat(e.target.value)})}
+                      className="h-8 text-xs font-mono"
+                    />
+                  </FormField>
+                </div>
               </div>
-              <FormField id="maps_link" label="Link Google Maps">
-                <Input 
-                  id="maps_link" 
-                  value={formData.maps_link}
-                  onChange={e => setFormData({...formData, maps_link: e.target.value})}
-                />
-              </FormField>
-            </div>
+            </form>
+          </div>
 
-            <div className="space-y-4">
-              <Label className="flex items-center gap-2 font-bold text-black border-none shadow-none">
-                <Navigation className="h-4 w-4 text-blue-600" /> Lokasi Geografis
-              </Label>
-
-              <MapPicker 
-                lng={formData.lng} 
-                lat={formData.lat} 
-                onChange={(lng, lat) => setFormData({...formData, lng, lat})}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField id="lng" label="Longitude">
-                  <Input 
-                    type="number" 
-                    step="any" 
-                    value={formData.lng} 
-                    onChange={e => setFormData({...formData, lng: parseFloat(e.target.value)})}
-                    className="h-8 text-xs font-mono"
-                  />
-                </FormField>
-                <FormField id="lat" label="Latitude">
-                  <Input 
-                    type="number" 
-                    step="any" 
-                    value={formData.lat} 
-                    onChange={e => setFormData({...formData, lat: parseFloat(e.target.value)})}
-                    className="h-8 text-xs font-mono"
-                  />
-                </FormField>
-              </div>
-            </div>
-
-            <DialogFooter className="col-span-full border-t-2 border-black pt-6">
-              <Button variant="primary" className="w-full font-bold" disabled={isSubmitLoading}>
-                {isSubmitLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (selectedItem ? "Simpan Perubahan" : "Tambahkan Destinasi")}
-              </Button>
-            </DialogFooter>
-          </form>
+          <DialogFooter className="p-6 pt-4 border-t-2 border-black bg-slate-50">
+            <Button form="wisata-form" type="submit" variant="primary" className="w-full font-bold" disabled={isSubmitLoading}>
+              {isSubmitLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : (selectedItem ? "Simpan Perubahan" : "Tambahkan Destinasi")}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

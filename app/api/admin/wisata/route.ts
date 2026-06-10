@@ -23,7 +23,6 @@ export async function GET(request: NextRequest) {
         FROM wisata
         WHERE name ILIKE $1 OR category ILIKE $1
         ORDER BY name ASC
-        LIMIT 100
       `;
       const result = await client.query(query, [`%${search}%`]);
       return NextResponse.json(result.rows);
@@ -54,8 +53,8 @@ export async function POST(request: NextRequest) {
     const client = await pool.connect();
     try {
       const query = `
-        INSERT INTO wisata (name, category, price, rating, reviews, address, phone, link, maps_link, latitude, longitude, geom)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, ST_SetSRID(ST_MakePoint($11, $10), 4326))
+        INSERT INTO wisata (name, category, price, rating, reviews, address, phone, link, maps_link, geom)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, ST_SetSRID(ST_MakePoint($11::float8, $10::float8), 4326))
         RETURNING gid, name, category, price, rating, reviews, address, phone, link, maps_link, ST_X(geom) as lng, ST_Y(geom) as lat
       `;
       const result = await client.query(query, [
