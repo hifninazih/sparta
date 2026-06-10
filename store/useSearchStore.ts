@@ -1,7 +1,8 @@
 import { create } from "zustand";
+import { WisataCategory } from "@/lib/wisata-categories";
 
 export interface WisataSearchResult {
-  id: string;
+  gid: string;
   name: string;
   category: string;
   price: number;
@@ -12,47 +13,51 @@ export interface WisataSearchResult {
 
 interface SearchState {
   keyword: string;
-  category: string;
+  // Multi-select kategori — array kosong = "Semua" (tidak difilter)
+  selectedCategories: WisataCategory[];
   results: WisataSearchResult[];
   isSearching: boolean;
   showSearchAreaBtn: boolean;
 
   setKeyword: (keyword: string) => void;
-  setCategory: (category: string) => void;
+  setSelectedCategories: (cats: WisataCategory[]) => void;
   setResults: (results: WisataSearchResult[]) => void;
   setIsSearching: (status: boolean) => void;
   setShowSearchAreaBtn: (status: boolean) => void;
 
   executeSearch: (
     keyword: string,
-    category: string,
+    categories: WisataCategory[],
     bbox?: { minLng: number; minLat: number; maxLng: number; maxLat: number },
   ) => Promise<void>;
   clearSearch: () => void;
 }
 
-export const useSearchStore = create<SearchState>((set, get) => ({
+export const useSearchStore = create<SearchState>((set) => ({
   keyword: "",
-  category: "Semua",
+  selectedCategories: [], // kosong = semua
   results: [],
   isSearching: false,
   showSearchAreaBtn: false,
 
   setKeyword: (keyword) => set({ keyword }),
-  setCategory: (category) => set({ category }),
+  setSelectedCategories: (cats) => set({ selectedCategories: cats }),
   setResults: (results) => set({ results }),
   setIsSearching: (status) => set({ isSearching: status }),
   setShowSearchAreaBtn: (status) => set({ showSearchAreaBtn: status }),
 
-  executeSearch: async (keyword, category, bbox) => {
-    // 1. Set isSearching ke true, TAPI JANGAN ubah/hapus 'results'.
-    // Ini yang membuat marker lama tetap nongkrong di peta selama API loading.
-    set({ isSearching: true });
+  executeSearch: async (keyword, categories, bbox) => {
+    set({ isSearching: true, keyword, selectedCategories: categories });
 
     try {
       const params = new URLSearchParams();
       if (keyword) params.append("s", keyword);
-      if (category !== "Semua") params.append("c", category);
+
+      // Kirim setiap kategori sebagai param "c" yang diulang
+      // (kecuali kosong = Semua)
+      categories.forEach((cat) => {
+        if (cat !== "Semua") params.append("c", cat);
+      });
 
       if (bbox) {
         params.append("minLng", bbox.minLng.toString());
@@ -64,14 +69,13 @@ export const useSearchStore = create<SearchState>((set, get) => ({
       const response = await fetch(`/api/wisata?${params.toString()}`);
       const data: WisataSearchResult[] = await response.json();
 
-      // 2. TIMPA (Overwrite) data lama dengan data yang baru saja datang
       set({ results: data, isSearching: false });
     } catch (error) {
       console.error("Gagal mencari wisata", error);
-      // Tetap kembalikan state loading ke false jika gagal
       set({ isSearching: false });
     }
   },
 
-  clearSearch: () => set({ keyword: "", category: "Semua", results: [] }),
+  clearSearch: () =>
+    set({ keyword: "", selectedCategories: [], results: [], showSearchAreaBtn: false }),
 }));

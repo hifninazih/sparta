@@ -3,13 +3,22 @@ import { pool } from "@/lib/db";
 
 // Format Data Standar agar Frontend tidak bingung
 export interface UnifiedSearchResult {
-  id: string;
+  gid: string;
   name: string;
   type: "wisata" | "osm"; // Untuk membedakan sumber data
   category?: string; // Hanya ada di wisata
   lng: number;
   lat: number;
   address?: string; // Nama alamat lengkap (untuk OSM)
+}
+
+// Tipe respons dari Nominatim OSM API
+interface NominatimResult {
+  place_id: number;
+  name: string;
+  display_name: string;
+  lon: string;
+  lat: string;
 }
 
 export async function GET(request: NextRequest) {
@@ -24,8 +33,8 @@ export async function GET(request: NextRequest) {
 
     // 1. QUERY LOKAL: Cari di Database (PostgreSQL)
     const localQuery = `
-      SELECT id, name, category, ST_X(geom) as lng, ST_Y(geom) as lat 
-      FROM wisata_diy 
+      SELECT gid, name, category, ST_X(geom) as lng, ST_Y(geom) as lat 
+      FROM wisata 
       WHERE name ILIKE $1 
       LIMIT 5
     `;
@@ -50,7 +59,7 @@ export async function GET(request: NextRequest) {
     // 4. Standarisasi Format Data
     const formattedLocal: UnifiedSearchResult[] = localResult.rows.map(
       (row) => ({
-        id: `local-${row.id}`,
+        gid: `local-${row.gid}`,
         name: row.name,
         type: "wisata",
         category: row.category,
@@ -59,8 +68,8 @@ export async function GET(request: NextRequest) {
       }),
     );
 
-    const formattedOsm: UnifiedSearchResult[] = osmResult.map((item: any) => ({
-      id: `osm-${item.place_id}`,
+    const formattedOsm: UnifiedSearchResult[] = osmResult.map((item: NominatimResult) => ({
+      gid: `osm-${item.place_id}`,
       name: item.name || item.display_name.split(",")[0], // Ambil nama utamanya saja
       type: "osm",
       lng: parseFloat(item.lon),

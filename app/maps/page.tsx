@@ -4,9 +4,10 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 import Map, { MapProvider, MapLayerMouseEvent } from "@vis.gl/react-maplibre";
 
-// Style and Icon
+// Style dan icon
 import { CircleQuestionMark } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Z } from "@/lib/z-index";
 import { satelliteStyle, streetStyle } from "@/lib/basemaps";
 
 // UI Component
@@ -55,7 +56,7 @@ export default function Maps() {
   const handleMapInteraction = () => {
     // Jika mobile dan drawer sedang terbuka (ada rekomendasi), turunkan ke snap TERENDAH (0.25)
     if (!isDesktop && recommendations.length > 0 && mobileSnap !== null) {
-      setMobileSnap(0.25); 
+      setMobileSnap(0.25);
     }
     setShowSearchAreaBtn(true);
   };
@@ -77,7 +78,8 @@ export default function Maps() {
   // Snap Full: 0.9
   const isSnapFull = !isDesktop && recommendations.length > 0 && currentSnap >= 0.8;
   // Snap Mid: 0.6
-  const isSnapMid = !isDesktop && recommendations.length > 0 && currentSnap > 0.4 && currentSnap < 0.8;
+  const isSnapMid =
+    !isDesktop && recommendations.length > 0 && currentSnap > 0.4 && currentSnap < 0.8;
   // Snap Low: 0.25
   const isSnapLow = !isDesktop && recommendations.length > 0 && currentSnap <= 0.4;
 
@@ -113,14 +115,17 @@ export default function Maps() {
           <SelectedSuggestionMarker />
         </Map>
 
-        {/* Hasil Rekomendasi (Z-INDEX 50 via Portal di drawer.tsx) */}
+        {/* Hasil Rekomendasi (Z-INDEX: recommendationPanel = 20) */}
         <RecommendationResult />
 
-        {/* PANEL ATAS */}
-        {/* Tombol Telusuri Top Center */}
+        {/* =========================================
+            PANEL ATAS — TENGAH
+        ========================================= */}
+        {/* Tombol "Telusuri area ini" — muncul saat user drag/zoom & belum ada rekomendasi */}
         <div
+          style={{ zIndex: Z.searchAreaBtn }}
           className={cn(
-            "absolute top-20 left-1/2 z-60 flex -translate-x-1/2 transition-all duration-300 lg:top-6",
+            "absolute top-20 left-1/2 -translate-x-1/2 transition-all duration-300 lg:top-6",
             (showSearchAreaBtn || isSearching) && recommendations.length === 0
               ? "pointer-events-auto translate-y-0 opacity-100"
               : "pointer-events-none -translate-y-10 opacity-0",
@@ -129,13 +134,22 @@ export default function Maps() {
           <SearchThisAreaButton />
         </div>
 
-        {/* Input pencarian dengan z-[100] untuk memastikan di atas segalanya */}
-        <div className="absolute top-5 left-4 z-[100] hidden w-full max-w-sm sm:block sm:w-80">
+        {/* =========================================
+            PANEL ATAS — DESKTOP
+        ========================================= */}
+        {/* Input pencarian desktop */}
+        <div
+          style={{ zIndex: Z.searchInput }}
+          className="absolute top-5 left-4 hidden w-full max-w-sm sm:block sm:w-80"
+        >
           <GlobalSearch />
         </div>
 
-        {/* Tombol Panduan */}
-        <div className="absolute top-5 right-4 z-10 hidden flex-col items-end gap-5 sm:flex">
+        {/* Tombol Panduan desktop */}
+        <div
+          style={{ zIndex: Z.mapControls }}
+          className="absolute top-5 right-4 hidden flex-col items-end gap-5 sm:flex"
+        >
           <Button
             variant={"primary"}
             size={"rect"}
@@ -145,62 +159,74 @@ export default function Maps() {
           </Button>
         </div>
 
-        <div className="absolute top-40 right-4 z-10 flex flex-col items-end gap-5">
+        {/* Kompas — hanya muncul saat bearing/pitch bukan nol */}
+        <div
+          style={{ zIndex: Z.mapControls }}
+          className="absolute top-40 right-4 flex flex-col items-end gap-5"
+        >
           <MapCompass />
         </div>
 
-        {/* PANEL ATAS MOBILE - z-[100] untuk menjamin interaksi */}
-        <div className="absolute top-0 left-1/2 z-[100] flex w-full -translate-x-1/2 items-center justify-between gap-2 px-3 pt-4 sm:hidden">
+        {/* =========================================
+            PANEL ATAS — MOBILE
+        ========================================= */}
+        <div
+          style={{ zIndex: Z.searchInput }}
+          className="absolute top-0 left-1/2 flex w-full -translate-x-1/2 items-center justify-between gap-2 px-3 pt-4 sm:hidden"
+        >
           <GlobalSearch />
           <Button
             variant={"primary"}
             size={"rect"}
             startIcon={<CircleQuestionMark />}
-          ></Button>
+          />
         </div>
 
         {/* =========================================
-          PANEL BAWAH
-      ========================================= */}
-        {/* Tombol Rekomendasi Wisata - SEMBUNYIKAN jika ada hasil (Baik Mobile maupun Desktop) */}
+            PANEL BAWAH
+        ========================================= */}
+        {/* Tombol Rekomendasi Wisata — sembunyikan jika ada hasil */}
         <div
+          style={{ zIndex: Z.mapControls }}
           className={cn(
-            "absolute bottom-10 left-4 z-10 flex flex-col items-end gap-5 transition-all duration-300",
-            recommendations.length > 0 ? "pointer-events-none opacity-0" : "opacity-100"
+            "absolute bottom-10 left-4 flex flex-col items-end gap-5 transition-all duration-300",
+            recommendations.length > 0 ? "pointer-events-none opacity-0" : "opacity-100",
           )}
         >
           <PreferensiDialog />
         </div>
 
-        {/* MAP CONTROL - Z-INDEX 10 (Berada di bawah drawer z-50) */}
+        {/* MAP CONTROL (zoom + locate) */}
         <div
+          style={{ zIndex: Z.mapControls }}
           className={cn(
-            "absolute right-4 z-10 flex flex-col items-end gap-5 transition-all duration-300 sm:bottom-40",
+            "absolute right-4 flex flex-col items-end gap-5 transition-all duration-300 sm:bottom-40",
             isSnapFull ? "pointer-events-none opacity-0" : "opacity-100",
-            recommendations.length > 0 && !isDesktop 
-              ? isSnapMid 
-                  ? "bottom-[61vh]" 
-                  : isSnapLow
-                    ? "bottom-[26vh]" 
-                    : "bottom-32"
-              : "bottom-32"
+            recommendations.length > 0 && !isDesktop
+              ? isSnapMid
+                ? "bottom-[61vh]"
+                : isSnapLow
+                  ? "bottom-[26vh]"
+                  : "bottom-32"
+              : "bottom-32",
           )}
         >
           <MapControlPanel />
         </div>
 
-        {/* TOGGLE BASEMAPS - Z-INDEX 10 (Berada di bawah drawer z-50) */}
+        {/* TOGGLE BASEMAPS */}
         <div
+          style={{ zIndex: Z.mapControls }}
           className={cn(
-            "absolute right-4 z-10 flex flex-col items-end gap-5 transition-all duration-300",
+            "absolute right-4 flex flex-col items-end gap-5 transition-all duration-300",
             isSnapFull ? "pointer-events-none opacity-0" : "opacity-100",
-            recommendations.length > 0 && !isDesktop 
-              ? isSnapMid 
-                  ? "bottom-[51vh]" 
-                  : isSnapLow
-                    ? "bottom-[16vh]" 
-                    : "bottom-10"
-              : "bottom-10"
+            recommendations.length > 0 && !isDesktop
+              ? isSnapMid
+                ? "bottom-[51vh]"
+                : isSnapLow
+                  ? "bottom-[16vh]"
+                  : "bottom-10"
+              : "bottom-10",
           )}
         >
           <BasemapsToggle />

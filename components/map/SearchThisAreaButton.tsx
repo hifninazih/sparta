@@ -10,13 +10,12 @@ export default function SearchThisAreaButton() {
     executeSearch,
     setShowSearchAreaBtn,
     isSearching,
+    selectedCategories,
   } = useSearchStore();
 
-  // Fungsi yang dipanggil ketika tombol diklik
   const handleSearchThisArea = async () => {
     if (!spartaMap) return;
 
-    // Ambil batas BBOX dari peta
     const bounds = spartaMap.getMap().getBounds();
     const bbox = {
       minLng: bounds.getWest(),
@@ -25,12 +24,12 @@ export default function SearchThisAreaButton() {
       maxLat: bounds.getNorth(),
     };
 
-    // 1. Jalankan pencarian dan tunggu (akan memicu isSearching = true di Zustand)
-    await executeSearch("", "", bbox);
+    // Gunakan selectedCategories dari store (shared dengan GlobalSearch filter)
+    await executeSearch("", selectedCategories, bbox);
 
-    // 2. SETELAH SELESAI mencari, baru sembunyikan state tombol
     setShowSearchAreaBtn(false);
   };
+
   return (
     <button
       onClick={handleSearchThisArea}

@@ -1,10 +1,8 @@
 // component/recommendation-result.tsx
 "use client";
 
-import { useEffect, useMemo } from "react";
-import {
-  useRecommendationStore,
-} from "@/store/useRecommendationStore";
+import { useEffect } from "react";
+import { useRecommendationStore, WisataRecommendation } from "@/store/useRecommendationStore";
 import { X, MapPin, Star, Ticket } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -18,7 +16,6 @@ import {
 import { useMap } from "@vis.gl/react-maplibre";
 
 // Snap points yang konsisten: 25% (rendah), 60% (tengah), 90% (full)
-// Kita gunakan 0.25 agar header laci lebih terlihat jelas di semua device
 const SNAP_POINTS = [0.25, 0.6, 0.9];
 
 export function RecommendationResult() {
@@ -29,7 +26,7 @@ export function RecommendationResult() {
     activeWisataId,
     setActiveWisataId,
     mobileSnap,
-    setMobileSnap
+    setMobileSnap,
   } = useRecommendationStore();
 
   const { "sparta-map": spartaMap } = useMap();
@@ -44,7 +41,7 @@ export function RecommendationResult() {
   }, [recommendations.length, setMobileSnap]);
 
   // Fungsi untuk flyTo ke titik rekomendasi
-  const handleWisataSelect = (wisata: any) => {
+  const handleWisataSelect = (wisata: WisataRecommendation) => {
     if (!spartaMap) return;
 
     spartaMap.getMap().flyTo({
@@ -53,8 +50,8 @@ export function RecommendationResult() {
       duration: 1200,
       essential: true,
       padding: isDesktop
-        ? { left: 400, top: 0, bottom: 0, right: 0 } 
-        : { bottom: window.innerHeight * 0.3, top: 0, left: 0, right: 0 }, 
+        ? { left: 384, top: 0, bottom: 0, right: 0 }
+        : { bottom: window.innerHeight * (Number(mobileSnap) || 0.6), top: 80, left: 0, right: 0 },
     });
   };
 
@@ -72,6 +69,11 @@ export function RecommendationResult() {
     return `${(distM / 1000).toFixed(1)} km`;
   };
 
+  const formatRating = (rating: number | string) => {
+    const val = parseFloat(String(rating));
+    return isNaN(val) ? "0.00" : val.toFixed(2);
+  };
+
   if (isLoading) {
     return (
       <div className="absolute top-1/2 left-1/2 z-20 flex w-[90%] max-w-sm -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-xl border-2 border-black bg-white p-8 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
@@ -85,17 +87,17 @@ export function RecommendationResult() {
 
   if (recommendations.length === 0) return null;
 
+  // Komponen list kartu wisata (reusable untuk desktop sidebar & mobile drawer)
   const ContentList = (
     <div className="space-y-3">
       {recommendations.map((item, index) => (
         <div
-          key={item.id}
-          onMouseEnter={() => isDesktop && setActiveWisataId(item.id)}
+          key={item.gid}
+          onMouseEnter={() => isDesktop && setActiveWisataId(item.gid)}
           onMouseLeave={() => isDesktop && setActiveWisataId(null)}
           onClick={() => {
-            setActiveWisataId(item.id);
+            setActiveWisataId(item.gid);
             handleWisataSelect(item);
-
             if (!isDesktop) {
               setMobileSnap(SNAP_POINTS[1]);
             }
@@ -103,17 +105,27 @@ export function RecommendationResult() {
           className={cn(
             "group relative flex cursor-pointer flex-col gap-2 rounded-lg border-2 border-black bg-white p-3 transition-all",
             "hover:-translate-y-1 hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] active:scale-[0.98]",
-            activeWisataId === item.id
+            activeWisataId === item.gid
               ? "border-blue-600 bg-blue-50 shadow-[4px_4px_0px_rgba(0,0,0,1)]"
               : "",
           )}
         >
+          {/* Badge rank + skor */}
           <div className="bg-primary absolute -top-3 -right-2 flex items-center gap-1 rounded-full border-2 border-black px-2 py-0.5 text-xs font-black shadow-sm">
             <span>#{index + 1}</span>
             <span className="opacity-50">|</span>
             <span>{(item.score * 100).toFixed(1)}</span>
           </div>
+
           <h3 className="line-clamp-1 pr-12 text-sm font-bold">{item.name}</h3>
+
+          {/* Badge kategori */}
+          <div className="flex items-center gap-1">
+            <span className="rounded border border-black/20 bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-gray-600">
+              {item.category}
+            </span>
+          </div>
+
           <div className="grid grid-cols-2 gap-y-1 text-xs font-semibold text-gray-600">
             <div className="flex items-center gap-1">
               <MapPin className="size-3.5" />
@@ -121,7 +133,7 @@ export function RecommendationResult() {
             </div>
             <div className="flex items-center gap-1">
               <Star className="size-3.5 fill-yellow-400 text-yellow-500" />
-              <span>{item.rating}</span>
+              <span>{formatRating(item.rating)}</span>
             </div>
             <div className="col-span-2 flex items-center gap-1 text-black">
               <Ticket className="size-3.5" />
@@ -133,36 +145,43 @@ export function RecommendationResult() {
     </div>
   );
 
+  // Header panel (desktop sidebar)
+  const PanelHeader = (
+    <div className="flex items-center justify-between border-b-2 border-black bg-[#DCFFBC] px-4 py-3">
+      <div>
+        <h2 className="text-lg leading-tight font-black">Top Rekomendasi</h2>
+        <p className="text-xs font-semibold text-gray-700">
+          Berdasarkan preferensi Anda
+        </p>
+      </div>
+      <button
+        onClick={clearRecommendations}
+        className="rounded-md border-2 border-transparent p-1 transition-colors hover:border-black hover:bg-white"
+      >
+        <X className="size-5" strokeWidth={2.5} />
+      </button>
+    </div>
+  );
+
+  // =====================
+  // RENDER DESKTOP SIDEBAR
+  // =====================
   if (isDesktop) {
     return (
       <div className="absolute top-24 bottom-10 left-4 z-20 flex w-80 flex-col overflow-hidden rounded-xl border-2 border-black bg-slate-50 shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all lg:w-96">
-        <div className="flex items-center justify-between border-b-2 border-black bg-[#DCFFBC] px-4 py-3">
-          <div>
-            <h2 className="text-lg leading-tight font-black">
-              Top Rekomendasi
-            </h2>
-            <p className="text-xs font-semibold text-gray-700">
-              Berdasarkan preferensi Anda
-            </p>
-          </div>
-          <button
-            onClick={clearRecommendations}
-            className="rounded-md border-2 border-transparent p-1 transition-colors hover:border-black hover:bg-white"
-          >
-            <X className="size-5" strokeWidth={2.5} />
-          </button>
-        </div>
+        {PanelHeader}
         <div className="flex-1 overflow-y-auto p-4">{ContentList}</div>
       </div>
     );
   }
 
+  // =====================
+  // RENDER MOBILE DRAWER
+  // =====================
   const getPaddingBottom = () => {
     const snapValue = Number(mobileSnap) || 0;
-    // Drawer height is 85vh. Hidden portion is 85vh - (snapValue * 100)vh
     const hiddenHeightVh = Math.max(0, 0.85 - snapValue) * 100;
-    // Berikan padding 120px agar item terakhir tidak tertutup safe area/ujung layar
-    return `calc(${hiddenHeightVh}vh + 120px)`; 
+    return `calc(${hiddenHeightVh}vh + 120px)`;
   };
 
   return (
@@ -177,9 +196,8 @@ export function RecommendationResult() {
       modal={false}
       dismissible={false}
     >
-      <DrawerContent 
+      <DrawerContent
         className="h-[85vh] shadow-[0px_-4px_0px_rgba(0,0,0,1)]"
-        // Cegah drawer menangkap interaksi klik/sentuh yang seharusnya ke input search di luar
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -198,7 +216,6 @@ export function RecommendationResult() {
           </button>
         </DrawerHeader>
 
-        {/* AREA SCROLL DENGAN PADDING DINAMIS */}
         <div
           className="min-h-0 flex-1 overflow-y-auto overscroll-y-none p-4"
           style={{ paddingBottom: getPaddingBottom() }}

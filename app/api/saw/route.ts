@@ -4,12 +4,12 @@ import { calculateSAW } from "@/lib/saw";
 
 // Interface untuk tipe data wisata dari database
 interface Wisata {
-  id: string;
+  gid: number;
   name: string;
   category: string;
   price: number;
   rating: number;
-  all_facility: string;
+  reviews: number;
   lng: number;
   lat: number;
   distance_m: number;
@@ -17,8 +17,6 @@ interface Wisata {
 
 export async function POST(request: NextRequest) {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-
     // 1. Tangkap parameter dari Body Request
     const body = await request.json();
     const {
@@ -26,8 +24,9 @@ export async function POST(request: NextRequest) {
       lat,
       w_jarak = 50,
       w_harga = 50,
-      w_fasilitas = 50,
+      w_reviews = 50,
       w_rating = 50,
+      categories = [], // Array kategori yang dipilih user. Kosong = semua.
     } = body;
 
     if (!lng || !lat) {
@@ -40,28 +39,47 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Tarik Data & Hitung Jarak Fisik (PostGIS)
+    // 2. Bangun filter kategori (jika ada)
+    // categories adalah array string dari client, misal: ["Alam", "Budaya"]
+    // Jika kosong → tidak ada filter (semua kategori diikutsertakan)
+    const categoryList: string[] = Array.isArray(categories)
+      ? categories.filter((c: unknown) => typeof c === "string" && c !== "Semua")
+      : [];
+
+    const hasCategoryFilter = categoryList.length > 0;
+
+    // 3. Tarik Data & Hitung Jarak Fisik (PostGIS)
+    // Gunakan ANY($3) untuk filter kategori yang efisien di PostgreSQL
+    const queryParams: (number | string[])[] = [
+      parseFloat(lng),
+      parseFloat(lat),
+    ];
+
+    let categoryClause = "";
+    if (hasCategoryFilter) {
+      categoryClause = "AND category = ANY($3)";
+      queryParams.push(categoryList);
+    }
+
     const dataQuery = `
       SELECT 
-        id, 
+        gid, 
         name, 
         category, 
         price, 
         rating, 
-        all_facility,
+        reviews,
         ST_X(geom) as lng, 
         ST_Y(geom) as lat,
         ST_DistanceSphere(geom, ST_MakePoint($1, $2)) as distance_m
-      FROM wisata_diy 
+      FROM wisata
+      WHERE 1=1 ${categoryClause}
     `;
 
     const client = await pool.connect();
     let rawData: Wisata[] = [];
     try {
-      const result = await client.query(dataQuery, [
-        parseFloat(lng),
-        parseFloat(lat),
-      ]);
+      const result = await client.query(dataQuery, queryParams);
       rawData = result.rows;
     } finally {
       client.release();
@@ -72,15 +90,17 @@ export async function POST(request: NextRequest) {
     }
 
     // ==========================================
-    // FASE 3: PROSES ALGORITMA SAW (DARI UTILITAS)
+    // FASE 4: PROSES ALGORITMA SAW (DARI UTILITAS)
+    // Data yang masuk sudah terfilter per kategori.
+    // SAW hanya bersaing di dalam kategori terpilih.
     // ==========================================
-    const totalWeight = w_jarak + w_harga + w_fasilitas + w_rating;
+    const totalWeight = w_jarak + w_harga + w_reviews + w_rating;
     const safeTotalWeight = totalWeight === 0 ? 1 : totalWeight;
 
     const weights = {
       jarak: w_jarak / safeTotalWeight,
       harga: w_harga / safeTotalWeight,
-      fasilitas: w_fasilitas / safeTotalWeight,
+      reviews: w_reviews / safeTotalWeight,
       rating: w_rating / safeTotalWeight,
     };
 

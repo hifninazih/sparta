@@ -16,7 +16,6 @@ import {
   DialogFooter, 
   DialogHeader, 
   DialogTitle, 
-  DialogTrigger 
 } from "@/components/core/dialog";
 import { Button } from "@/components/core/button"; 
 import { Input } from "@/components/core/input";
@@ -25,11 +24,8 @@ import { Textarea } from "@/components/core/textarea";
 import { 
   MapPin, 
   Plus, 
-  Pencil, 
   Trash2, 
   Loader2, 
-  Search,
-  RefreshCw,
   Star,
   Banknote,
   Navigation
@@ -42,14 +38,23 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { SearchSection } from "@/components/admin/SearchSection";
 import { ActionButtons } from "@/components/admin/ActionButtons";
 import { FormField } from "@/components/core/form-field";
+import { WISATA_CATEGORIES } from "@/lib/wisata-categories";
+
+// Opsi kategori untuk dropdown — hilangkan "Semua" karena tidak valid sebagai nilai data
+const KATEGORI_OPTIONS = WISATA_CATEGORIES.filter((k) => k !== "Semua");
+
 
 interface Wisata {
-  id: string;
+  gid: number;
   name: string;
   category: string;
   price: number;
   rating: number;
-  all_facility: string;
+  reviews: number;
+  address: string;
+  phone: string;
+  link: string;
+  maps_link: string;
   lng: number;
   lat: number;
 }
@@ -58,7 +63,6 @@ export default function WisataManagementPage() {
   const { 
     wisata, 
     fetchWisata,
-    isWisataLoaded, 
     isLoading,
     addWisata, 
     updateWisata, 
@@ -75,7 +79,11 @@ export default function WisataManagementPage() {
     category: "",
     price: 0,
     rating: 4.0,
-    all_facility: "",
+    reviews: 0,
+    address: "",
+    phone: "",
+    link: "",
+    maps_link: "",
     lng: 110.3695,
     lat: -7.7956,
   });
@@ -84,7 +92,6 @@ export default function WisataManagementPage() {
     fetchWisata();
   }, [fetchWisata]);
 
-  // ... rest of handlers
   const handleOpenAdd = () => {
     setSelectedItem(null);
     setFormData({
@@ -92,7 +99,11 @@ export default function WisataManagementPage() {
       category: "",
       price: 0,
       rating: 4.5,
-      all_facility: "",
+      reviews: 0,
+      address: "",
+      phone: "",
+      link: "",
+      maps_link: "",
       lng: 110.3695,
       lat: -7.7956,
     });
@@ -106,7 +117,11 @@ export default function WisataManagementPage() {
       category: item.category,
       price: item.price,
       rating: item.rating,
-      all_facility: item.all_facility,
+      reviews: item.reviews,
+      address: item.address || "",
+      phone: item.phone || "",
+      link: item.link || "",
+      maps_link: item.maps_link || "",
       lng: item.lng,
       lat: item.lat,
     });
@@ -118,7 +133,7 @@ export default function WisataManagementPage() {
     setIsSubmitLoading(true);
 
     const url = selectedItem 
-      ? `/api/admin/wisata/${selectedItem.id}` 
+      ? `/api/admin/wisata/${selectedItem.gid}` 
       : "/api/admin/wisata";
     const method = selectedItem ? "PATCH" : "POST";
 
@@ -134,9 +149,9 @@ export default function WisataManagementPage() {
         toast.success(selectedItem ? "Data diperbarui" : "Wisata ditambahkan");
         setIsDialogOpen(false);
         if (selectedItem) {
-          updateWisata(data); // Optimistic update
+          updateWisata(data);
         } else {
-          addWisata(data); // Optimistic update
+          addWisata(data);
         }
       } else {
         const err = await res.json();
@@ -149,12 +164,12 @@ export default function WisataManagementPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (gid: number) => {
     try {
-      const res = await fetch(`/api/admin/wisata/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/wisata/${gid}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("Data dihapus");
-        removeWisata(id); // Optimistic update
+        removeWisata(gid.toString());
       } else {
         toast.error("Gagal menghapus");
       }
@@ -163,13 +178,10 @@ export default function WisataManagementPage() {
     }
   };
 
-
-  // Client-side filtering for blazing fast search
   const filteredData = wisata.filter(item => 
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
 
   return (
     <div className="p-6 sm:p-10 space-y-6">
@@ -222,10 +234,10 @@ export default function WisataManagementPage() {
             </TableRow>
           ) : (
             filteredData.map((item) => (
-              <TableRow key={item.id}>
+              <TableRow key={item.gid}>
                 <TableCell>
                   <div className="font-bold text-slate-800">{item.name}</div>
-                  <div className="text-[10px] font-mono text-slate-400 uppercase tracking-widest mt-0.5">ID: {item.id}</div>
+                  <div className="text-[10px] font-mono text-slate-400 uppercase tracking-widest mt-0.5">GID: {item.gid}</div>
                 </TableCell>
                 <TableCell>
                   <div className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-300 text-[10px] font-black uppercase w-fit">
@@ -237,13 +249,13 @@ export default function WisataManagementPage() {
                 </TableCell>
                 <TableCell className="text-center">
                   <div className="flex items-center justify-center gap-1 text-amber-500 font-black">
-                    <Star className="h-3 w-3 fill-amber-500" /> {item.rating}
+                    <Star className="h-3 w-3 fill-amber-500" /> {parseFloat(item.rating as any).toFixed(2)}
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
                   <ActionButtons 
                     onEdit={() => handleOpenEdit(item)}
-                    onDelete={() => handleDelete(item.id)}
+                    onDelete={() => handleDelete(item.gid)}
                     deleteTitle="Hapus Destinasi?"
                     deleteDescription={`Apakah Anda yakin ingin menghapus ${item.name}? Data ini akan hilang permanen dari sistem.`}
                   />
@@ -254,22 +266,12 @@ export default function WisataManagementPage() {
         </TableBody>
       </Table>
 
-      {/* Form Dialog */}
       <Dialog 
         open={isDialogOpen} 
         onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) {
             setSelectedItem(null);
-            setFormData({
-              name: "",
-              category: "",
-              price: 0,
-              rating: 4.5,
-              all_facility: "",
-              lng: 110.3695,
-              lat: -7.7956,
-            });
           }
         }}
       >
@@ -282,7 +284,6 @@ export default function WisataManagementPage() {
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-            {/* Kiri: Atribut Data */}
             <div className="space-y-4">
               <FormField id="name" label="Nama Destinasi">
                 <Input 
@@ -292,16 +293,21 @@ export default function WisataManagementPage() {
                   onChange={e => setFormData({...formData, name: e.target.value})}
                 />
               </FormField>
+              <FormField id="category" label="Kategori">
+                <select
+                  id="category"
+                  required
+                  value={formData.category}
+                  onChange={e => setFormData({...formData, category: e.target.value})}
+                  className="w-full rounded-md border-2 border-black bg-white px-3 py-2 text-sm font-semibold outline-none transition-shadow focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                >
+                  <option value="" disabled>Pilih kategori...</option>
+                  {KATEGORI_OPTIONS.map((k) => (
+                    <option key={k} value={k}>{k}</option>
+                  ))}
+                </select>
+              </FormField>
               <div className="grid grid-cols-2 gap-4">
-                <FormField id="category" label="Kategori">
-                  <Input 
-                    id="category" 
-                    placeholder="Alam, Budaya, dll"
-                    required 
-                    value={formData.category}
-                    onChange={e => setFormData({...formData, category: e.target.value})}
-                  />
-                </FormField>
                 <FormField id="rating" label="Rating (1-5)">
                   <Input 
                     id="rating" 
@@ -315,6 +321,15 @@ export default function WisataManagementPage() {
                     onChange={e => setFormData({...formData, rating: parseFloat(e.target.value)})}
                   />
                 </FormField>
+                <FormField id="reviews" label="Jumlah Ulasan">
+                  <Input 
+                    id="reviews" 
+                    type="number" 
+                    required 
+                    value={formData.reviews}
+                    onChange={e => setFormData({...formData, reviews: parseInt(e.target.value)})}
+                  />
+                </FormField>
               </div>
               <FormField id="price" label="Harga Tiket (Rp)">
                 <Input 
@@ -326,18 +341,39 @@ export default function WisataManagementPage() {
                   onChange={e => setFormData({...formData, price: parseInt(e.target.value)})}
                 />
               </FormField>
-              <FormField id="facilities" label="Fasilitas (Pisahkan dengan koma)">
+              <FormField id="address" label="Alamat">
                 <Textarea 
-                  id="facilities" 
-                  placeholder="Toilet, Parkir, Mushola, dll"
-                  rows={3}
-                  value={formData.all_facility}
-                  onChange={e => setFormData({...formData, all_facility: e.target.value})}
+                  id="address" 
+                  rows={2}
+                  value={formData.address}
+                  onChange={e => setFormData({...formData, address: e.target.value})}
+                />
+              </FormField>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField id="phone" label="No. Telepon">
+                  <Input 
+                    id="phone" 
+                    value={formData.phone}
+                    onChange={e => setFormData({...formData, phone: e.target.value})}
+                  />
+                </FormField>
+                <FormField id="link" label="Website/Link">
+                  <Input 
+                    id="link" 
+                    value={formData.link}
+                    onChange={e => setFormData({...formData, link: e.target.value})}
+                  />
+                </FormField>
+              </div>
+              <FormField id="maps_link" label="Link Google Maps">
+                <Input 
+                  id="maps_link" 
+                  value={formData.maps_link}
+                  onChange={e => setFormData({...formData, maps_link: e.target.value})}
                 />
               </FormField>
             </div>
 
-            {/* Kanan: Lokasi / Peta */}
             <div className="space-y-4">
               <Label className="flex items-center gap-2 font-bold text-black border-none shadow-none">
                 <Navigation className="h-4 w-4 text-blue-600" /> Lokasi Geografis

@@ -1,12 +1,12 @@
 import { create } from "zustand";
 
 export interface WisataRecommendation {
-  id: string;
+  gid: number;
   name: string;
   category: string;
   price: number;
   rating: number;
-  all_facility: string;
+  reviews: number;
   lng: number;
   lat: number;
   distance_m: number;
@@ -16,12 +16,12 @@ export interface WisataRecommendation {
 interface RecommendationState {
   recommendations: WisataRecommendation[];
   isLoading: boolean;
-  activeWisataId: string | null; // Untuk efek highlight saat di-hover
+  activeWisataId: number | null; // Untuk efek highlight saat di-hover
   mobileSnap: number | string | null; // Track posisi drawer mobile
 
   setRecommendations: (data: WisataRecommendation[]) => void;
   setIsLoading: (loading: boolean) => void;
-  setActiveWisataId: (id: string | null) => void;
+  setActiveWisataId: (id: number | null) => void;
   setMobileSnap: (snap: number | string | null) => void;
   clearRecommendations: () => void;
 }

@@ -9,12 +9,16 @@ interface User {
 }
 
 interface Wisata {
-  id: string;
+  gid: number;
   name: string;
   category: string;
   price: number;
   rating: number;
-  all_facility: string;
+  reviews: number;
+  address: string;
+  phone: string;
+  link: string;
+  maps_link: string;
   lng: number;
   lat: number;
 }
@@ -39,7 +43,7 @@ interface AdminState {
   
   addWisata: (wisata: Wisata) => void;
   updateWisata: (wisata: Wisata) => void;
-  removeWisata: (id: string) => void;
+  removeWisata: (gid: string) => void;
 
   clearStore: () => void; // Call this on logout
 }
@@ -98,10 +102,10 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   addWisata: (wisata) => set((state) => ({ wisata: [wisata, ...state.wisata] })),
   updateWisata: (wisata) => set((state) => ({
-    wisata: state.wisata.map((w) => (w.id === wisata.id ? wisata : w))
+    wisata: state.wisata.map((w) => (w.gid === wisata.gid ? wisata : w))
   })),
-  removeWisata: (id) => set((state) => ({
-    wisata: state.wisata.filter((w) => w.id !== id)
+  removeWisata: (gid) => set((state) => ({
+    wisata: state.wisata.filter((w) => w.gid.toString() !== gid)
   })),
 
   clearStore: () => set({ users: [], wisata: [], isUsersLoaded: false, isWisataLoaded: false }),

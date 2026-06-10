@@ -24,14 +24,14 @@ export default function SearchAreaResultMarker() {
         // --- LOGIKA ANTI-DUPLIKAT (Hapus titik hijau jika sudah ada titik oranye) ---
         .filter((wisata) => {
           if (!selectedPlace) return true;
-          return selectedPlace.id !== `local-${wisata.id}`;
+          return selectedPlace.gid !== `local-${wisata.gid}`;
         })
         .map((wisata) => {
           const isZoomedIn = viewState.zoom >= 13;
 
           return (
             <Marker
-              key={`search-${wisata.id}`}
+              key={`search-${wisata.gid}`}
               longitude={wisata.lng}
               latitude={wisata.lat}
               anchor="bottom"

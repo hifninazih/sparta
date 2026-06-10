@@ -61,7 +61,7 @@ export default function LandingPage() {
               </h1>
               
               <p className="mt-10 max-w-2xl text-lg font-medium text-slate-700 sm:text-xl border-l-4 border-blue-600 pl-6 text-left mx-auto">
-                SPARTA menggunakan algoritma <strong className="text-black bg-[#DCFFBC] px-1">Simple Additive Weighting (SAW)</strong> untuk memberikan rekomendasi wisata yang paling akurat berdasarkan prioritas jarak, harga, dan fasilitas Anda.
+                SPARTA menggunakan algoritma <strong className="text-black bg-[#DCFFBC] px-1">Simple Additive Weighting (SAW)</strong> untuk memberikan rekomendasi wisata yang paling akurat berdasarkan prioritas jarak, harga, dan ulasan (reviews) Anda.
               </p>
               
               <div className="mt-12 flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-6">

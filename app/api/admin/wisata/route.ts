@@ -18,9 +18,9 @@ export async function GET(request: NextRequest) {
     try {
       const query = `
         SELECT 
-          id, name, category, price, rating, all_facility,
+          gid, name, category, price, rating, reviews, address, phone, link, maps_link,
           ST_X(geom) as lng, ST_Y(geom) as lat
-        FROM wisata_diy
+        FROM wisata
         WHERE name ILIKE $1 OR category ILIKE $1
         ORDER BY name ASC
         LIMIT 100
@@ -43,28 +43,23 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { name, category, price, rating, all_facility, lng, lat } = await request.json();
+    const { 
+      name, category, price, rating, reviews, address, phone, link, maps_link, lng, lat 
+    } = await request.json();
     
     if (!name || !category || lng === undefined || lat === undefined) {
       return NextResponse.json({ message: "Field wajib (nama, kategori, koordinat) tidak boleh kosong" }, { status: 400 });
     }
 
-    const id = generateId();
-    
-    // Parse comma-separated string into a JSON array
-    const facilityArray = typeof all_facility === 'string' 
-      ? all_facility.split(",").map(f => f.trim()).filter(Boolean) 
-      : (Array.isArray(all_facility) ? all_facility : []);
-
     const client = await pool.connect();
     try {
       const query = `
-        INSERT INTO wisata_diy (id, name, category, price, rating, all_facility, geom)
-        VALUES ($1, $2, $3, $4, $5, $6, ST_SetSRID(ST_MakePoint($7, $8), 4326))
-        RETURNING id, name, category, price, rating, all_facility, ST_X(geom) as lng, ST_Y(geom) as lat
+        INSERT INTO wisata (name, category, price, rating, reviews, address, phone, link, maps_link, latitude, longitude, geom)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, ST_SetSRID(ST_MakePoint($11, $10), 4326))
+        RETURNING gid, name, category, price, rating, reviews, address, phone, link, maps_link, ST_X(geom) as lng, ST_Y(geom) as lat
       `;
       const result = await client.query(query, [
-        id, name, category, price, rating, JSON.stringify(facilityArray), lng, lat
+        name, category, price || 0, rating || 0, reviews || 0, address, phone, link, maps_link, lat, lng
       ]);
       return NextResponse.json(result.rows[0]);
     } finally {

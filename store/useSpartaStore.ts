@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 interface SpartaState {
-  bobot: { rating: number; fasilitas: number; harga: number; jarak: number };
+  bobot: { rating: number; reviews: number; harga: number; jarak: number };
   userLocation: [number, number] | null;
   isLoading: boolean;
   geojsonData: any | null; // Hasil kalkulasi rute & SAW
@@ -15,7 +15,7 @@ interface SpartaState {
 }
 
 export const useSpartaStore = create<SpartaState>((set) => ({
-  bobot: { rating: 25, fasilitas: 25, harga: 25, jarak: 25 },
+  bobot: { rating: 25, reviews: 25, harga: 25, jarak: 25 },
   userLocation: null,
   isLoading: false,
   geojsonData: null,

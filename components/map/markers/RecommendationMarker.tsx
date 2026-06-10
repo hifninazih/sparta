@@ -29,7 +29,7 @@ export default function RecommendationMarker() {
 
         return (
           <Marker
-            key={`saw-${wisata.id}`}
+            key={`saw-${wisata.gid}`}
             longitude={wisata.lng}
             latitude={wisata.lat}
             anchor="bottom"

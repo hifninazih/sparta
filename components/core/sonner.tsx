@@ -8,6 +8,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme="light"
+      position="top-center"
       className="toaster group"
       icons={{
         success: <CircleCheckIcon className="size-6 text-black" />,
@@ -19,7 +20,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         unstyled: true,
         classNames: {
-          toast: "group toast w-full flex items-center gap-4 p-4 rounded-xl border-2 border-black font-black text-sm shadow-[6px_6px_0px_rgba(0,0,0,1)] mb-2",
+          toast: "group toast w-full flex items-center gap-4 p-4 rounded-xl border-2 border-black bg-white font-black text-sm shadow-[6px_6px_0px_rgba(0,0,0,1)] mb-2",
           title: "text-black leading-tight group-data-[type=error]:text-white group-data-[type=info]:text-white",
           description: "text-black/60 font-bold text-xs group-data-[type=error]:text-white/80 group-data-[type=info]:text-white/80",
           actionButton: "group-[.toast]:bg-black group-[.toast]:text-white border-2 border-black p-2 rounded-lg text-xs transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none shadow-[2px_2px_0px_rgba(0,0,0,1)]",
