@@ -123,7 +123,7 @@ export function PreferensiDialog() {
         setIsLoadingGPS(false);
       },
       (error) => {
-        console.error("Gagal:", error);
+        console.warn("Gagal mendapatkan lokasi:", error.message || error.code);
         toast.error("Gagal mengakses lokasi", {
           description: "Pastikan izin lokasi sudah diberikan di browser Anda.",
         });

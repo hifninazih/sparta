@@ -94,7 +94,7 @@ export default function MapControlPanel() {
         });
       },
       (error) => {
-        console.error("Gagal mendapatkan lokasi:", error);
+        console.warn("Akses lokasi ditolak atau gagal:", error.message || error.code);
         setIsLocating(false);
         toast.dismiss(toastId);
         toast.error("Gagal mengakses lokasi", {
