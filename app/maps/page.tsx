@@ -3,7 +3,7 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import Map, { MapProvider, MapLayerMouseEvent } from "@vis.gl/react-maplibre";
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect, useState } from "react";
 
 // Style dan icon
 import { CircleQuestionMark } from "lucide-react";
@@ -53,6 +53,19 @@ export default function Maps() {
     useWizardStore();
   const { recommendations, mobileSnap, setMobileSnap } = useRecommendationStore();
   const { selectedCategories, executeSearch, isSearching } = useSearchStore();
+  const [showLoading, setShowLoading] = useState(false);
+
+  // Mencegah flickering loading indicator pada koneksi cepat (hanya tampil jika request > 250ms)
+  useEffect(() => {
+    if (isSearching) {
+      const timer = setTimeout(() => {
+        setShowLoading(true);
+      }, 250);
+      return () => clearTimeout(timer);
+    } else {
+      setShowLoading(false);
+    }
+  }, [isSearching]);
 
   // --- DEBOUNCE SEMI-LIVE SEARCH (selalu aktif) ---
   const liveSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -158,7 +171,7 @@ export default function Maps() {
         </Map>
 
         {/* Loading Indicator (Pill) di Tengah Atas */}
-        {isSearching && (
+        {showLoading && (
           <div
             style={{ zIndex: Z.searchAreaBtn }}
             className="absolute top-24 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border-2 border-black bg-[#DCFFBC] px-3.5 py-1.5 text-xs font-black shadow-[2px_2px_0px_rgba(0,0,0,1)] animate-in fade-in slide-in-from-top-2 duration-200"
