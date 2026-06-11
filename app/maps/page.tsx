@@ -2,7 +2,7 @@
 "use client";
 
 import "maplibre-gl/dist/maplibre-gl.css";
-import Map, { MapProvider, MapLayerMouseEvent } from "@vis.gl/react-maplibre";
+import Map, { MapProvider, MapLayerMouseEvent, MapRef } from "@vis.gl/react-maplibre";
 import { useRef, useCallback, useEffect, useState } from "react";
 
 // Style dan icon
@@ -68,16 +68,16 @@ export default function Maps() {
     }
   }, [isSearching]);
 
+  const mapRef = useRef<MapRef | null>(null);
+
   // --- DEBOUNCE SEMI-LIVE SEARCH (selalu aktif) ---
   const liveSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const liveRef = useRef({
-    viewState,
     selectedCategories,
     executeSearch,
     recommendations,
   });
   liveRef.current = {
-    viewState,
     selectedCategories,
     executeSearch,
     recommendations,
@@ -87,24 +87,24 @@ export default function Maps() {
     if (liveSearchTimer.current) clearTimeout(liveSearchTimer.current);
 
     liveSearchTimer.current = setTimeout(async () => {
-      const { viewState, selectedCategories, executeSearch, recommendations } =
+      const { selectedCategories, executeSearch, recommendations } =
         liveRef.current;
 
       // Jangan jalankan search area jika sedang ada rekomendasi (SAW) aktif
       if (recommendations.length > 0) return;
 
-      const { longitude, latitude, zoom } = viewState;
+      const map = mapRef.current?.getMap();
+      if (!map) return;
 
-      const degPerPixel = 360 / (256 * Math.pow(2, zoom));
-      const halfW = degPerPixel * (window.innerWidth / 2);
-      const halfH = degPerPixel * (window.innerHeight / 2);
+      const bounds = map.getBounds();
+      const bbox = {
+        minLng: bounds.getWest(),
+        minLat: bounds.getSouth(),
+        maxLng: bounds.getEast(),
+        maxLat: bounds.getNorth(),
+      };
 
-      await executeSearch("", selectedCategories, {
-        minLng: longitude - halfW,
-        minLat: latitude - halfH,
-        maxLng: longitude + halfW,
-        maxLat: latitude + halfH,
-      });
+      await executeSearch("", selectedCategories, bbox);
     }, 200);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -156,6 +156,7 @@ export default function Maps() {
     <div className="relative h-dvh w-full overflow-hidden bg-slate-100">
       <MapProvider>
         <Map
+          ref={mapRef}
           id="sparta-map"
           initialViewState={viewState}
           maxZoom={maxZoom}
@@ -164,6 +165,7 @@ export default function Maps() {
             setViewState(e.viewState);
             triggerLiveSearch();
           }}
+          onLoad={triggerLiveSearch}
           onClick={handleMapClick}
           onDragStart={handleMapInteraction}
           onZoomStart={handleMapInteraction}
