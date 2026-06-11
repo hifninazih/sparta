@@ -3,6 +3,7 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import Map, { MapProvider, MapLayerMouseEvent } from "@vis.gl/react-maplibre";
+import { useRef, useCallback, useEffect } from "react";
 
 // Style dan icon
 import { CircleQuestionMark } from "lucide-react";
@@ -18,7 +19,6 @@ import { RecommendationResult } from "@/components/shared/recommendation-result"
 // Komponen jadi
 import BasemapsToggle from "@/components/map/BasemapsToggle";
 import MapControlPanel from "@/components/map/MapControlPanel";
-import SearchThisAreaButton from "@/components/map/SearchThisAreaButton";
 import GlobalSearch from "@/components/search/global-search";
 
 // Marker komponen
@@ -52,15 +52,48 @@ export default function Maps() {
   const { isPickingLocation, setIsPickingLocation, setIsOpen, setStep } =
     useWizardStore();
   const { recommendations, mobileSnap, setMobileSnap } = useRecommendationStore();
-  const { isSearching, setShowSearchAreaBtn, showSearchAreaBtn } =
-    useSearchStore();
+  const { selectedCategories, executeSearch, isSearching } = useSearchStore();
+
+  // --- DEBOUNCE SEMI-LIVE SEARCH (selalu aktif) ---
+  const liveSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const liveRef = useRef({ viewState, selectedCategories, executeSearch, recommendations });
+  liveRef.current = { viewState, selectedCategories, executeSearch, recommendations };
+
+  const triggerLiveSearch = useCallback(() => {
+    if (liveSearchTimer.current) clearTimeout(liveSearchTimer.current);
+
+    liveSearchTimer.current = setTimeout(async () => {
+      const { viewState, selectedCategories, executeSearch, recommendations } = liveRef.current;
+      
+      // Jangan jalankan search area jika sedang ada rekomendasi (SAW) aktif
+      if (recommendations.length > 0) return;
+
+      const { longitude, latitude, zoom } = viewState;
+
+      const degPerPixel = 360 / (256 * Math.pow(2, zoom));
+      const halfW = degPerPixel * (window.innerWidth / 2) * 1.2;
+      const halfH = degPerPixel * (window.innerHeight / 2) * 1.2;
+
+      await executeSearch("", selectedCategories, {
+        minLng: longitude - halfW,
+        minLat: latitude - halfH,
+        maxLng: longitude + halfW,
+        maxLat: latitude + halfH,
+      });
+    }, 800);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Jalankan pencarian live saat mount pertama kali ATAU ketika kategori terpilih berubah
+  useEffect(() => {
+    if (recommendations.length > 0) return;
+    triggerLiveSearch();
+  }, [selectedCategories, recommendations.length, triggerLiveSearch]);
 
   const handleMapInteraction = () => {
     // Jika mobile dan drawer sedang terbuka (ada rekomendasi), turunkan ke snap TERENDAH (0.25)
     if (!isDesktop && recommendations.length > 0 && mobileSnap !== null) {
       setMobileSnap(0.25);
     }
-    setShowSearchAreaBtn(true);
   };
 
   const handleMapClick = (event: MapLayerMouseEvent) => {
@@ -97,7 +130,10 @@ export default function Maps() {
           initialViewState={viewState}
           maxZoom={maxZoom}
           minZoom={minZoom}
-          onMove={(e) => setViewState(e.viewState)}
+          onMove={(e) => {
+            setViewState(e.viewState);
+            triggerLiveSearch();
+          }}
           onClick={handleMapClick}
           onDragStart={handleMapInteraction}
           onZoomStart={handleMapInteraction}
@@ -121,24 +157,26 @@ export default function Maps() {
           <SelectedSuggestionMarker />
         </Map>
 
+        {/* Loading Indicator (Pill) di Tengah Atas */}
+        {isSearching && (
+          <div
+            style={{ zIndex: Z.searchAreaBtn }}
+            className="absolute top-24 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border-2 border-black bg-[#DCFFBC] px-3.5 py-1.5 text-xs font-black shadow-[2px_2px_0px_rgba(0,0,0,1)] animate-in fade-in slide-in-from-top-2 duration-200"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-black"></span>
+            </span>
+            <span className="text-black uppercase tracking-widest text-[9px] font-black">
+              Menelusuri Area...
+            </span>
+          </div>
+        )}
+
         {/* Hasil Rekomendasi (Z-INDEX: recommendationPanel = 20) */}
         <RecommendationResult />
 
-        {/* =========================================
-            PANEL ATAS — TENGAH
-        ========================================= */}
-        {/* Tombol "Telusuri area ini" — muncul saat user drag/zoom & belum ada rekomendasi */}
-        <div
-          style={{ zIndex: Z.searchAreaBtn }}
-          className={cn(
-            "absolute top-20 left-1/2 -translate-x-1/2 transition-all duration-300 lg:top-6",
-            (showSearchAreaBtn || isSearching) && recommendations.length === 0
-              ? "pointer-events-auto translate-y-0 opacity-100"
-              : "pointer-events-none -translate-y-10 opacity-0",
-          )}
-        >
-          <SearchThisAreaButton />
-        </div>
+
 
         {/* =========================================
             PANEL ATAS — DESKTOP

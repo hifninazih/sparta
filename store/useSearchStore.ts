@@ -18,17 +18,15 @@ export interface WisataSearchResult {
 
 interface SearchState {
   keyword: string;
-  // Multi-select kategori — array kosong = "Semua" (tidak difilter)
+  // Multi-select kategori — array kosong = tidak difilter
   selectedCategories: WisataCategory[];
   results: WisataSearchResult[];
   isSearching: boolean;
-  showSearchAreaBtn: boolean;
 
   setKeyword: (keyword: string) => void;
   setSelectedCategories: (cats: WisataCategory[]) => void;
   setResults: (results: WisataSearchResult[]) => void;
   setIsSearching: (status: boolean) => void;
-  setShowSearchAreaBtn: (status: boolean) => void;
 
   executeSearch: (
     keyword: string,
@@ -38,27 +36,34 @@ interface SearchState {
   clearSearch: () => void;
 }
 
+// Menyimpan AbortController aktif untuk membatalkan request in-flight jika ada pencarian baru
+let activeAbortController: AbortController | null = null;
+
 export const useSearchStore = create<SearchState>((set) => ({
   keyword: "",
-  selectedCategories: [], // kosong = semua
+  selectedCategories: [],
   results: [],
   isSearching: false,
-  showSearchAreaBtn: false,
 
   setKeyword: (keyword) => set({ keyword }),
   setSelectedCategories: (cats) => set({ selectedCategories: cats }),
   setResults: (results) => set({ results }),
   setIsSearching: (status) => set({ isSearching: status }),
-  setShowSearchAreaBtn: (status) => set({ showSearchAreaBtn: status }),
 
   executeSearch: async (keyword, categories, bbox) => {
+    // Batalkan request sebelumnya jika masih berjalan
+    if (activeAbortController) {
+      activeAbortController.abort();
+    }
+    activeAbortController = new AbortController();
+    const { signal } = activeAbortController;
+
     set({ isSearching: true, keyword, selectedCategories: categories });
 
     try {
       const params = new URLSearchParams();
       if (keyword) params.append("s", keyword);
 
-      // Kirim setiap kategori sebagai param "c" yang diulang
       categories.forEach((cat) => {
         params.append("c", cat);
       });
@@ -70,16 +75,21 @@ export const useSearchStore = create<SearchState>((set) => ({
         params.append("maxLat", bbox.maxLat.toString());
       }
 
-      const response = await fetch(`/api/wisata?${params.toString()}`);
+      const response = await fetch(`/api/wisata?${params.toString()}`, { signal });
       const data: WisataSearchResult[] = await response.json();
 
       set({ results: data, isSearching: false });
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === "AbortError") {
+        // Abaikan error pembatalan
+        return;
+      }
       console.error("Gagal mencari wisata", error);
       set({ isSearching: false });
     }
   },
 
   clearSearch: () =>
-    set({ keyword: "", selectedCategories: [], results: [], showSearchAreaBtn: false }),
+    set({ keyword: "", selectedCategories: [], results: [] }),
 }));
+
