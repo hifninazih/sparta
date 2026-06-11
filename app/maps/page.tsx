@@ -96,8 +96,8 @@ export default function Maps() {
       const { longitude, latitude, zoom } = viewState;
 
       const degPerPixel = 360 / (256 * Math.pow(2, zoom));
-      const halfW = degPerPixel * (window.innerWidth / 2) * 1.2;
-      const halfH = degPerPixel * (window.innerHeight / 2) * 1.2;
+      const halfW = degPerPixel * (window.innerWidth / 2) * 1.1;
+      const halfH = degPerPixel * (window.innerHeight / 2) * 1.1;
 
       await executeSearch("", selectedCategories, {
         minLng: longitude - halfW,
