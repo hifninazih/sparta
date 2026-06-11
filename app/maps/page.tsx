@@ -51,7 +51,8 @@ export default function Maps() {
   } = useMapStore();
   const { isPickingLocation, setIsPickingLocation, setIsOpen, setStep } =
     useWizardStore();
-  const { recommendations, mobileSnap, setMobileSnap } = useRecommendationStore();
+  const { recommendations, mobileSnap, setMobileSnap } =
+    useRecommendationStore();
   const { selectedCategories, executeSearch, isSearching } = useSearchStore();
   const [showLoading, setShowLoading] = useState(false);
 
@@ -60,7 +61,7 @@ export default function Maps() {
     if (isSearching) {
       const timer = setTimeout(() => {
         setShowLoading(true);
-      }, 250);
+      }, 150);
       return () => clearTimeout(timer);
     } else {
       setShowLoading(false);
@@ -69,15 +70,26 @@ export default function Maps() {
 
   // --- DEBOUNCE SEMI-LIVE SEARCH (selalu aktif) ---
   const liveSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const liveRef = useRef({ viewState, selectedCategories, executeSearch, recommendations });
-  liveRef.current = { viewState, selectedCategories, executeSearch, recommendations };
+  const liveRef = useRef({
+    viewState,
+    selectedCategories,
+    executeSearch,
+    recommendations,
+  });
+  liveRef.current = {
+    viewState,
+    selectedCategories,
+    executeSearch,
+    recommendations,
+  };
 
   const triggerLiveSearch = useCallback(() => {
     if (liveSearchTimer.current) clearTimeout(liveSearchTimer.current);
 
     liveSearchTimer.current = setTimeout(async () => {
-      const { viewState, selectedCategories, executeSearch, recommendations } = liveRef.current;
-      
+      const { viewState, selectedCategories, executeSearch, recommendations } =
+        liveRef.current;
+
       // Jangan jalankan search area jika sedang ada rekomendasi (SAW) aktif
       if (recommendations.length > 0) return;
 
@@ -93,7 +105,7 @@ export default function Maps() {
         maxLng: longitude + halfW,
         maxLat: latitude + halfH,
       });
-    }, 800);
+    }, 200);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Jalankan pencarian live saat mount pertama kali ATAU ketika kategori terpilih berubah
@@ -128,12 +140,17 @@ export default function Maps() {
   // Toleransi floating point untuk perbandingan snap
   const currentSnap = Number(mobileSnap) || 0;
   // Snap Full: 0.9
-  const isSnapFull = !isDesktop && recommendations.length > 0 && currentSnap >= 0.8;
+  const isSnapFull =
+    !isDesktop && recommendations.length > 0 && currentSnap >= 0.8;
   // Snap Mid: 0.6
   const isSnapMid =
-    !isDesktop && recommendations.length > 0 && currentSnap > 0.4 && currentSnap < 0.8;
+    !isDesktop &&
+    recommendations.length > 0 &&
+    currentSnap > 0.4 &&
+    currentSnap < 0.8;
   // Snap Low: 0.25
-  const isSnapLow = !isDesktop && recommendations.length > 0 && currentSnap <= 0.4;
+  const isSnapLow =
+    !isDesktop && recommendations.length > 0 && currentSnap <= 0.4;
 
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-slate-100">
@@ -174,13 +191,13 @@ export default function Maps() {
         {showLoading && (
           <div
             style={{ zIndex: Z.searchAreaBtn }}
-            className="absolute top-24 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border-2 border-black bg-[#DCFFBC] px-3.5 py-1.5 text-xs font-black shadow-[2px_2px_0px_rgba(0,0,0,1)] animate-in fade-in slide-in-from-top-2 duration-200"
+            className="animate-in fade-in slide-in-from-top-2 absolute top-24 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border-2 border-black bg-[#DCFFBC] px-3.5 py-1.5 text-xs font-black shadow-[2px_2px_0px_rgba(0,0,0,1)] duration-200"
           >
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-black"></span>
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-black opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-black"></span>
             </span>
-            <span className="text-black uppercase tracking-widest text-[9px] font-black">
+            <span className="text-[9px] font-black tracking-widest text-black uppercase">
               Menelusuri Area...
             </span>
           </div>
@@ -188,8 +205,6 @@ export default function Maps() {
 
         {/* Hasil Rekomendasi (Z-INDEX: recommendationPanel = 20) */}
         <RecommendationResult />
-
-
 
         {/* =========================================
             PANEL ATAS — DESKTOP
@@ -247,7 +262,9 @@ export default function Maps() {
           style={{ zIndex: Z.mapControls }}
           className={cn(
             "absolute bottom-10 left-4 flex flex-col items-end gap-5 transition-all duration-300",
-            recommendations.length > 0 ? "pointer-events-none opacity-0" : "opacity-100",
+            recommendations.length > 0
+              ? "pointer-events-none opacity-0"
+              : "opacity-100",
           )}
         >
           <PreferensiDialog />
