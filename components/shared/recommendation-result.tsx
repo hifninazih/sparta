@@ -55,7 +55,7 @@ export function RecommendationResult() {
       padding: isDesktop
         ? { left: 384, top: 0, bottom: 0, right: 0 }
         : {
-            bottom: window.innerHeight * (Number(mobileSnap) || 0.6),
+            bottom: window.innerHeight * SNAP_POINTS[1], // Menargetkan posisi 0.6 saat drawer turun
             top: 80,
             left: 0,
             right: 0,
@@ -206,8 +206,6 @@ export function RecommendationResult() {
     >
       <DrawerContent
         className="h-[85vh] shadow-[0px_-4px_0px_rgba(0,0,0,1)]"
-        onPointerDownOutside={(e) => e.preventDefault()}
-        onInteractOutside={(e) => e.preventDefault()}
       >
         <DrawerHeader className="flex touch-none flex-row items-center justify-between pb-4 text-left">
           <div>
