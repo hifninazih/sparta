@@ -28,6 +28,7 @@ import { useWizardStore } from "@/store/useWizardStore";
 import { useRecommendationStore } from "@/store/useRecommendationStore";
 import { useMapStore } from "@/store/useMapStore";
 import { useSearchStore } from "@/store/useSearchStore";
+import { useTourStore } from "@/store/useTourStore";
 import { useState } from "react";
 import { toast } from "sonner";
 import { WisataCategory } from "@/lib/wisata-categories";
@@ -98,6 +99,7 @@ export function PreferensiDialog() {
   const { setUserLocation, selectedLocation, setSelectedLocation } =
     useMapStore();
   const { setRecommendations, setIsLoading } = useRecommendationStore();
+  const { run, stepIndex, nextStep: tourNextStep } = useTourStore();
 
   const [isLoadingGPS, setIsLoadingGPS] = useState(false);
 
@@ -150,6 +152,10 @@ export function PreferensiDialog() {
     setIsOpen(false);
     setIsLoading(true);
 
+    if (run && useTourStore.getState().stepIndex === 5) {
+      tourNextStep();
+    }
+
     try {
       // Kirim kategori terpilih ke API.
       // Array kosong artinya "Semua" — API tidak akan memfilter.
@@ -173,6 +179,11 @@ export function PreferensiDialog() {
 
       if (result.success) {
         setRecommendations(result.data);
+        if (run && useTourStore.getState().stepIndex === 6) {
+          setTimeout(() => {
+            tourNextStep();
+          }, 600);
+        }
       }
 
       setStep(1);
@@ -201,7 +212,15 @@ export function PreferensiDialog() {
         : `${selectedCategories.length} kategori`;
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      setIsOpen(open);
+      const currentStep = useTourStore.getState().stepIndex;
+      if (open && run && currentStep === 4) {
+        tourNextStep();
+      } else if (!open && run && currentStep === 5) {
+        useTourStore.getState().setStepIndex(4);
+      }
+    }}>
       <DialogTrigger asChild>
         <Button variant={"gradient"} size={"lg"} startIcon={<MapPinSearch />}>
           Rekomendasi Wisata

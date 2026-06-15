@@ -7,10 +7,12 @@ import { useRecommendationStore } from "@/store/useRecommendationStore";
 import { Marker } from "@vis.gl/react-maplibre";
 import { WisataMarkerPopover } from "../WisataPopup";
 import { getCategoryColor } from "@/lib/wisata-categories";
+import { useTourStore } from "@/store/useTourStore";
 
 export default function RecommendationMarker() {
   const { recommendations } = useRecommendationStore();
   const { viewState, activeWisata, setActiveWisata } = useMapStore();
+  const { run, stepIndex, nextStep: tourNextStep } = useTourStore();
 
   if (!recommendations || recommendations.length === 0) return null;
 
@@ -45,10 +47,12 @@ export default function RecommendationMarker() {
             <WisataMarkerPopover
               wisata={wisata}
               isOpen={isOpen}
-              onOpenChange={(open) => setActiveWisata(open ? wisata : null)}
+              onOpenChange={(open) => {
+                setActiveWisata(open ? wisata : null);
+              }}
             >
               <div 
-                className="relative z-10 flex cursor-pointer flex-col items-center justify-center hover:scale-110 transition-transform"
+                className={cn("relative z-10 flex cursor-pointer flex-col items-center justify-center hover:scale-110 transition-transform", index === 0 && "tour-map-marker")}
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
               >

@@ -9,15 +9,13 @@ import {
   Step,
   TooltipRenderProps,
 } from "react-joyride";
-import { useTheme } from "next-themes";
 import { Button } from "@/components/core/button";
 import { X } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useRecommendationStore } from "@/store/useRecommendationStore";
+import { useTourStore } from "@/store/useTourStore";
 
-interface MapsTourProps {
-  run: boolean;
-  setRun: (run: boolean) => void;
-}
+interface MapsTourProps {}
 
 function CustomTooltip({
   index,
@@ -34,7 +32,7 @@ function CustomTooltip({
   return (
     <div
       {...tooltipProps}
-      className="flex w-full max-w-sm flex-col gap-0 overflow-hidden rounded-md border-2 border-black bg-white shadow-[2px_2px_0px_rgba(0,0,0,1)] dark:bg-slate-800"
+      className="sparta-tour-tooltip flex w-full max-w-sm flex-col gap-0 overflow-hidden rounded-md border-2 border-black bg-white shadow-[2px_2px_0px_rgba(0,0,0,1)]"
     >
       <div className="relative p-6 pr-8 pb-2">
         {step.title && (
@@ -62,49 +60,52 @@ function CustomTooltip({
             key={i}
             className={`h-1.5 rounded-full transition-all duration-300 ${
               i === index
-                ? "w-6 bg-black dark:bg-white"
+                ? "w-6 bg-black"
                 : i < index
-                  ? "w-3 bg-black/40 dark:bg-white/40"
-                  : "w-3 bg-black/15 dark:bg-white/15"
+                  ? "w-3 bg-black/40"
+                  : "w-3 bg-black/15"
             }`}
           />
         ))}
       </div>
 
       {/* --- FOOTER NAVIGASI --- */}
-      <div className="flex flex-row items-center border-t-2 border-black bg-slate-100 p-4 sm:justify-between dark:bg-slate-900">
-        <div
-          className={`flex w-full ${isFirstStep ? "justify-end" : "justify-between"}`}
-        >
-          {!isFirstStep && (
+      {!(step.buttons && step.buttons.length === 0) && (
+        <div className="flex flex-row items-center border-t-2 border-black bg-slate-100 p-4 sm:justify-between">
+          <div
+            className={`flex w-full ${isFirstStep ? "justify-end" : "justify-between"}`}
+          >
+            {!isFirstStep && (
+              <Button
+                {...backProps}
+                variant="outline"
+                size={"rect"}
+                className="font-bold"
+              >
+                Sebelumnya
+              </Button>
+            )}
+
             <Button
-              {...backProps}
-              variant="outline"
+              {...primaryProps}
+              variant="gradient"
               size={"rect"}
               className="font-bold"
             >
-              Sebelumnya
+              {isLastStep ? "Selesai" : "Selanjutnya"}
             </Button>
-          )}
-
-          <Button
-            {...primaryProps}
-            variant="gradient"
-            size={"rect"}
-            className="font-bold"
-          >
-            {isLastStep ? "Selesai" : "Selanjutnya"}
-          </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
 
-export default function MapsTour({ run, setRun }: MapsTourProps) {
-  const { theme } = useTheme();
+export default function MapsTour({}: MapsTourProps) {
   const [mounted, setMounted] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 640px)");
+  const { run, setRun, stepIndex, setStepIndex } = useTourStore();
+  const { clearRecommendations } = useRecommendationStore();
 
   useEffect(() => {
     setMounted(true);
@@ -114,27 +115,18 @@ export default function MapsTour({ run, setRun }: MapsTourProps) {
     }
   }, [setRun]);
 
+  useEffect(() => {
+    if (run && stepIndex === 0) {
+      clearRecommendations();
+    }
+  }, [run, stepIndex, clearRecommendations]);
+
   const steps: Step[] = [
     {
       target: "body",
       title: "Selamat Datang!",
       content: "Mari kita lihat fitur-fitur yang tersedia di sistem ini.",
       placement: "center",
-      skipBeacon: true,
-    },
-    {
-      target: isDesktop ? ".tour-search-desktop" : ".tour-search-mobile",
-      title: "Pencarian",
-      content:
-        "Gunakan kotak pencarian ini untuk mencari lokasi, tempat wisata, atau tempat tertentu.",
-      placement: "bottom",
-    },
-    {
-      target: ".tour-preferensi-btn",
-      title: "Rekomendasi Wisata",
-      content:
-        "Klik tombol ini untuk mendapatkan rekomendasi wisata terbaik berdasarkan preferensi Anda.",
-      placement: "top-start",
     },
     {
       target: ".tour-map-controls",
@@ -145,26 +137,84 @@ export default function MapsTour({ run, setRun }: MapsTourProps) {
     },
     {
       target: ".tour-basemaps-toggle",
-      title: "Tampilan Peta",
+      title: "Peta Dasar",
       content:
         "Anda bisa mengubah tampilan peta menjadi mode peta jalan atau satelit melalui tombol ini.",
       placement: "left",
     },
     {
-      target: isDesktop ? ".tour-panduan-desktop" : ".tour-panduan-mobile",
-      title: "Butuh Bantuan?",
-      content: "Kapan pun Anda butuh bantuan lagi, klik tombol Panduan ini.",
+      target: isDesktop ? ".tour-search-desktop" : ".tour-search-mobile",
+      title: "Pencarian",
+      content:
+        "Gunakan kotak pencarian ini untuk mencari lokasi atau tempat wisata tertentu secara manual.",
       placement: "bottom",
+    },
+    {
+      target: ".tour-preferensi-btn",
+      title: "Rekomendasi Wisata",
+      content:
+        "Klik tombol ini untuk memulai pencarian rekomendasi wisata cerdas berdasarkan preferensi Anda.",
+      placement: "top-start",
+      buttons: [],
+    },
+    {
+      target: "[role='dialog']",
+      title: "Wizard Rekomendasi",
+      content:
+        "Isi form ini. Untuk melanjutkan tour dengan mulus, gunakan fitur GPS ('Lokasi Saya') lalu tekan 'Cari Wisata'.",
+      placement: "right",
+      buttons: [],
+    },
+    {
+      target: ".tour-loading-spinner",
+      title: "Mengkalkulasi...",
+      content:
+        "Sistem sedang menghitung rekomendasi terbaik menggunakan metode SAW berdasarkan preferensi Anda.",
+      placement: "right",
+      hideOverlay: true,
+      buttons: [],
+    },
+    {
+      target: ".tour-recommendation-container",
+      title: "10 Top Rekomendasi",
+      content:
+        "Ini adalah daftar 10 rekomendasi wisata terbaik yang paling sesuai dengan preferensi Anda, diurutkan dari skor tertinggi.",
+      placement: "right",
+    },
+    {
+      target: ".tour-result-item",
+      title: "Pilih Hasil",
+      content:
+        "Klik pada hasil nomor 1 ini untuk melihat lokasinya secara otomatis di peta.",
+      placement: "right",
+      buttons: [],
+    },
+    {
+      target: ".sparta-popup",
+      title: "Informasi Detail",
+      content:
+        "Popup ini berisi informasi detail wisata. Anda juga dapat menekan 'Rute ke Sini' untuk membuka navigasi.",
+      placement: "right",
+    },
+    {
+      target: isDesktop ? ".tour-panduan-desktop" : ".tour-panduan-mobile",
+      title: "Panduan",
+      content:
+        "Kapan pun Anda butuh bantuan lagi, klik tombol Panduan ini. Tur selesai!",
+      placement: "bottom" as const,
     },
   ];
 
   const handleJoyrideCallback = (data: EventData) => {
-    const { status } = data;
+    const { status, type, index, action } = data;
     const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
 
     if (finishedStatuses.includes(status)) {
       setRun(false);
+      setStepIndex(0);
       localStorage.setItem("sparta_maps_tour_seen", "true");
+    } else if (type === "step:after") {
+      setStepIndex(index + (action === "prev" ? -1 : 1));
     }
   };
 
@@ -172,19 +222,22 @@ export default function MapsTour({ run, setRun }: MapsTourProps) {
 
   return (
     <Joyride
+      stepIndex={stepIndex}
       onEvent={handleJoyrideCallback}
       continuous
       run={run}
-      scrollToFirstStep
-      steps={steps}
-      tooltipComponent={CustomTooltip}
       options={{
+        skipScroll: true,
+        overlayClickAction: false,
+        skipBeacon: true,
         zIndex: 10000,
         primaryColor: "#000",
-        backgroundColor: theme === "dark" ? "#1f2937" : "#ffffff",
-        textColor: theme === "dark" ? "#f3f4f6" : "#111827",
-        arrowColor: theme === "dark" ? "#1f2937" : "#ffffff",
+        backgroundColor: "#ffffff",
+        textColor: "#111827",
+        arrowColor: "#ffffff"
       }}
+      steps={steps}
+      tooltipComponent={CustomTooltip}
     />
   );
 }

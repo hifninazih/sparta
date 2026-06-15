@@ -35,6 +35,7 @@ import { useMapStore } from "@/store/useMapStore";
 import { useWizardStore } from "@/store/useWizardStore";
 import { useRecommendationStore } from "@/store/useRecommendationStore";
 import { useSearchStore } from "@/store/useSearchStore";
+import { useTourStore } from "@/store/useTourStore";
 import MapCompass from "@/components/map/MapCompass";
 
 export default function Maps() {
@@ -55,8 +56,8 @@ export default function Maps() {
   const { recommendations, mobileSnap, setMobileSnap } =
     useRecommendationStore();
   const { selectedCategories, executeSearch, isSearching } = useSearchStore();
+  const { run: runTour, setRun: setRunTour } = useTourStore();
   const [showLoading, setShowLoading] = useState(false);
-  const [runTour, setRunTour] = useState(false);
 
   // Mencegah flickering loading indicator pada koneksi cepat (hanya tampil jika request > 250ms)
   useEffect(() => {
@@ -156,7 +157,7 @@ export default function Maps() {
 
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-slate-100">
-      <MapsTour run={runTour} setRun={setRunTour} />
+      <MapsTour />
       <MapProvider>
         <Map
           ref={mapRef}
@@ -175,6 +176,7 @@ export default function Maps() {
           style={{ width: "100%", height: "100%" }}
           mapStyle={isSatellite ? satelliteStyle : streetStyle}
           cursor={isPickingLocation ? "crosshair" : "grab"}
+          attributionControl={false}
         >
           {/* MARKER 1: LOKASI GPS */}
           <MarkerGPS />

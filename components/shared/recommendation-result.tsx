@@ -1,7 +1,7 @@
 // component/recommendation-result.tsx
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   useRecommendationStore,
   WisataRecommendation,
@@ -17,6 +17,8 @@ import {
   DrawerDescription,
 } from "@/components/shared/drawer";
 import { useMap } from "@vis.gl/react-maplibre";
+import { useTourStore } from "@/store/useTourStore";
+import { useMapStore } from "@/store/useMapStore";
 
 // Snap points yang konsisten: 25% (rendah), 60% (tengah), 90% (full)
 const SNAP_POINTS = [0.25, 0.6, 0.9];
@@ -31,6 +33,9 @@ export function RecommendationResult() {
     mobileSnap,
     setMobileSnap,
   } = useRecommendationStore();
+
+  const { run, stepIndex, nextStep: tourNextStep } = useTourStore();
+  const { setActiveWisata } = useMapStore();
 
   const { "sparta-map": spartaMap } = useMap();
 
@@ -84,7 +89,7 @@ export function RecommendationResult() {
 
   if (isLoading) {
     return (
-      <div className="absolute top-1/2 left-1/2 z-20 flex w-[90%] max-w-sm -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-xl border-2 border-black bg-white p-8 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+      <div className="tour-loading-spinner absolute top-1/2 left-1/2 z-20 flex w-[90%] max-w-sm -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-xl border-2 border-black bg-white p-8 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-black border-t-transparent"></div>
           <p className="text-sm font-bold">Mencari rekomendasi...</p>
@@ -97,7 +102,7 @@ export function RecommendationResult() {
 
   // Komponen list kartu wisata (reusable untuk desktop sidebar & mobile drawer)
   const ContentList = (
-    <div className="space-y-3">
+    <div className="tour-recommendation-list space-y-3">
       {recommendations.map((item, index) => (
         <div
           key={item.gid}
@@ -105,9 +110,15 @@ export function RecommendationResult() {
           onMouseLeave={() => isDesktop && setActiveWisataId(null)}
           onClick={() => {
             setActiveWisataId(item.gid);
+            setActiveWisata(item);
             handleWisataSelect(item);
             if (!isDesktop) {
               setMobileSnap(SNAP_POINTS[1]);
+            }
+            if (run && useTourStore.getState().stepIndex === 8) {
+              setTimeout(() => {
+                tourNextStep();
+              }, 1300);
             }
           }}
           className={cn(
@@ -116,6 +127,7 @@ export function RecommendationResult() {
             activeWisataId === item.gid
               ? "border-blue-600 bg-blue-50 shadow-[4px_4px_0px_rgba(0,0,0,1)]"
               : "",
+            index === 0 && "tour-result-item"
           )}
         >
           {/* Badge rank + skor */}
@@ -163,7 +175,13 @@ export function RecommendationResult() {
         </p>
       </div>
       <button
-        onClick={clearRecommendations}
+        onClick={() => {
+          clearRecommendations();
+          if (run) {
+            useTourStore.getState().setRun(false);
+            useTourStore.getState().setStepIndex(0);
+          }
+        }}
         className="rounded-md border-2 border-transparent p-1 transition-colors hover:border-black hover:bg-white"
       >
         <X className="size-5" strokeWidth={2.5} />
@@ -176,7 +194,7 @@ export function RecommendationResult() {
   // =====================
   if (isDesktop) {
     return (
-      <div className="absolute top-24 bottom-10 left-4 z-20 flex w-80 flex-col overflow-hidden rounded-xl border-2 border-black bg-slate-50 shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all lg:w-96">
+      <div className="tour-recommendation-container absolute top-24 bottom-10 left-4 z-20 flex w-80 flex-col overflow-hidden rounded-xl border-2 border-black bg-slate-50 shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all lg:w-96">
         {PanelHeader}
         <div className="flex-1 overflow-y-auto p-4">{ContentList}</div>
       </div>
@@ -196,7 +214,13 @@ export function RecommendationResult() {
     <Drawer
       open={recommendations.length > 0}
       onOpenChange={(open) => {
-        if (!open) clearRecommendations();
+        if (!open) {
+          clearRecommendations();
+          if (run) {
+            useTourStore.getState().setRun(false);
+            useTourStore.getState().setStepIndex(0);
+          }
+        }
       }}
       snapPoints={SNAP_POINTS}
       activeSnapPoint={mobileSnap}
@@ -205,7 +229,7 @@ export function RecommendationResult() {
       dismissible={false}
     >
       <DrawerContent
-        className="h-[85vh] shadow-[0px_-4px_0px_rgba(0,0,0,1)]"
+        className="tour-recommendation-container h-[85vh] shadow-[0px_-4px_0px_rgba(0,0,0,1)]"
       >
         <DrawerHeader className="flex touch-none flex-row items-center justify-between pb-4 text-left">
           <div>
@@ -215,7 +239,13 @@ export function RecommendationResult() {
             </DrawerDescription>
           </div>
           <button
-            onClick={clearRecommendations}
+            onClick={() => {
+              clearRecommendations();
+              if (run) {
+                useTourStore.getState().setRun(false);
+                useTourStore.getState().setStepIndex(0);
+              }
+            }}
             className="rounded-md border-2 border-transparent p-1 transition-colors hover:border-black hover:bg-gray-100"
           >
             <X className="size-5 text-black" strokeWidth={2.5} />

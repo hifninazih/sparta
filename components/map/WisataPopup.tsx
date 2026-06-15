@@ -35,9 +35,20 @@ export function WisataMarkerPopover({ wisata, isOpen, onOpenChange, children }: 
       <PopoverContent 
         side="top" 
         sideOffset={12} 
-        className="w-[320px] p-0 border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] rounded-xl overflow-hidden z-[100] bg-white"
+        className="sparta-popup w-[320px] p-0 border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] rounded-xl overflow-hidden z-[100] bg-white"
         onClick={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
+        onFocusOutside={(e) => {
+          // Cegah popover tertutup saat Joyride mengambil alih fokus
+          e.preventDefault();
+        }}
+        onInteractOutside={(e) => {
+          // Jangan tutup popover jika user berinteraksi dengan elemen Joyride (tooltip)
+          const target = e.target as HTMLElement;
+          if (target.closest('.react-joyride, .sparta-tour-tooltip')) {
+            e.preventDefault();
+          }
+        }}
       >
         <div className="flex w-full flex-col">
           {/* Header Image */}
