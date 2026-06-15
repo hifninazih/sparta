@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sparta 🏛️🌍
 
-## Getting Started
+**Sparta** adalah Sistem Informasi Geografis (WebGIS) modern berbasis web untuk mengelola dan memvisualisasikan data persebaran wisata dan statistik wilayah administrasi. Aplikasi ini dibangun dengan standar teknologi mutakhir dan mengusung antarmuka yang tegas, interaktif, serta elegan bergaya **Neo-Brutalism**.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Fitur Utama
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Dashboard Interaktif**: Menampilkan statistik data spasial menggunakan grafik *Pie Chart* interaktif (berbasis SVG murni) dan peringkat wilayah secara dinamis (Top Wisata & Top Kecamatan).
+- **Manajemen Pengguna Tingkat Lanjut**: Dilengkapi dengan *Role-Based Access Control* (Super Admin & Admin). Mendukung validasi formulir asinkron secara *real-time* (pengecekan username instan), fitur visibilitas *password* yang sinkron, serta keamanan sesi cerdas untuk mencegah penghapusan akun mandiri secara tak sengaja.
+- **Kecerdasan Spasial (GIS)**: Terintegrasi langsung dengan PostGIS untuk melakukan kueri spasial tingkat lanjut (seperti `ST_Intersects`), mencocokkan titik-titik kordinat wisata dengan poligon batas administrasi kabupaten/kecamatan secara presisi.
+- **Autentikasi & Keamanan Solid**: Menggunakan *stateless session* berbasis **JWT** (`jose`) di dalam *HTTP-only cookies*, enkripsi *password* menggunakan `bcryptjs`, dan perlindungan *route* di sisi server menggunakan Next.js Middleware.
+- **Desain UI/UX Premium**: Dibangun di atas Tailwind CSS dengan sistem desain kustom yang menonjolkan batas garis tegas, palet warna vibran, bayangan pekat (*hard drop-shadows*), serta *micro-animations* yang responsif.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router, Server Actions, API Routes)
+- **Bahasa Utama**: TypeScript, React
+- **Styling**: Tailwind CSS & Vanilla CSS
+- **Database**: PostgreSQL dengan ekstensi **PostGIS** (`pg`)
+- **State Management**: [Zustand](https://github.com/pmndrs/zustand)
+- **Ikonografi**: [Lucide React](https://lucide.dev/)
 
-## Learn More
+## ⚙️ Persiapan & Instalasi Lokal
 
-To learn more about Next.js, take a look at the following resources:
+1. **Clone Repositori**
+   ```bash
+   git clone https://github.com/hifninazih/sparta.git
+   cd sparta
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Instalasi Dependensi**
+   Pastikan Anda telah menginstal Node.js versi terbaru.
+   ```bash
+   npm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Konfigurasi Environment Variables**
+   Buat file bernama `.env` di *root* direktori proyek, lalu isi dengan konfigurasi database PostgreSQL lokal Anda:
+   ```env
+   DB_USER=postgres
+   DB_PASSWORD=password_db_anda
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=nama_database_sparta
+   JWT_SECRET=rahasia_jwt_acak_dan_panjang
+   ```
 
-## Deploy on Vercel
+4. **Jalankan Server**
+   ```bash
+   npm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+5. **Akses Aplikasi**
+   Aplikasi siap diakses melalui [http://localhost:3000](http://localhost:3000) di browser Anda.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📝 Catatan Struktur Database
+
+Agar semua fitur perhitungan spasial dan statistik wilayah berfungsi dengan baik, pastikan:
+- Ekstensi PostGIS telah diaktifkan di database Anda: `CREATE EXTENSION postgis;`.
+- Terdapat tabel spasial (seperti `wisata` untuk titik lokasi dan `administrasi_desa` untuk poligon wilayah) yang memiliki kolom `geom` dengan sistem koordinat yang valid.
+
+---
+
+*Dibangun dengan ❤️ untuk pemetaan cerdas berbasis web.*
