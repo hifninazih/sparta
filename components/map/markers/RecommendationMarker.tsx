@@ -9,6 +9,7 @@ import { WisataMarkerPopover } from "../WisataPopup";
 import { getCategoryColor } from "@/lib/wisata-categories";
 import { useTourStore } from "@/store/useTourStore";
 import { Z } from "@/lib/z-index";
+import { AnimatedMapMarker } from "../AnimatedMapMarker";
 
 export default function RecommendationMarker() {
   const { recommendations } = useRecommendationStore();
@@ -52,8 +53,8 @@ export default function RecommendationMarker() {
                 setActiveWisata(open ? wisata : null);
               }}
             >
-              <div 
-                className={cn("relative z-10 flex cursor-pointer flex-col items-center justify-center hover:scale-110 transition-transform animate-in fade-in zoom-in duration-300", index === 0 && "tour-map-marker")}
+              <AnimatedMapMarker 
+                className={cn("relative z-10 flex cursor-pointer flex-col items-center justify-center hover:scale-110 transition-transform", index === 0 && "tour-map-marker")}
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
               >
@@ -89,7 +90,7 @@ export default function RecommendationMarker() {
               {/* Batang Pin Kecil (Tetap ada sebagai penunjuk koordinat tanah) */}
               <div className="h-2 w-0.5 bg-black"></div>
               <div className="h-1 w-1 rounded-full bg-black"></div>
-            </div>
+            </AnimatedMapMarker>
             </WisataMarkerPopover>
           </Marker>
         );

@@ -10,6 +10,7 @@ import { Marker } from "@vis.gl/react-maplibre";
 import { WisataMarkerPopover } from "../WisataPopup";
 import { getCategoryColor } from "@/lib/wisata-categories";
 import { Z } from "@/lib/z-index";
+import { AnimatedMapMarker } from "../AnimatedMapMarker";
 
 export default function SearchAreaResultMarker() {
   const { recommendations } = useRecommendationStore();
@@ -47,8 +48,8 @@ export default function SearchAreaResultMarker() {
                 isOpen={isOpen}
                 onOpenChange={(open) => setActiveWisata(open ? wisata : null)}
               >
-                <div 
-                  className="relative z-10 flex cursor-pointer flex-col items-center hover:scale-110 transition-transform animate-in fade-in zoom-in duration-300"
+                <AnimatedMapMarker 
+                  className="relative z-10 flex cursor-pointer flex-col items-center hover:scale-110 transition-transform"
                   onClick={(e) => e.stopPropagation()}
                   onPointerDown={(e) => e.stopPropagation()}
                 >
@@ -79,7 +80,7 @@ export default function SearchAreaResultMarker() {
 
                 {/* Batang Pin Tipis */}
                 <div className="h-1.5 w-0.5 bg-black"></div>
-              </div>
+              </AnimatedMapMarker>
               </WisataMarkerPopover>
             </Marker>
           );
