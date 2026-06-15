@@ -14,6 +14,9 @@ export interface WisataSearchResult {
   maps_link?: string;
   lng: number;
   lat: number;
+  desa?: string;
+  kecamatan?: string;
+  kabupaten?: string;
 }
 
 interface SearchState {

@@ -66,7 +66,10 @@ export async function GET(request: NextRequest) {
         link,
         maps_link,
         ST_X(geom) as lng, 
-        ST_Y(geom) as lat 
+        ST_Y(geom) as lat,
+        (SELECT namobj FROM public.administrasi_desa d WHERE ST_Intersects(d.geom, wisata.geom) LIMIT 1) as desa,
+        (SELECT wadmkc FROM public.administrasi_desa d WHERE ST_Intersects(d.geom, wisata.geom) LIMIT 1) as kecamatan,
+        (SELECT wadmkk FROM public.administrasi_desa d WHERE ST_Intersects(d.geom, wisata.geom) LIMIT 1) as kabupaten
       FROM wisata 
       ${whereClause}
       ORDER BY rating DESC 
