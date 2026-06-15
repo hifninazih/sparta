@@ -8,6 +8,7 @@ import { Marker } from "@vis.gl/react-maplibre";
 import { MapPinSearch } from "lucide-react";
 import { WisataMarkerPopover } from "../WisataPopup";
 import { getCategoryColor } from "@/lib/wisata-categories";
+import { Z } from "@/lib/z-index";
 
 export default function SelectedSuggestionMarker() {
   const { selectedPlace } = useAutosuggestStore();
@@ -22,7 +23,7 @@ export default function SelectedSuggestionMarker() {
           longitude={selectedPlace.lng}
           latitude={selectedPlace.lat}
           anchor="bottom"
-          style={{ zIndex: activeWisata?.gid === selectedPlace.gid ? 100 : 3 }}
+          style={{ zIndex: activeWisata?.gid === selectedPlace.gid ? Z.mapPopup : 3 }}
         >
           <WisataMarkerPopover
             wisata={selectedPlace as any}

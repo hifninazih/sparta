@@ -8,6 +8,7 @@ import { useSearchStore } from "@/store/useSearchStore";
 import { Marker } from "@vis.gl/react-maplibre";
 import { WisataMarkerPopover } from "../WisataPopup";
 import { getCategoryColor } from "@/lib/wisata-categories";
+import { Z } from "@/lib/z-index";
 
 export default function SearchAreaResultMarker() {
   const { recommendations } = useRecommendationStore();
@@ -38,7 +39,7 @@ export default function SearchAreaResultMarker() {
               longitude={wisata.lng}
               latitude={wisata.lat}
               anchor="bottom"
-              style={{ zIndex: isOpen ? 100 : 1 }}
+              style={{ zIndex: isOpen ? Z.mapPopup : 1 }}
             >
               <WisataMarkerPopover
                 wisata={wisata}

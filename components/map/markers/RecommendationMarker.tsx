@@ -8,6 +8,7 @@ import { Marker } from "@vis.gl/react-maplibre";
 import { WisataMarkerPopover } from "../WisataPopup";
 import { getCategoryColor } from "@/lib/wisata-categories";
 import { useTourStore } from "@/store/useTourStore";
+import { Z } from "@/lib/z-index";
 
 export default function RecommendationMarker() {
   const { recommendations } = useRecommendationStore();
@@ -42,7 +43,7 @@ export default function RecommendationMarker() {
             longitude={wisata.lng}
             latitude={wisata.lat}
             anchor="bottom"
-            style={{ zIndex: isOpen ? 100 : 2 }}
+            style={{ zIndex: isOpen ? Z.mapPopup : 2 }}
           >
             <WisataMarkerPopover
               wisata={wisata}
