@@ -6,6 +6,7 @@ import { WisataSearchResult } from "@/store/useSearchStore";
 import { Button } from "@/components/core/button";
 import Image from "next/image";
 import { getCategoryColor } from "@/lib/wisata-categories";
+import { Z } from "@/lib/z-index";
 
 interface WisataMarkerPopoverProps {
   wisata: WisataSearchResult;
@@ -35,7 +36,8 @@ export function WisataMarkerPopover({ wisata, isOpen, onOpenChange, children }: 
       <PopoverContent 
         side="top" 
         sideOffset={12} 
-        className="sparta-popup w-[320px] p-0 border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] rounded-xl overflow-hidden z-[100] bg-white"
+        className="sparta-popup w-[320px] p-0 border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] rounded-xl overflow-hidden bg-white"
+        style={{ zIndex: Z.mapPopup }}
         onClick={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
         onFocusOutside={(e) => {

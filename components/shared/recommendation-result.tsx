@@ -113,7 +113,7 @@ export function RecommendationResult() {
             setActiveWisata(item);
             handleWisataSelect(item);
             if (!isDesktop) {
-              setMobileSnap(SNAP_POINTS[1]);
+              setMobileSnap(SNAP_POINTS[0]);
             }
             if (run && useTourStore.getState().stepIndex === 8) {
               setTimeout(() => {

@@ -14,6 +14,9 @@ export const Z = {
   /** Layer peta dasar */
   mapCanvas: 0,
 
+  /** Popup informasi wisata di atas peta (harus di bawah kontrol dan panel) */
+  mapPopup: 5,
+
   /** Kontrol peta: zoom, basemap toggle, compass, tombol rekomendasi */
   mapControls: 10,
 
