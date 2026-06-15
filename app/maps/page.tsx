@@ -19,6 +19,7 @@ import { RecommendationResult } from "@/components/shared/recommendation-result"
 // Komponen jadi
 import BasemapsToggle from "@/components/map/BasemapsToggle";
 import MapControlPanel from "@/components/map/MapControlPanel";
+import MapsTour from "@/components/map/MapsTour";
 import GlobalSearch from "@/components/search/global-search";
 
 // Marker komponen
@@ -55,6 +56,7 @@ export default function Maps() {
     useRecommendationStore();
   const { selectedCategories, executeSearch, isSearching } = useSearchStore();
   const [showLoading, setShowLoading] = useState(false);
+  const [runTour, setRunTour] = useState(false);
 
   // Mencegah flickering loading indicator pada koneksi cepat (hanya tampil jika request > 250ms)
   useEffect(() => {
@@ -154,6 +156,7 @@ export default function Maps() {
 
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-slate-100">
+      <MapsTour run={runTour} setRun={setRunTour} />
       <MapProvider>
         <Map
           ref={mapRef}
@@ -214,7 +217,7 @@ export default function Maps() {
         {/* Input pencarian desktop */}
         <div
           style={{ zIndex: Z.searchInput }}
-          className="absolute top-5 left-4 hidden w-full max-w-sm sm:block sm:w-80"
+          className="tour-search-desktop absolute top-5 left-4 hidden w-full max-w-sm sm:block sm:w-80"
         >
           <GlobalSearch />
         </div>
@@ -228,6 +231,8 @@ export default function Maps() {
             variant={"primary"}
             size={"rect"}
             startIcon={<CircleQuestionMark />}
+            className="tour-panduan-desktop"
+            onClick={() => setRunTour(true)}
           >
             <p>Panduan</p>
           </Button>
@@ -248,11 +253,15 @@ export default function Maps() {
           style={{ zIndex: Z.searchInput }}
           className="absolute top-0 left-1/2 flex w-full -translate-x-1/2 items-center justify-between gap-2 px-3 pt-4 sm:hidden"
         >
-          <GlobalSearch />
+          <div className="tour-search-mobile w-full">
+            <GlobalSearch />
+          </div>
           <Button
             variant={"primary"}
             size={"rect"}
             startIcon={<CircleQuestionMark />}
+            className="tour-panduan-mobile"
+            onClick={() => setRunTour(true)}
           />
         </div>
 
@@ -263,7 +272,7 @@ export default function Maps() {
         <div
           style={{ zIndex: Z.mapControls }}
           className={cn(
-            "absolute bottom-10 left-4 flex flex-col items-end gap-5 transition-all duration-300",
+            "tour-preferensi-btn absolute bottom-10 left-4 flex flex-col items-end gap-5 transition-all duration-300",
             recommendations.length > 0
               ? "pointer-events-none opacity-0"
               : "opacity-100",
@@ -276,7 +285,7 @@ export default function Maps() {
         <div
           style={{ zIndex: Z.mapControls }}
           className={cn(
-            "absolute right-4 flex flex-col items-end gap-5 transition-all duration-300 sm:bottom-40",
+            "tour-map-controls absolute right-4 flex flex-col items-end gap-5 transition-all duration-300 sm:bottom-40",
             isSnapFull ? "pointer-events-none opacity-0" : "opacity-100",
             recommendations.length > 0 && !isDesktop
               ? isSnapMid
@@ -294,7 +303,7 @@ export default function Maps() {
         <div
           style={{ zIndex: Z.mapControls }}
           className={cn(
-            "absolute right-4 flex flex-col items-end gap-5 transition-all duration-300",
+            "tour-basemaps-toggle absolute right-4 flex flex-col items-end gap-5 transition-all duration-300",
             isSnapFull ? "pointer-events-none opacity-0" : "opacity-100",
             recommendations.length > 0 && !isDesktop
               ? isSnapMid

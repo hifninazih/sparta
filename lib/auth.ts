@@ -1,8 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
 
-const secretKey = process.env.JWT_SECRET || "sparta_secret_key_1234567890_change_me";
+const secretKey =
+  process.env.JWT_SECRET || "sparta_secret_key_1234567890_change_me";
 const key = new TextEncoder().encode(secretKey);
 
 export async function encrypt(payload: any) {
@@ -20,16 +20,21 @@ export async function decrypt(input: string): Promise<any> {
   return payload;
 }
 
-export async function login(user: { id: string; username: string; full_name: string; role: string }) {
+export async function login(user: {
+  id: string;
+  username: string;
+  full_name: string;
+  role: string;
+}) {
   const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const session = await encrypt({ user, expires });
 
-  (await cookies()).set("session", session, { 
-    expires, 
+  (await cookies()).set("session", session, {
+    expires,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    path: "/"
+    path: "/",
   });
 }
 
