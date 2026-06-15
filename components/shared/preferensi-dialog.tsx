@@ -137,6 +137,12 @@ export function PreferensiDialog() {
 
   // --- FUNGSI 2: PILIH LOKASI MANUAL ---
   const handlePickLocation = () => {
+    if (run) {
+      toast.info("Panduan sedang berjalan", {
+        description: "Mohon gunakan 'Lokasi Saya' agar simulasi panduan berjalan dengan mulus.",
+      });
+      return;
+    }
     setIsOpen(false);
     setIsPickingLocation(true);
   };
