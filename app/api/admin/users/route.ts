@@ -34,19 +34,34 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { username, full_name, password, role } = await request.json();
+    const { username, full_name, password, confirmPassword, role } = await request.json();
     
     if (!username || !password || !full_name || !role) {
       return NextResponse.json({ message: "Semua field wajib diisi" }, { status: 400 });
     }
 
-    const id = generateId();
-    const hashedPassword = await bcrypt.hash(password, 10);
+    if (password !== confirmPassword) {
+      return NextResponse.json({ message: "Konfirmasi password tidak cocok" }, { status: 400 });
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return NextResponse.json({ message: "Password minimal 8 karakter, mengandung huruf besar, huruf kecil, dan angka" }, { status: 400 });
+    }
 
     const client = await pool.connect();
     try {
+      // Cek username ganda secara eksplisit
+      const checkUser = await client.query("SELECT id FROM users WHERE username = $1", [username]);
+      if (checkUser.rows.length > 0) {
+        return NextResponse.json({ message: "Username sudah digunakan" }, { status: 400 });
+      }
+
+      const id = generateId();
+      const hashedPassword = await bcrypt.hash(password, 10);
+
       const result = await client.query(
-        "INSERT INTO users (id, username, full_name, password, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, username, full_name, role",
+        "INSERT INTO users (id, username, full_name, password, role, created_at) VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '7 hours') RETURNING id, username, full_name, role, created_at",
         [id, username, full_name, hashedPassword, role]
       );
       return NextResponse.json(result.rows[0]);
@@ -56,7 +71,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("CREATE USER ERROR:", error);
     if (error.code === '23505') {
-      return NextResponse.json({ message: "Username already exists" }, { status: 400 });
+      return NextResponse.json({ message: "Username sudah digunakan" }, { status: 400 });
     }
     // Jika error karena tipe data id (masih integer di DB)
     if (error.code === '22P02') {

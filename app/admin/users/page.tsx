@@ -27,6 +27,7 @@ import {
 } from "@/components/core/select";
 import { Button } from "@/components/core/button"; 
 import { Input } from "@/components/core/input";
+import { PasswordInput } from "@/components/core/PasswordInput";
 import { Label } from "@/components/core/label";
 import { 
   Users, 
@@ -67,20 +68,111 @@ export default function UserManagementPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     username: "",
     full_name: "",
     password: "",
+    confirmPassword: "",
     role: "admin" as "admin" | "superadmin",
   });
 
+  const [formErrors, setFormErrors] = useState({
+    username: "",
+    password: "",
+    confirmPassword: ""
+  });
+
+  const [formSuccess, setFormSuccess] = useState({
+    username: ""
+  });
+
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+
+  // Debounced Username Check
+  useEffect(() => {
+    const checkUsername = async () => {
+      if (!formData.username || (selectedUser && formData.username === selectedUser.username)) {
+        setFormErrors(prev => ({ ...prev, username: "" }));
+        setFormSuccess(prev => ({ ...prev, username: "" }));
+        setIsCheckingUsername(false);
+        return;
+      }
+      
+      setIsCheckingUsername(true);
+      setFormSuccess(prev => ({ ...prev, username: "" })); // Reset success before checking
+      try {
+        const res = await fetch(`/api/admin/users/check-username?username=${encodeURIComponent(formData.username)}`);
+        const data = await res.json();
+        
+        if (data.exists) {
+          setFormErrors(prev => ({ ...prev, username: "Username sudah digunakan" }));
+          setFormSuccess(prev => ({ ...prev, username: "" }));
+        } else {
+          setFormErrors(prev => ({ ...prev, username: "" }));
+          setFormSuccess(prev => ({ ...prev, username: "Username tersedia!" }));
+        }
+      } catch (error) {
+        // Silently fail on network error during typing
+      } finally {
+        setIsCheckingUsername(false);
+      }
+    };
+
+    const delay = setTimeout(checkUsername, 500);
+    return () => clearTimeout(delay);
+  }, [formData.username, selectedUser]);
+
+  // Sync validation for passwords
+
+  useEffect(() => {
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    
+    setFormErrors(prev => {
+      const newErrors = { ...prev };
+      newErrors.password = "";
+      newErrors.confirmPassword = "";
+
+      if (formData.password && !passwordRegex.test(formData.password)) {
+        newErrors.password = "Min 8 karakter, ada huruf besar, huruf kecil, dan angka";
+      }
+      
+      if (formData.confirmPassword && formData.password !== formData.confirmPassword) {
+        newErrors.confirmPassword = "Konfirmasi password tidak cocok";
+      }
+
+      return newErrors;
+    });
+  }, [formData.password, formData.confirmPassword]);
+
   useEffect(() => {
     fetchUsers();
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.id) {
+          setCurrentUser(data);
+        }
+      })
+      .catch(() => {});
   }, [fetchUsers]);
 
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Konfirmasi password tidak cocok");
+      return;
+    }
+
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      toast.error("Password minimal 8 karakter, mengandung huruf besar, huruf kecil, dan angka");
+      return;
+    }
+
     setIsSubmitLoading(true);
     try {
       const res = await fetch("/api/admin/users", {
@@ -92,7 +184,8 @@ export default function UserManagementPage() {
       if (res.ok) {
         toast.success("User berhasil ditambahkan");
         setIsAddDialogOpen(false);
-        setFormData({ username: "", full_name: "", password: "", role: "admin" });
+        setShowPassword(false);
+        setFormData({ username: "", full_name: "", password: "", confirmPassword: "", role: "admin" });
         addUser(data); // Optimistic update via Zustand
       } else {
         toast.error(data.message || "Gagal menambah user");
@@ -163,7 +256,8 @@ export default function UserManagementPage() {
           onOpenChange={(open) => {
             setIsAddDialogOpen(open);
             if (!open) {
-              setFormData({ username: "", full_name: "", password: "", role: "admin" });
+              setShowPassword(false);
+              setFormData({ username: "", full_name: "", password: "", confirmPassword: "", role: "admin" });
             }
           }}
         >
@@ -180,13 +274,23 @@ export default function UserManagementPage() {
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleAddUser} className="space-y-4 pt-4">
-              <FormField id="username" label="Username">
+              <FormField 
+                id="username" 
+                label="Username" 
+                error={formErrors.username} 
+                success={formSuccess.username}
+                description={isCheckingUsername ? "Mengecek ketersediaan..." : undefined}
+              >
                 <Input 
                   id="username" 
                   placeholder="admin_wisata" 
                   required 
                   value={formData.username}
-                  onChange={e => setFormData({...formData, username: e.target.value})}
+                  onChange={e => {
+                    setFormData({...formData, username: e.target.value});
+                    setFormErrors(prev => ({ ...prev, username: "" }));
+                    setFormSuccess(prev => ({ ...prev, username: "" }));
+                  }}
                 />
               </FormField>
               <FormField id="full_name" label="Nama Lengkap">
@@ -198,14 +302,26 @@ export default function UserManagementPage() {
                   onChange={e => setFormData({...formData, full_name: e.target.value})}
                 />
               </FormField>
-              <FormField id="password" label="Password">
-                <Input 
+              <FormField id="password" label="Password" error={formErrors.password}>
+                <PasswordInput 
                   id="password" 
-                  type="password" 
                   autoComplete="new-password"
                   required 
                   value={formData.password}
                   onChange={e => setFormData({...formData, password: e.target.value})}
+                  visible={showPassword}
+                  onVisibleChange={setShowPassword}
+                />
+              </FormField>
+              <FormField id="confirmPassword" label="Konfirmasi Password" error={formErrors.confirmPassword}>
+                <PasswordInput 
+                  id="confirmPassword" 
+                  autoComplete="new-password"
+                  required 
+                  value={formData.confirmPassword}
+                  onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
+                  visible={showPassword}
+                  onVisibleChange={setShowPassword}
                 />
               </FormField>
               <FormField id="role" label="Role">
@@ -223,7 +339,11 @@ export default function UserManagementPage() {
                 </Select>
               </FormField>
               <DialogFooter className="pt-4">
-                <Button variant="gradient" className="w-full font-bold" disabled={isSubmitLoading}>
+                <Button 
+                  variant="gradient" 
+                  className="w-full font-bold" 
+                  disabled={isSubmitLoading || isCheckingUsername || Object.values(formErrors).some(err => err !== "")}
+                >
                   {isSubmitLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Simpan Akun"}
                 </Button>
               </DialogFooter>
@@ -276,9 +396,12 @@ export default function UserManagementPage() {
                   </div>
                 </TableCell>
                 <TableCell className="text-slate-500 text-xs font-bold">
-                  {new Date(user.created_at).toLocaleDateString('id-ID', {
-                    day: 'numeric', month: 'short', year: 'numeric'
-                  })}
+                  {user.created_at && !isNaN(new Date(user.created_at).getTime()) ? (
+                    new Date(user.created_at).toLocaleString('id-ID', {
+                      day: 'numeric', month: 'short', year: 'numeric',
+                      hour: '2-digit', minute: '2-digit'
+                    }) + ' WIB'
+                  ) : '-'}
                 </TableCell>
                 <TableCell className="text-right">
                   <ActionButtons 
@@ -288,12 +411,14 @@ export default function UserManagementPage() {
                         username: user.username,
                         full_name: user.full_name,
                         password: "",
+                        confirmPassword: "",
                         role: user.role
                       });
+                      setShowPassword(false);
                       setIsEditDialogOpen(true);
                     }}
                     onDelete={() => handleDeleteUser(user.id)}
-                    isProtected={user.role === "superadmin"}
+                    isProtected={currentUser ? user.id === currentUser.id : false}
                     deleteTitle="Hapus Pengguna?"
                     deleteDescription={`Apakah Anda yakin ingin menghapus ${user.full_name}? Tindakan ini tidak dapat dibatalkan.`}
                   />
@@ -305,7 +430,13 @@ export default function UserManagementPage() {
       </Table>
 
       {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <Dialog 
+        open={isEditDialogOpen} 
+        onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) setShowPassword(false);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-bold text-lg">Edit Akun Admin</DialogTitle>
@@ -314,12 +445,22 @@ export default function UserManagementPage() {
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEditUser} className="space-y-4 pt-4">
-            <FormField id="edit_username" label="Username">
+            <FormField 
+              id="edit_username" 
+              label="Username" 
+              error={formErrors.username}
+              success={formSuccess.username}
+              description={isCheckingUsername ? "Mengecek ketersediaan..." : undefined}
+            >
               <Input 
                 id="edit_username" 
                 required 
                 value={formData.username}
-                onChange={e => setFormData({...formData, username: e.target.value})}
+                onChange={e => {
+                  setFormData({...formData, username: e.target.value});
+                  setFormErrors(prev => ({ ...prev, username: "" }));
+                  setFormSuccess(prev => ({ ...prev, username: "" }));
+                }}
               />
             </FormField>
             <FormField id="edit_full_name" label="Nama Lengkap">
@@ -330,16 +471,30 @@ export default function UserManagementPage() {
                 onChange={e => setFormData({...formData, full_name: e.target.value})}
               />
             </FormField>
-            <FormField id="edit_password" label="Password Baru (Opsional)" description="Isi jika ingin ganti password">
-              <Input 
+            <FormField id="edit_password" label="Password Baru (Opsional)" description="Isi jika ingin ganti password" error={formErrors.password}>
+              <PasswordInput 
                 id="edit_password" 
-                type="password" 
                 autoComplete="new-password"
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={e => setFormData({...formData, password: e.target.value})}
+                visible={showPassword}
+                onVisibleChange={setShowPassword}
               />
             </FormField>
+            {formData.password && (
+              <FormField id="edit_confirm_password" label="Konfirmasi Password Baru" error={formErrors.confirmPassword}>
+                <PasswordInput 
+                  id="edit_confirm_password" 
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  value={formData.confirmPassword}
+                  onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
+                  visible={showPassword}
+                  onVisibleChange={setShowPassword}
+                />
+              </FormField>
+            )}
             <FormField id="edit_role" label="Role">
               <Select 
                 value={formData.role} 
@@ -355,7 +510,11 @@ export default function UserManagementPage() {
               </Select>
             </FormField>
             <DialogFooter className="pt-4">
-              <Button variant="primary" className="w-full font-bold" disabled={isSubmitLoading}>
+              <Button 
+                variant="primary" 
+                className="w-full font-bold" 
+                disabled={isSubmitLoading || isCheckingUsername || Object.values(formErrors).some(err => err !== "")}
+              >
                 {isSubmitLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Perbarui Akun"}
               </Button>
             </DialogFooter>
