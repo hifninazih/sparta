@@ -53,43 +53,38 @@ export default function RecommendationMarker() {
               }}
             >
               <div 
-                className={cn("relative z-10 flex cursor-pointer flex-col items-center justify-center hover:scale-110 transition-transform", index === 0 && "tour-map-marker")}
+                className={cn("relative z-10 flex cursor-pointer flex-col items-center justify-center hover:scale-110 transition-transform animate-in fade-in zoom-in duration-300", index === 0 && "tour-map-marker")}
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
               >
-              {isZoomedIn ? (
-                /* --- TAMPILAN ZOOM DEKAT (TINGGI): Angka Rank + Nama --- */
                 <div 
-                  className="flex h-7 items-center overflow-hidden rounded-full border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)]"
-                  style={{ backgroundColor: getCategoryColor(wisata.category) }}
+                  className={cn(
+                    "flex items-center overflow-hidden rounded-full border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all duration-300 ease-out origin-center",
+                    isZoomedIn ? "h-7" : "h-6"
+                  )}
+                  style={{ backgroundColor: isZoomedIn ? getCategoryColor(wisata.category) : "" }}
                 >
                   {/* Kotak Angka (kiri) */}
                   <div
                     className={cn(
-                      "flex h-full shrink-0 items-center justify-center border-r-2 border-black px-2 text-xs font-black",
+                      "flex shrink-0 items-center justify-center font-black transition-all duration-300 ease-out",
+                      isZoomedIn ? "h-full w-7 border-r-2 border-black text-xs" : "h-full w-6 text-xs",
                       pinColor,
                     )}
-                    style={customStyle}
+                    style={!isZoomedIn && pinColor === "" ? { backgroundColor: getCategoryColor(wisata.category) } : customStyle}
                   >
                     {index + 1}
                   </div>
                   {/* Teks Nama (kanan) */}
-                  <span className="max-w-40 truncate px-2 text-[12px] font-bold text-black">
+                  <span 
+                    className={cn(
+                      "truncate font-bold text-black transition-all duration-300 ease-out",
+                      isZoomedIn ? "max-w-[160px] opacity-100 px-2 text-[12px]" : "max-w-0 opacity-0 px-0 text-[0px]"
+                    )}
+                  >
                     {wisata.name}
                   </span>
                 </div>
-              ) : (
-                /* --- TAMPILAN ZOOM JAUH (RENDAH): Hanya Angka Rank --- */
-                <div
-                  className={cn(
-                    "flex h-6 w-6 items-center justify-center rounded-full border-2 border-black text-xs font-black shadow-[2px_2px_0px_rgba(0,0,0,1)]",
-                    pinColor,
-                  )}
-                  style={customStyle}
-                >
-                  {index + 1}
-                </div>
-              )}
 
               {/* Batang Pin Kecil (Tetap ada sebagai penunjuk koordinat tanah) */}
               <div className="h-2 w-0.5 bg-black"></div>

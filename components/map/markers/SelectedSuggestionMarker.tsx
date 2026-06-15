@@ -31,7 +31,7 @@ export default function SelectedSuggestionMarker() {
             onOpenChange={(open) => setActiveWisata(open ? selectedPlace : null)}
           >
             <div 
-              className="group animate-in fade-in slide-in-from-top-4 relative z-50 flex cursor-pointer flex-col items-center duration-300"
+              className="relative z-10 flex cursor-pointer flex-col items-center hover:scale-110 transition-transform animate-in fade-in zoom-in duration-300"
               onClick={(e) => e.stopPropagation()}
               onPointerDown={(e) => e.stopPropagation()}
             >
