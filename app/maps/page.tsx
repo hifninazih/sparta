@@ -3,7 +3,7 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 import Map, { MapProvider, MapLayerMouseEvent, MapRef, Source, Layer } from "@vis.gl/react-maplibre";
-import { useRef, useCallback, useEffect, useState } from "react";
+import { useRef, useCallback, useEffect, useState, useMemo } from "react";
 
 // Style dan icon
 import { CircleQuestionMark } from "lucide-react";
@@ -156,6 +156,11 @@ export default function Maps() {
   const isSnapLow =
     !isDesktop && recommendations.length > 0 && currentSnap <= 0.4;
 
+  const terrainProps = useMemo(
+    () => ({ source: "sparta-terrain", exaggeration: isSatellite ? 1.5 : 0 }),
+    [isSatellite]
+  );
+
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-slate-100">
       <MapsTour />
@@ -167,7 +172,7 @@ export default function Maps() {
           maxZoom={maxZoom}
           minZoom={minZoom}
           maxBounds={maxBounds}
-          onMove={(e) => {
+          onMoveEnd={(e) => {
             setViewState(e.viewState);
             triggerLiveSearch();
           }}
@@ -177,7 +182,7 @@ export default function Maps() {
           onZoomStart={handleMapInteraction}
           style={{ width: "100%", height: "100%" }}
           mapStyle={isSatellite ? satelliteStyle : streetStyle}
-          terrain={{ source: "sparta-terrain", exaggeration: isSatellite ? 1.5 : 0 }}
+          terrain={terrainProps as any}
           cursor={isPickingLocation ? "crosshair" : "grab"}
           attributionControl={false}
         >
