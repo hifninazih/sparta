@@ -28,7 +28,6 @@ import InitialMarker from "@/components/map/markers/InitialMarker";
 import RecommendationMarker from "@/components/map/markers/RecommendationMarker";
 import SearchAreaResultMarker from "@/components/map/markers/SearchAreaResultMarker";
 import SelectedSuggestionMarker from "@/components/map/markers/SelectedSuggestionMarker";
-import ProvBoundaryLayer from "@/components/map/markers/ProvBoundaryLayer";
 
 // Store
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -206,9 +205,6 @@ export default function Maps() {
 
           {/* MARKER 5: Hasil search query */}
           <SelectedSuggestionMarker />
-
-          {/* LAYER 6: Batas Wilayah DIY */}
-          <ProvBoundaryLayer />
         </Map>
 
         {/* Loading Indicator (Pill) di Tengah Atas */}
