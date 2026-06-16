@@ -9,9 +9,20 @@ import {
   MapPin,
   CheckCircle2,
   XCircle,
-  Tag
+  Tag,
+  Mountain,
+  Trees,
+  Waves,
+  Coffee,
+  Utensils,
+  ShoppingBag,
+  Tent,
+  Camera,
+  Landmark,
+  Car
 } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 import { PageHeader } from "@/components/admin/PageHeader";
 import { SearchSection } from "@/components/admin/SearchSection";
@@ -34,6 +45,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/core/dialog";
+
+const AVAILABLE_ICONS = [
+  { name: "MapPin", component: MapPin },
+  { name: "Mountain", component: Mountain },
+  { name: "Trees", component: Trees },
+  { name: "Waves", component: Waves },
+  { name: "Tent", component: Tent },
+  { name: "Coffee", component: Coffee },
+  { name: "Utensils", component: Utensils },
+  { name: "ShoppingBag", component: ShoppingBag },
+  { name: "Camera", component: Camera },
+  { name: "Landmark", component: Landmark },
+  { name: "Car", component: Car },
+];
 
 export default function CategoryManagementPage() {
   const { 
@@ -252,6 +277,31 @@ export default function CategoryManagementPage() {
                   onChange={e => setFormData({...formData, color: e.target.value})}
                   className="flex h-10 flex-1 rounded-md border-2 border-black bg-white px-3 py-2 font-mono text-sm font-bold shadow-[2px_2px_0px_rgba(0,0,0,1)] outline-none transition-all focus-visible:translate-x-[1px] focus-visible:translate-y-[1px] focus-visible:shadow-[1px_1px_0px_rgba(0,0,0,1)]"
                 />
+              </div>
+            </FormField>
+
+            <FormField id="icon" label="Pilih Ikon Penanda">
+              <div className="grid grid-cols-6 gap-2">
+                {AVAILABLE_ICONS.map((icon) => {
+                  const IconComp = icon.component;
+                  const isSelected = formData.icon === icon.name;
+                  return (
+                    <button
+                      key={icon.name}
+                      type="button"
+                      onClick={() => setFormData({...formData, icon: icon.name})}
+                      className={cn(
+                        "flex h-10 w-10 items-center justify-center rounded-md border-2 border-black transition-all",
+                        isSelected 
+                          ? "bg-black text-white shadow-none translate-y-[2px] translate-x-[2px]" 
+                          : "bg-white text-slate-600 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_rgba(0,0,0,1)]"
+                      )}
+                      title={icon.name}
+                    >
+                      <IconComp className="h-5 w-5" />
+                    </button>
+                  );
+                })}
               </div>
             </FormField>
 

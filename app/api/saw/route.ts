@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
         ST_DistanceSphere(w.geom, ST_MakePoint($1, $2)) as distance_m
       FROM wisata w
       LEFT JOIN categories c ON w.category_id = c.id
-      WHERE 1=1 ${categoryClause}
+      WHERE c.is_active = true ${categoryClause}
     `;
 
     const client = await pool.connect();

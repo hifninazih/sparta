@@ -1,6 +1,7 @@
 // components/marker/SearchAreaResultMarker.tsx
 "use client";
 
+import * as LucideIcons from "lucide-react";
 import { useAutosuggestStore } from "@/store/useAutosuggestStore";
 import { useMapStore } from "@/store/useMapStore";
 import { useRecommendationStore } from "@/store/useRecommendationStore";
@@ -15,7 +16,7 @@ import { AnimatedMapMarker } from "../AnimatedMapMarker";
 export default function SearchAreaResultMarker() {
   const { recommendations } = useRecommendationStore();
   const { viewState, activeWisata, setActiveWisata } = useMapStore();
-  const { getCategoryColor } = useCategoryStore();
+  const { getCategoryColor, getCategoryIcon } = useCategoryStore();
   const { results } = useSearchStore();
   const { selectedPlace } = useAutosuggestStore();
 
@@ -35,6 +36,8 @@ export default function SearchAreaResultMarker() {
         .map((wisata) => {
           const isZoomedIn = viewState.zoom >= 13;
           const isOpen = activeWisata?.gid === wisata.gid;
+          const iconName = getCategoryIcon(wisata.category);
+          const Icon = (LucideIcons as any)[iconName] || LucideIcons.MapPin;
 
           return (
             <Marker
@@ -57,26 +60,19 @@ export default function SearchAreaResultMarker() {
                 <div 
                   className={cn(
                     "flex items-center overflow-hidden rounded-full border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all duration-300 ease-out origin-center",
-                    isZoomedIn ? "px-2.5 py-1 h-auto" : "h-4 w-4 justify-center px-0 py-0"
+                    isZoomedIn ? "px-2 py-1 h-auto gap-1" : "h-6 w-6 justify-center p-0"
                   )}
                   style={{ backgroundColor: getCategoryColor(wisata.category) }}
                 >
+                  <Icon className={cn("text-black shrink-0 transition-all duration-300", isZoomedIn ? "h-3 w-3" : "h-3.5 w-3.5")} />
                   <span 
                     className={cn(
                       "truncate font-bold text-black transition-all duration-300 ease-out",
-                      isZoomedIn ? "max-w-[120px] opacity-100 text-[12px]" : "max-w-0 opacity-0 text-[0px]"
+                      isZoomedIn ? "max-w-[120px] opacity-100 text-[11px]" : "max-w-0 opacity-0 text-[0px]"
                     )}
                   >
                     {wisata.name}
                   </span>
-                  
-                  {/* Dot (Only visible when zoomed out) */}
-                  <div 
-                    className={cn(
-                      "shrink-0 rounded-full bg-black transition-all duration-300",
-                      isZoomedIn ? "h-0 w-0 opacity-0" : "h-1 w-1 opacity-100"
-                    )}
-                  ></div>
                 </div>
 
                 {/* Batang Pin Tipis */}

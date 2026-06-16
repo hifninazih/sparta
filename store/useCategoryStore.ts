@@ -15,6 +15,7 @@ interface CategoryState {
   error: string | null;
   fetchCategories: () => Promise<void>;
   getCategoryColor: (name: string) => string;
+  getCategoryIcon: (name: string) => string;
 }
 
 export const useCategoryStore = create<CategoryState>((set, get) => ({
@@ -41,5 +42,10 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
     const { categories } = get();
     const category = categories.find((c) => c.name === name);
     return category?.color || "#FF8038";
+  },
+  getCategoryIcon: (name: string) => {
+    const { categories } = get();
+    const category = categories.find((c) => c.name === name);
+    return category?.icon || "MapPin";
   },
 }));

@@ -6,6 +6,7 @@ import { useAutosuggestStore } from "@/store/useAutosuggestStore";
 import { useMapStore } from "@/store/useMapStore";
 import { Marker } from "@vis.gl/react-maplibre";
 import { MapPinSearch } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { WisataMarkerPopover } from "../WisataPopup";
 import { useCategoryStore } from "@/store/useCategoryStore";
 import { Z } from "@/lib/z-index";
@@ -14,7 +15,7 @@ import { AnimatedMapMarker } from "../AnimatedMapMarker";
 export default function SelectedSuggestionMarker() {
   const { selectedPlace } = useAutosuggestStore();
   const { activeWisata, setActiveWisata } = useMapStore();
-  const { getCategoryColor } = useCategoryStore();
+  const { getCategoryColor, getCategoryIcon } = useCategoryStore();
 
   if (!selectedPlace) return null;
 
@@ -51,7 +52,13 @@ export default function SelectedSuggestionMarker() {
                 )}
                 style={{ backgroundColor: selectedPlace.category ? getCategoryColor(selectedPlace.category) : "#FF8038" }}
               >
-                <MapPinSearch className="size-5 text-black" strokeWidth={3} />
+                {selectedPlace.category ? (() => {
+                  const iconName = getCategoryIcon(selectedPlace.category);
+                  const Icon = (LucideIcons as any)[iconName] || LucideIcons.MapPin;
+                  return <Icon className="size-5 text-black" strokeWidth={3} />;
+                })() : (
+                  <MapPinSearch className="size-5 text-black" strokeWidth={3} />
+                )}
               </div>
 
               {/* Batang Pin */}

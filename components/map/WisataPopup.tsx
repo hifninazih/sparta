@@ -6,6 +6,7 @@ import {
   PopoverTrigger,
 } from "@/components/core/popover";
 import { Star, MapPin, Navigation, Phone, ExternalLink, X } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { WisataSearchResult } from "@/store/useSearchStore";
 import { Button } from "@/components/core/button";
 import Image from "next/image";
@@ -26,7 +27,7 @@ export function WisataMarkerPopover({
   onOpenChange,
   children,
 }: WisataMarkerPopoverProps) {
-  const { getCategoryColor } = useCategoryStore();
+  const { getCategoryColor, getCategoryIcon } = useCategoryStore();
   const popoverRef = useRef<HTMLDivElement>(null);
   // Dummy image (placeholder) since real images are not available yet
   const dummyImage = `https://picsum.photos/seed/${wisata.gid}/400/200`;
@@ -82,14 +83,23 @@ export function WisataMarkerPopover({
               <X className="h-4 w-4" />
             </button>
 
-            <div
-              className="absolute bottom-2 left-2 flex items-center gap-1 rounded-md border-2 border-black px-2 py-1 text-xs font-black uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)]"
-              style={{
-                backgroundColor: getCategoryColor(wisata.category || "Umum"),
-              }}
-            >
-              {wisata.category || "Lokasi Umum"}
-            </div>
+            {(() => {
+              const catName = wisata.category || "Umum";
+              const iconName = getCategoryIcon(catName);
+              const Icon = (LucideIcons as any)[iconName] || LucideIcons.MapPin;
+              
+              return (
+                <div
+                  className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-md border-2 border-black px-2 py-1 text-[10px] font-black uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                  style={{
+                    backgroundColor: getCategoryColor(catName),
+                  }}
+                >
+                  <Icon className="h-3 w-3 shrink-0" />
+                  {catName}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Content */}

@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
         ST_X(w.geom) as lng, ST_Y(w.geom) as lat 
       FROM wisata w
       LEFT JOIN categories c ON w.category_id = c.id
-      WHERE w.name ILIKE $1 
+      WHERE w.name ILIKE $1 AND c.is_active = true
       LIMIT 5
     `;
     const localDbPromise = pool.query(localQuery, [`%${keyword}%`]);

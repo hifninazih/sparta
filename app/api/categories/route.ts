@@ -8,6 +8,7 @@ export async function GET() {
       const result = await client.query(`
         SELECT id, name, color, icon, is_active, created_at 
         FROM categories 
+        WHERE is_active = true
         ORDER BY name ASC
       `);
       return NextResponse.json({ success: true, data: result.rows });

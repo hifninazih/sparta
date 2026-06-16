@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const maxLng = searchParams.get("maxLng");
     const maxLat = searchParams.get("maxLat");
 
-    let whereClause = `WHERE 1=1`;
+    let whereClause = `WHERE c.is_active = true`;
     const values: (string | number | string[])[] = [];
     let paramIndex = 1;
 
