@@ -36,6 +36,7 @@ import { useWizardStore } from "@/store/useWizardStore";
 import { useRecommendationStore } from "@/store/useRecommendationStore";
 import { useSearchStore } from "@/store/useSearchStore";
 import { useTourStore } from "@/store/useTourStore";
+import { useCategoryStore } from "@/store/useCategoryStore";
 import MapCompass from "@/components/map/MapCompass";
 
 export default function Maps() {
@@ -58,7 +59,13 @@ export default function Maps() {
     useRecommendationStore();
   const { selectedCategories, executeSearch, isSearching } = useSearchStore();
   const { run: runTour, setRun: setRunTour } = useTourStore();
+  const { categories, fetchCategories } = useCategoryStore();
   const [showLoading, setShowLoading] = useState(false);
+
+  // Fetch categories on mount if empty
+  useEffect(() => {
+    if (categories.length === 0) fetchCategories();
+  }, [categories.length, fetchCategories]);
 
   // Mencegah flickering loading indicator pada koneksi cepat (hanya tampil jika request > 250ms)
   useEffect(() => {
