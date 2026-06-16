@@ -172,8 +172,10 @@ export default function Maps() {
           maxZoom={maxZoom}
           minZoom={minZoom}
           maxBounds={maxBounds}
-          onMoveEnd={(e) => {
+          onMove={(e) => {
             setViewState(e.viewState);
+          }}
+          onMoveEnd={() => {
             triggerLiveSearch();
           }}
           onLoad={triggerLiveSearch}
