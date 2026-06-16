@@ -27,7 +27,7 @@ export function WisataMarkerPopover({
   onOpenChange,
   children,
 }: WisataMarkerPopoverProps) {
-  const { getCategoryColor, getCategoryIcon } = useCategoryStore();
+  const { categories, getCategoryColor, getCategoryIcon } = useCategoryStore();
   const popoverRef = useRef<HTMLDivElement>(null);
   // Dummy image (placeholder) since real images are not available yet
   const dummyImage = `https://picsum.photos/seed/${wisata.gid}/400/200`;

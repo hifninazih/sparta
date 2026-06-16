@@ -16,7 +16,7 @@ import { AnimatedMapMarker } from "../AnimatedMapMarker";
 export default function SearchAreaResultMarker() {
   const { recommendations } = useRecommendationStore();
   const { viewState, activeWisata, setActiveWisata } = useMapStore();
-  const { getCategoryColor, getCategoryIcon } = useCategoryStore();
+  const { categories, getCategoryColor, getCategoryIcon } = useCategoryStore();
   const { results } = useSearchStore();
   const { selectedPlace } = useAutosuggestStore();
 

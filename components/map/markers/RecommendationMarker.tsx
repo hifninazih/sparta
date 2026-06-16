@@ -15,7 +15,7 @@ export default function RecommendationMarker() {
   const { recommendations } = useRecommendationStore();
   const { viewState, activeWisata, setActiveWisata } = useMapStore();
   const { run, stepIndex, nextStep: tourNextStep } = useTourStore();
-  const { getCategoryColor } = useCategoryStore();
+  const { categories, getCategoryColor } = useCategoryStore();
 
   if (!recommendations || recommendations.length === 0) return null;
 

@@ -15,7 +15,7 @@ import { AnimatedMapMarker } from "../AnimatedMapMarker";
 export default function SelectedSuggestionMarker() {
   const { selectedPlace } = useAutosuggestStore();
   const { activeWisata, setActiveWisata } = useMapStore();
-  const { getCategoryColor, getCategoryIcon } = useCategoryStore();
+  const { categories, getCategoryColor, getCategoryIcon } = useCategoryStore();
 
   if (!selectedPlace) return null;
 
