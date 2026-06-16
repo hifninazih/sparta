@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   Tag,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/core/button";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,14 @@ export default function AdminLayout({
   const [user, setUser] = useState<{ username: string; role: string } | null>(
     null,
   );
+  
+  const [isPending, startTransition] = useTransition();
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Selesai navigasi (path berubah) -> matikan indikator loading
+    setNavigatingTo(null);
+  }, [pathname]);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -72,6 +81,14 @@ export default function AdminLayout({
     } catch (error) {
       toast.error("Gagal keluar. Silakan coba lagi.");
     }
+  };
+
+  const handleNavigation = (href: string) => {
+    if (href === pathname) return;
+    setNavigatingTo(href);
+    startTransition(() => {
+      router.push(href);
+    });
   };
 
   const menuItems = [
@@ -179,16 +196,21 @@ export default function AdminLayout({
                   ? pathname === "/admin"
                   : pathname.startsWith(item.href);
 
+              const isLoading = isPending && navigatingTo === item.href;
+
               return (
-                <Link
+                <button
                   key={item.href}
-                  href={item.href}
-                  onClick={() => setIsSidebarOpen(false)}
+                  onClick={() => {
+                    setIsSidebarOpen(false);
+                    handleNavigation(item.href);
+                  }}
                   className={cn(
-                    "group flex items-center justify-between rounded-lg border-2 px-4 py-3 text-sm font-bold transition-all",
+                    "w-full group flex items-center justify-between rounded-lg border-2 px-4 py-3 text-sm font-bold transition-all",
                     isActive
                       ? "-translate-y-0.5 border-black bg-linear-to-tr from-[#DCFFBC] to-[#6FD1D7] text-black shadow-[2px_3px_0px_rgba(0,0,0,1)]"
                       : "border-transparent text-slate-600 hover:-translate-y-0.5 hover:border-black/50 hover:shadow-[2px_3px_0px_rgba(0,0,0,0.5)]",
+                    isLoading && "opacity-70 pointer-events-none"
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -198,12 +220,12 @@ export default function AdminLayout({
                         "group-hover:text-slate-500",
                       )}
                     >
-                      {item.icon}
+                      {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : item.icon}
                     </span>
                     {item.title}
                   </div>
-                  {isActive && <ChevronRight className="h-4 w-4" />}
-                </Link>
+                  {isActive && !isLoading && <ChevronRight className="h-4 w-4" />}
+                </button>
               );
             })}
           </nav>
