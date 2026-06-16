@@ -33,6 +33,7 @@ export default function MapCompass() {
   return (
     <>
       <CompassButton
+        className="tour-map-compass"
         bearing={bearing}
         pitch={pitch}
         onReset={handleResetCompass}

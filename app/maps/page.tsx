@@ -163,8 +163,8 @@ export default function Maps() {
 
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-slate-100">
-      <MapsTour />
       <MapProvider>
+        <MapsTour />
         <Map
           ref={mapRef}
           id="sparta-map"

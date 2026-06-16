@@ -14,6 +14,7 @@ import { X } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useRecommendationStore } from "@/store/useRecommendationStore";
 import { useTourStore } from "@/store/useTourStore";
+import { useMap } from "@vis.gl/react-maplibre";
 
 interface MapsTourProps {}
 
@@ -106,6 +107,7 @@ export default function MapsTour({}: MapsTourProps) {
   const isDesktop = useMediaQuery("(min-width: 640px)");
   const { run, setRun, stepIndex, setStepIndex } = useTourStore();
   const { clearRecommendations } = useRecommendationStore();
+  const { "sparta-map": spartaMap } = useMap();
 
   useEffect(() => {
     setMounted(true);
@@ -118,8 +120,14 @@ export default function MapsTour({}: MapsTourProps) {
   useEffect(() => {
     if (run && stepIndex === 0) {
       clearRecommendations();
+      // Animasi peta ke 3D untuk memunculkan ikon kompas
+      spartaMap?.getMap()?.easeTo({ pitch: 60, bearing: -45, duration: 1500 });
     }
-  }, [run, stepIndex, clearRecommendations]);
+    // Kembali ke mode 2D saat masuk ke step ke-3 (Peta Dasar)
+    if (run && stepIndex === 3) {
+      spartaMap?.getMap()?.easeTo({ pitch: 0, bearing: 0, duration: 1000 });
+    }
+  }, [run, stepIndex, clearRecommendations, spartaMap]);
 
   const steps: Step[] = [
     {
@@ -133,6 +141,13 @@ export default function MapsTour({}: MapsTourProps) {
       title: "Kontrol Peta",
       content:
         "Gunakan kontrol ini untuk memperbesar/memperkecil peta dan mencari lokasi Anda saat ini.",
+      placement: "left",
+    },
+    {
+      target: ".tour-map-compass",
+      title: "Reset Kompas",
+      content:
+        "Ikon kompas ini otomatis muncul ketika Anda sedang memutar peta atau berada dalam mode 3D (klik kanan + geser). Tekan ikon ini untuk mengembalikan orientasi peta lurus ke Utara.",
       placement: "left",
     },
     {
@@ -213,6 +228,10 @@ export default function MapsTour({}: MapsTourProps) {
       setRun(false);
       setStepIndex(0);
       localStorage.setItem("sparta_maps_tour_seen", "true");
+      // Reset peta jika tour selesai/di-skip di tengah jalan sebelum step 3
+      if (stepIndex < 3) {
+        spartaMap?.getMap()?.easeTo({ pitch: 0, bearing: 0, duration: 1000 });
+      }
     } else if (type === "step:after") {
       setStepIndex(index + (action === "prev" ? -1 : 1));
     }

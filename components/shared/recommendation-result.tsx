@@ -115,7 +115,7 @@ export function RecommendationResult() {
             if (!isDesktop) {
               setMobileSnap(SNAP_POINTS[0]);
             }
-            if (run && useTourStore.getState().stepIndex === 8) {
+            if (run && useTourStore.getState().stepIndex === 9) {
               setTimeout(() => {
                 tourNextStep();
               }, 1300);
