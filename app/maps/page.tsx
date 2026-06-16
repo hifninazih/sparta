@@ -80,6 +80,7 @@ export default function Maps() {
   }, [isSearching]);
 
   const mapRef = useRef<MapRef | null>(null);
+  const throttleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // --- DEBOUNCE SEMI-LIVE SEARCH (selalu aktif) ---
   const liveSearchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -180,9 +181,20 @@ export default function Maps() {
           minZoom={minZoom}
           maxBounds={maxBounds}
           onMove={(e) => {
-            setViewState(e.viewState);
+            // Throttle setViewState update (approx 10fps instead of 60fps)
+            if (!throttleTimer.current) {
+              throttleTimer.current = setTimeout(() => {
+                setViewState(e.viewState);
+                throttleTimer.current = null;
+              }, 100);
+            }
           }}
-          onMoveEnd={() => {
+          onMoveEnd={(e) => {
+            if (throttleTimer.current) {
+              clearTimeout(throttleTimer.current);
+              throttleTimer.current = null;
+            }
+            setViewState(e.viewState);
             triggerLiveSearch();
           }}
           onLoad={triggerLiveSearch}
