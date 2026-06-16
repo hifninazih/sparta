@@ -6,7 +6,7 @@ import { useMapStore } from "@/store/useMapStore";
 import { useRecommendationStore } from "@/store/useRecommendationStore";
 import { Marker } from "@vis.gl/react-maplibre";
 import { WisataMarkerPopover } from "../WisataPopup";
-import { getCategoryColor } from "@/lib/wisata-categories";
+import { useCategoryStore } from "@/store/useCategoryStore";
 import { useTourStore } from "@/store/useTourStore";
 import { Z } from "@/lib/z-index";
 import { AnimatedMapMarker } from "../AnimatedMapMarker";
@@ -15,6 +15,7 @@ export default function RecommendationMarker() {
   const { recommendations } = useRecommendationStore();
   const { viewState, activeWisata, setActiveWisata } = useMapStore();
   const { run, stepIndex, nextStep: tourNextStep } = useTourStore();
+  const { getCategoryColor } = useCategoryStore();
 
   if (!recommendations || recommendations.length === 0) return null;
 

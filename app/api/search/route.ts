@@ -40,11 +40,12 @@ export async function GET(request: NextRequest) {
     // 1. QUERY LOKAL: Cari di Database (PostgreSQL)
     const localQuery = `
       SELECT 
-        gid::text, name, category, 
-        price, rating, reviews, address, phone, link, maps_link,
-        ST_X(geom) as lng, ST_Y(geom) as lat 
-      FROM wisata 
-      WHERE name ILIKE $1 
+        w.gid::text, w.name, c.name as category, 
+        w.price, w.rating, w.reviews, w.address, w.phone, w.link, w.maps_link,
+        ST_X(w.geom) as lng, ST_Y(w.geom) as lat 
+      FROM wisata w
+      LEFT JOIN categories c ON w.category_id = c.id
+      WHERE w.name ILIKE $1 
       LIMIT 5
     `;
     const localDbPromise = pool.query(localQuery, [`%${keyword}%`]);

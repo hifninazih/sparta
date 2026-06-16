@@ -9,7 +9,8 @@ import { Star, MapPin, Navigation, Phone, ExternalLink, X } from "lucide-react";
 import { WisataSearchResult } from "@/store/useSearchStore";
 import { Button } from "@/components/core/button";
 import Image from "next/image";
-import { getCategoryColor } from "@/lib/wisata-categories";
+import { useEffect, useRef } from "react";
+import { useCategoryStore } from "@/store/useCategoryStore";
 import { Z } from "@/lib/z-index";
 
 interface WisataMarkerPopoverProps {
@@ -25,6 +26,8 @@ export function WisataMarkerPopover({
   onOpenChange,
   children,
 }: WisataMarkerPopoverProps) {
+  const { getCategoryColor } = useCategoryStore();
+  const popoverRef = useRef<HTMLDivElement>(null);
   // Dummy image (placeholder) since real images are not available yet
   const dummyImage = `https://picsum.photos/seed/${wisata.gid}/400/200`;
 

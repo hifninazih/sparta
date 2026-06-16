@@ -57,26 +57,27 @@ export async function POST(request: NextRequest) {
 
     let categoryClause = "";
     if (hasCategoryFilter) {
-      categoryClause = "AND category = ANY($3)";
+      categoryClause = "AND c.name = ANY($3)";
       queryParams.push(categoryList);
     }
 
     const dataQuery = `
       SELECT 
-        gid::text, 
-        name, 
-        category, 
-        price, 
-        rating, 
-        reviews,
-        address,
-        phone,
-        link,
-        maps_link,
-        ST_X(geom) as lng, 
-        ST_Y(geom) as lat,
-        ST_DistanceSphere(geom, ST_MakePoint($1, $2)) as distance_m
-      FROM wisata
+        w.gid::text, 
+        w.name, 
+        c.name as category, 
+        w.price, 
+        w.rating, 
+        w.reviews,
+        w.address,
+        w.phone,
+        w.link,
+        w.maps_link,
+        ST_X(w.geom) as lng, 
+        ST_Y(w.geom) as lat,
+        ST_DistanceSphere(w.geom, ST_MakePoint($1, $2)) as distance_m
+      FROM wisata w
+      LEFT JOIN categories c ON w.category_id = c.id
       WHERE 1=1 ${categoryClause}
     `;
 

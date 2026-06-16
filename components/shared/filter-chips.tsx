@@ -2,7 +2,9 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { WISATA_CATEGORIES, WisataCategory } from "@/lib/wisata-categories";
+import { WisataCategory } from "@/lib/wisata-categories";
+import { useCategoryStore } from "@/store/useCategoryStore";
+import { useEffect } from "react";
 
 interface FilterChipsProps {
   /** Daftar kategori yang sedang aktif. Array kosong = "Semua" aktif. */
@@ -12,6 +14,12 @@ interface FilterChipsProps {
 }
 
 export function FilterChips({ value, onChange, className }: FilterChipsProps) {
+  const { categories, fetchCategories } = useCategoryStore();
+  
+  useEffect(() => {
+    if (categories.length === 0) fetchCategories();
+  }, [categories.length, fetchCategories]);
+
   const handleClick = (cat: WisataCategory) => {
     const isCurrentlySelected = value.includes(cat);
 
@@ -28,7 +36,8 @@ export function FilterChips({ value, onChange, className }: FilterChipsProps) {
 
   return (
     <div className={cn("flex flex-wrap gap-1.5", className)}>
-      {WISATA_CATEGORIES.map((cat) => {
+      {categories.map((c) => {
+        const cat = c.name as WisataCategory;
         const active = isActive(cat);
         return (
           <button

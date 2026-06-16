@@ -13,6 +13,7 @@ import {
   User as UserIcon,
   Menu,
   X,
+  Tag,
 } from "lucide-react";
 import { Button } from "@/components/core/button";
 import { cn } from "@/lib/utils";
@@ -84,6 +85,12 @@ export default function AdminLayout({
       title: "Data Wisata",
       href: "/admin/wisata",
       icon: <MapPin className="h-5 w-5" />,
+      role: "all",
+    },
+    {
+      title: "Kategori Wisata",
+      href: "/admin/categories",
+      icon: <Tag className="h-5 w-5" />,
       role: "all",
     },
     {

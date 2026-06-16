@@ -40,10 +40,7 @@ import { PageHeader } from "@/components/admin/PageHeader";
 import { SearchSection } from "@/components/admin/SearchSection";
 import { ActionButtons } from "@/components/admin/ActionButtons";
 import { FormField } from "@/components/core/form-field";
-import { WISATA_CATEGORIES } from "@/lib/wisata-categories";
-
-// Opsi kategori untuk dropdown
-const KATEGORI_OPTIONS = WISATA_CATEGORIES;
+import { useCategoryStore } from "@/store/useCategoryStore";
 
 
 interface Wisata {
@@ -70,6 +67,12 @@ export default function WisataManagementPage() {
     updateWisata, 
     removeWisata 
   } = useAdminStore();
+
+  const { categories, fetchCategories } = useCategoryStore();
+
+  useEffect(() => {
+    if (categories.length === 0) fetchCategories();
+  }, [categories.length, fetchCategories]);
 
   const [isSubmitLoading, setIsSubmitLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -362,8 +365,8 @@ export default function WisataManagementPage() {
                     className="flex h-10 w-full min-w-0 rounded-md border-2 border-black bg-white px-3 py-2 text-sm font-bold ring-offset-background transition-all outline-none shadow-[2px_2px_0px_rgba(0,0,0,1)] focus-visible:shadow-[1px_1px_0px_rgba(0,0,0,1)] focus-visible:translate-x-[1px] focus-visible:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <option value="" disabled>Pilih kategori...</option>
-                    {KATEGORI_OPTIONS.map((k) => (
-                      <option key={k} value={k}>{k}</option>
+                    {categories.map((k) => (
+                      <option key={k.id} value={k.name}>{k.name}</option>
                     ))}
                   </select>
                 </FormField>

@@ -8,13 +8,14 @@ import { cn } from "@/lib/utils";
 import { useSearchStore } from "@/store/useSearchStore";
 import { Marker } from "@vis.gl/react-maplibre";
 import { WisataMarkerPopover } from "../WisataPopup";
-import { getCategoryColor } from "@/lib/wisata-categories";
+import { useCategoryStore } from "@/store/useCategoryStore";
 import { Z } from "@/lib/z-index";
 import { AnimatedMapMarker } from "../AnimatedMapMarker";
 
 export default function SearchAreaResultMarker() {
   const { recommendations } = useRecommendationStore();
   const { viewState, activeWisata, setActiveWisata } = useMapStore();
+  const { getCategoryColor } = useCategoryStore();
   const { results } = useSearchStore();
   const { selectedPlace } = useAutosuggestStore();
 

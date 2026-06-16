@@ -23,14 +23,14 @@ export async function GET(request: NextRequest) {
 
     // --- FILTER KEYWORD ---
     if (search) {
-      whereClause += ` AND name ILIKE $${paramIndex}`;
+      whereClause += ` AND w.name ILIKE $${paramIndex}`;
       values.push(`%${search}%`);
       paramIndex++;
     }
 
     // --- FILTER KATEGORI (multi-value dengan ANY) ---
     if (kategoriList.length > 0) {
-      whereClause += ` AND category = ANY($${paramIndex})`;
+      whereClause += ` AND c.name = ANY($${paramIndex})`;
       values.push(kategoriList);
       paramIndex++;
     }
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
       whereClause += ` 
         AND ST_Contains(
           ST_MakeEnvelope($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, 4326), 
-          geom
+          w.geom
         )
       `;
       values.push(
@@ -55,28 +55,34 @@ export async function GET(request: NextRequest) {
     // 4. Query Utama
     const dataQuery = `
       SELECT 
-        gid::text, 
-        name, 
-        category, 
-        price, 
-        rating, 
-        reviews,
-        address,
-        phone,
-        link,
-        maps_link,
-        ST_X(geom) as lng, 
-        ST_Y(geom) as lat,
-        (SELECT namobj FROM public.administrasi_desa d WHERE ST_Intersects(d.geom, wisata.geom) LIMIT 1) as desa,
-        (SELECT wadmkc FROM public.administrasi_desa d WHERE ST_Intersects(d.geom, wisata.geom) LIMIT 1) as kecamatan,
-        (SELECT wadmkk FROM public.administrasi_desa d WHERE ST_Intersects(d.geom, wisata.geom) LIMIT 1) as kabupaten
-      FROM wisata 
+        w.gid::text, 
+        w.name, 
+        c.name as category, 
+        w.price, 
+        w.rating, 
+        w.reviews,
+        w.address,
+        w.phone,
+        w.link,
+        w.maps_link,
+        ST_X(w.geom) as lng, 
+        ST_Y(w.geom) as lat,
+        (SELECT namobj FROM public.administrasi_desa d WHERE ST_Intersects(d.geom, w.geom) LIMIT 1) as desa,
+        (SELECT wadmkc FROM public.administrasi_desa d WHERE ST_Intersects(d.geom, w.geom) LIMIT 1) as kecamatan,
+        (SELECT wadmkk FROM public.administrasi_desa d WHERE ST_Intersects(d.geom, w.geom) LIMIT 1) as kabupaten
+      FROM wisata w
+      LEFT JOIN categories c ON w.category_id = c.id
       ${whereClause}
-      ORDER BY rating DESC 
+      ORDER BY w.rating DESC 
       LIMIT 20
     `;
 
-    const countQuery = `SELECT COUNT(*) FROM wisata ${whereClause}`;
+    const countQuery = `
+      SELECT COUNT(*) 
+      FROM wisata w 
+      LEFT JOIN categories c ON w.category_id = c.id 
+      ${whereClause}
+    `;
 
     const client = await pool.connect();
     try {

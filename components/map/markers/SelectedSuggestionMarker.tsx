@@ -7,13 +7,14 @@ import { useMapStore } from "@/store/useMapStore";
 import { Marker } from "@vis.gl/react-maplibre";
 import { MapPinSearch } from "lucide-react";
 import { WisataMarkerPopover } from "../WisataPopup";
-import { getCategoryColor } from "@/lib/wisata-categories";
+import { useCategoryStore } from "@/store/useCategoryStore";
 import { Z } from "@/lib/z-index";
 import { AnimatedMapMarker } from "../AnimatedMapMarker";
 
 export default function SelectedSuggestionMarker() {
   const { selectedPlace } = useAutosuggestStore();
   const { activeWisata, setActiveWisata } = useMapStore();
+  const { getCategoryColor } = useCategoryStore();
 
   if (!selectedPlace) return null;
 

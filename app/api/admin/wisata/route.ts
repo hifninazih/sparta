@@ -18,11 +18,12 @@ export async function GET(request: NextRequest) {
     try {
       const query = `
         SELECT 
-          gid, name, category, price, rating, reviews, address, phone, link, maps_link,
-          ST_X(geom) as lng, ST_Y(geom) as lat
-        FROM wisata
-        WHERE name ILIKE $1 OR category ILIKE $1
-        ORDER BY name ASC
+          w.gid, w.name, c.name as category, w.price, w.rating, w.reviews, w.address, w.phone, w.link, w.maps_link,
+          ST_X(w.geom) as lng, ST_Y(w.geom) as lat
+        FROM wisata w
+        LEFT JOIN categories c ON w.category_id = c.id
+        WHERE w.name ILIKE $1 OR c.name ILIKE $1
+        ORDER BY w.name ASC
       `;
       const result = await client.query(query, [`%${search}%`]);
       return NextResponse.json(result.rows);
@@ -53,9 +54,12 @@ export async function POST(request: NextRequest) {
     const client = await pool.connect();
     try {
       const query = `
-        INSERT INTO wisata (name, category, price, rating, reviews, address, phone, link, maps_link, geom)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, ST_SetSRID(ST_MakePoint($11::float8, $10::float8), 4326))
-        RETURNING gid, name, category, price, rating, reviews, address, phone, link, maps_link, ST_X(geom) as lng, ST_Y(geom) as lat
+        INSERT INTO wisata (
+          name, category_id, price, rating, reviews, address, phone, link, maps_link, geom
+        ) VALUES (
+          $1, (SELECT id FROM categories WHERE name = $2), $3, $4, $5, $6, $7, $8, $9, ST_SetSRID(ST_MakePoint($11, $10), 4326)
+        )
+        RETURNING gid, name, (SELECT name FROM categories WHERE id = category_id) as category, price, rating, reviews, address, phone, link, maps_link, ST_X(geom) as lng, ST_Y(geom) as lat
       `;
       const result = await client.query(query, [
         name, category, price || 0, rating || 0, reviews || 0, address, phone, link, maps_link, lat, lng
