@@ -7,6 +7,7 @@ interface MapState {
 
   minZoom: number;
   maxZoom: number;
+  maxBounds: [[number, number], [number, number]];
 
   // 1. Lokasi GPS Asli (Titik Biru)
   userLocation: [number, number] | null;
@@ -28,13 +29,17 @@ export const useMapStore = create<MapState>((set) => ({
   viewState: {
     longitude: 110.3695,
     latitude: -7.7956,
-    zoom: 10,
+    zoom: 9.5,
     pitch: 0,
     bearing: 0,
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
   },
-  minZoom: 5,
+  minZoom: 8.5,
   maxZoom: 20,
+  maxBounds: [
+    [109.70, -8.40], // Southwest bounds
+    [111.10, -7.30]  // Northeast bounds
+  ],
 
   userLocation: null,
   setUserLocation: (loc) => set({ userLocation: loc }),

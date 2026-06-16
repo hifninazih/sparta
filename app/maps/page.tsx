@@ -2,7 +2,7 @@
 "use client";
 
 import "maplibre-gl/dist/maplibre-gl.css";
-import Map, { MapProvider, MapLayerMouseEvent, MapRef } from "@vis.gl/react-maplibre";
+import Map, { MapProvider, MapLayerMouseEvent, MapRef, Source, Layer } from "@vis.gl/react-maplibre";
 import { useRef, useCallback, useEffect, useState } from "react";
 
 // Style dan icon
@@ -28,6 +28,7 @@ import InitialMarker from "@/components/map/markers/InitialMarker";
 import RecommendationMarker from "@/components/map/markers/RecommendationMarker";
 import SearchAreaResultMarker from "@/components/map/markers/SearchAreaResultMarker";
 import SelectedSuggestionMarker from "@/components/map/markers/SelectedSuggestionMarker";
+import ProvBoundaryLayer from "@/components/map/markers/ProvBoundaryLayer";
 
 // Store
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -46,6 +47,7 @@ export default function Maps() {
     setViewState,
     maxZoom,
     minZoom,
+    maxBounds,
     setSelectedLocation,
     isSatellite,
     activeWisata,
@@ -165,6 +167,7 @@ export default function Maps() {
           initialViewState={viewState}
           maxZoom={maxZoom}
           minZoom={minZoom}
+          maxBounds={maxBounds}
           onMove={(e) => {
             setViewState(e.viewState);
             triggerLiveSearch();
@@ -175,9 +178,20 @@ export default function Maps() {
           onZoomStart={handleMapInteraction}
           style={{ width: "100%", height: "100%" }}
           mapStyle={isSatellite ? satelliteStyle : streetStyle}
+          terrain={{ source: "sparta-terrain", exaggeration: isSatellite ? 1.5 : 0 }}
           cursor={isPickingLocation ? "crosshair" : "grab"}
           attributionControl={false}
         >
+          {/* TERRAIN SOURCE */}
+          <Source 
+            id="sparta-terrain" 
+            type="raster-dem" 
+            tiles={["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"]}
+            encoding="terrarium"
+            tileSize={256}
+            maxzoom={15}
+          />
+
           {/* MARKER 1: LOKASI GPS */}
           <MarkerGPS />
 
@@ -192,6 +206,9 @@ export default function Maps() {
 
           {/* MARKER 5: Hasil search query */}
           <SelectedSuggestionMarker />
+
+          {/* LAYER 6: Batas Wilayah DIY */}
+          <ProvBoundaryLayer />
         </Map>
 
         {/* Loading Indicator (Pill) di Tengah Atas */}
