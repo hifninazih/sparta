@@ -21,6 +21,7 @@ import {
   Landmark,
   Car
 } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -177,7 +178,7 @@ export default function CategoryManagementPage() {
         <TableHeader>
           <TableRow>
             <TableHead>Kategori</TableHead>
-            <TableHead>Warna Peta</TableHead>
+            <TableHead>Preview Marker</TableHead>
             <TableHead className="text-center">Status</TableHead>
             <TableHead className="text-right">Aksi</TableHead>
           </TableRow>
@@ -203,13 +204,23 @@ export default function CategoryManagementPage() {
                   <div className="text-[10px] font-mono text-slate-400 uppercase tracking-widest mt-0.5">ID: {item.id}</div>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-5 h-5 rounded-md border-2 border-black shadow-sm"
-                      style={{ backgroundColor: item.color }}
-                    />
-                    <span className="font-mono text-xs font-bold text-slate-600">{item.color}</span>
-                  </div>
+                  {(() => {
+                    const iconName = item.icon || "MapPin";
+                    const Icon = (LucideIcons as any)[iconName] || LucideIcons.MapPin;
+                    return (
+                      <div className="flex items-center gap-3">
+                        {/* Preview Marker Bulat */}
+                        <div 
+                          className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                          style={{ backgroundColor: item.color }}
+                        >
+                          <Icon className="h-4 w-4 text-black" />
+                        </div>
+                        {/* Nama Icon (Opsional, buat penjelas) */}
+                        <span className="text-xs font-bold text-slate-500">{iconName}</span>
+                      </div>
+                    );
+                  })()}
                 </TableCell>
                 <TableCell className="text-center">
                   {item.is_active ? (
