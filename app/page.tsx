@@ -63,7 +63,7 @@ export default function LandingPage() {
                     <Button
                       size="lg"
                       variant="gradient"
-                      className="h-14 w-full border-2 px-8 text-base shadow-[1px_2px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:-translate-x-0.5 hover:shadow-[3px_4px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:translate-x-0.5 active:shadow-[0px_0px_0px_rgba(0,0,0,1)] sm:text-lg transition-all"
+                      className="h-14 w-full border-2 px-8 text-base shadow-[1px_2px_0px_rgba(0,0,0,1)] transition-all hover:-translate-x-0.5 hover:-translate-y-1 hover:shadow-[3px_4px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[0px_0px_0px_rgba(0,0,0,1)] sm:text-lg"
                     >
                       Buka Peta Interaktif
                     </Button>
@@ -72,7 +72,7 @@ export default function LandingPage() {
                     <Button
                       size="lg"
                       variant="outline"
-                      className="h-14 w-full border-2 bg-white px-8 text-base shadow-[1px_2px_0px_rgba(0,0,0,1)] hover:bg-slate-100 hover:-translate-y-1 hover:-translate-x-0.5 hover:shadow-[3px_4px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:translate-x-0.5 active:shadow-[0px_0px_0px_rgba(0,0,0,1)] sm:text-lg transition-all"
+                      className="h-14 w-full border-2 bg-white px-8 text-base shadow-[1px_2px_0px_rgba(0,0,0,1)] transition-all hover:-translate-x-0.5 hover:-translate-y-1 hover:bg-slate-100 hover:shadow-[3px_4px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[0px_0px_0px_rgba(0,0,0,1)] sm:text-lg"
                     >
                       Pelajari Metodologi
                     </Button>
@@ -164,21 +164,21 @@ export default function LandingPage() {
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {[
                 {
-                  title: "Analisis SAW Cerdas",
-                  desc: "Algoritma pengambilan keputusan multi-kriteria untuk merangking destinasi berdasarkan bobot keinginan spesifik Anda secara dinamis.",
+                  title: "Sistem Rekomendasi SAW",
+                  desc: "Algoritma yang merangking destinasi terbaik berdasarkan perhitungan bobot prioritas Anda (Harga, Jarak, Rating, Ulasan).",
                   icon: <Navigation className="h-10 w-10 text-white" />,
                   color: "bg-blue-600",
                 },
                 {
-                  title: "Visualisasi Spasial",
-                  desc: "Antarmuka peta interaktif WebGIS berbasis MapLibre GL dengan rendering responsif dan integrasi database PostGIS.",
-                  icon: <Globe className="h-10 w-10 text-black" />,
+                  title: "Integrasi Data Hybrid",
+                  desc: "Menggabungkan validitas lokasi wisata resmi dari Dinas Pariwisata dengan data rating dan ulasan publik dari Google Maps.",
+                  icon: <Layers className="h-10 w-10 text-black" />,
                   color: "bg-[#DCFFBC]",
                 },
                 {
-                  title: "Bbox Live Search",
-                  desc: "Menelusuri tempat wisata secara instan berdasarkan area geografis layar yang sedang dilihat secara efisien tanpa lag.",
-                  icon: <Layers className="h-10 w-10 text-black" />,
+                  title: "Visualisasi Peta WebGIS",
+                  desc: "Eksplorasi pariwisata lebih mudah melalui antarmuka peta interaktif berbasis spasial yang memetakan ratusan titik lokasi wisata.",
+                  icon: <Globe className="h-10 w-10 text-black" />,
                   color: "bg-[#6FD1D7]",
                 },
               ].map((feature, i) => (
@@ -372,7 +372,7 @@ export default function LandingPage() {
               {/* Left Text */}
               <div className="flex-1">
                 <div className="mb-4 inline-block rounded-full border-2 border-black bg-[#6FD1D7] px-3.5 py-1 text-xs font-black text-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                  SISTEM PEMILIHAN PARIWISATA
+                  SISTEM PENDUKUNG KEPUTUSAN PARIWISATA
                 </div>
                 <h2 className="text-4xl leading-none font-black tracking-tighter text-black uppercase select-none sm:text-5xl">
                   Daerah Istimewa Yogyakarta
@@ -388,14 +388,19 @@ export default function LandingPage() {
                   wisatawan sering kali kesulitan menetapkan prioritas
                   perjalanan.{" "}
                   <strong>
-                    SPARTA dirancang untuk menyatukan parameter spasial dengan
-                    keputusan logis matematika
+                    SPARTA (Sistem Pemetaan dan Rekomendasi Wisata di
+                    Yogyakarta)
                   </strong>{" "}
-                  sehingga perencanaan liburan Anda menjadi efisien, transparan,
-                  dan sesuai dengan bobot prioritas finansial maupun waktu
-                  tempuh Anda.
+                  dirancang untuk menyatukan parameter spasial dengan keputusan
+                  logis matematika. Dengan memadukan data resmi dari{" "}
+                  <strong>Dinas Pariwisata</strong> dan data sentimen riil dari{" "}
+                  <strong>Google Maps</strong>, perencanaan liburan Anda menjadi
+                  objektif, efisien, dan sangat terpersonalisasi.
                 </p>
                 <div className="mt-8 flex flex-wrap gap-3">
+                  <div className="rounded-xl border-2 border-black bg-blue-600 px-3 py-1.5 text-xs font-black text-white shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                    #TugasSkripsiGeodesiUGM
+                  </div>
                   <div className="rounded-xl border-2 border-black bg-[#DCFFBC] px-3 py-1.5 text-xs font-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                     #WisataJogja
                   </div>
@@ -432,8 +437,8 @@ export default function LandingPage() {
                   </span>
                   <span className="mt-2 block text-xs font-semibold text-slate-700">
                     Menghilangkan subjektivitas pariwisata dengan
-                    mengkalkulasikan rating riil Google, jarak geografis live,
-                    dan harga tiket masuk.
+                    mengkalkulasikan data ulasan Google Maps, jarak spasial, dan
+                    harga tiket masuk.
                   </span>
                 </div>
               </div>
@@ -456,8 +461,8 @@ export default function LandingPage() {
             <div className="flex flex-col gap-4">
               {[
                 {
-                  q: "Bagaimana cara SPARTA mengukur jarak keberangkatan?",
-                  a: "Jarak diukur secara langsung (garis lurus udara/spasial) antara titik koordinat awal yang Anda tetapkan di peta (atau dari lokasi sensor GPS Anda) dengan koordinat lokasi wisata yang tersimpan di dalam basis data PostGIS.",
+                  q: "Bagaimana cara SPARTA mengukur jarak?",
+                  a: "Jarak diukur secara langsung (garis lurus) antara titik koordinat awal yang Anda tetapkan di peta (atau dari lokasi sensor GPS Anda) dengan koordinat lokasi wisata yang tersimpan di dalam basis data PostGIS.",
                 },
                 {
                   q: "Apakah data harga tiket masuk selalu ter-update?",
@@ -468,8 +473,12 @@ export default function LandingPage() {
                   a: "Ketika merencanakan pariwisata dengan rombongan atau budget tertentu, Anda sering kali memiliki batasan tersendiri (misal: mencari yang termurah namun dengan rating ulasan yang sangat baik). SAW membantu mengkombinasikan keinginan yang kontradiktif ini ke dalam satu nilai skor matematis mutlak.",
                 },
                 {
+                  q: "Darimana sumber data wisata dan rating di SPARTA?",
+                  a: "SPARTA menggunakan pendekatan data hybrid. Titik koordinat dan profil wisata bersumber dari data resmi Dinas Pariwisata DIY, sedangkan data rating, jumlah ulasan, dan harga tiket diambil dari publik/komunitas melalui Google Maps untuk menjamin objektivitas.",
+                },
+                {
                   q: "Apakah data di SPARTA mencakup seluruh kabupaten di DIY?",
-                  a: "Ya, basis data kami memetakan destinasi wisata unggulan yang tersebar di Kota Yogyakarta, Kabupaten Sleman, Kabupaten Bantul, Kabupaten Kulon Progo, hingga Kabupaten Gunungkidul.",
+                  a: "Ya, basis data kami memetakan lebih dari 320 destinasi wisata unggulan yang tersebar di Kota Yogyakarta, Kabupaten Sleman, Kabupaten Bantul, Kabupaten Kulon Progo, hingga Kabupaten Gunungkidul.",
                 },
               ].map((faq, idx) => (
                 <details
@@ -542,9 +551,14 @@ export default function LandingPage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-white bg-blue-600">
                 <Compass className="animate-spin-slow h-6 w-6 text-white" />
               </div>
-              <span className="text-2xl font-black tracking-tighter">
-                SPARTA
-              </span>
+              <div className="flex flex-col">
+                <span className="text-2xl font-black tracking-tighter">
+                  SPARTA
+                </span>
+                <span className="text-[10px] font-bold text-slate-400">
+                  Tugas Skripsi Teknik Geodesi UGM
+                </span>
+              </div>
             </div>
             <p className="text-center text-xs font-bold text-slate-400 sm:text-sm md:text-left">
               © 2026 SPARTA. All rights reserved.
