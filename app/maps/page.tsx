@@ -164,11 +164,6 @@ export default function Maps() {
   const isSnapLow =
     !isDesktop && recommendations.length > 0 && currentSnap <= 0.4;
 
-  const terrainProps = useMemo(
-    () => ({ source: "sparta-terrain", exaggeration: isSatellite ? 1.5 : 0 }),
-    [isSatellite]
-  );
-
   return (
     <div className="relative h-dvh w-full overflow-hidden bg-slate-100">
       <MapProvider>
@@ -206,19 +201,9 @@ export default function Maps() {
           onZoomStart={handleMapInteraction}
           style={{ width: "100%", height: "100%" }}
           mapStyle={isSatellite ? satelliteStyle : streetStyle}
-          terrain={terrainProps as any}
           cursor={isPickingLocation ? "crosshair" : "grab"}
           attributionControl={false}
         >
-          {/* TERRAIN SOURCE */}
-          <Source 
-            id="sparta-terrain" 
-            type="raster-dem" 
-            tiles={["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"]}
-            encoding="terrarium"
-            tileSize={256}
-            maxzoom={15}
-          />
 
           {/* MARKER 1: LOKASI GPS */}
           <MarkerGPS />

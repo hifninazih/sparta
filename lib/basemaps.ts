@@ -13,6 +13,12 @@ export const satelliteStyle: any = {
       maxzoom: 18,
       attribution:
         "&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+    },
+    "terrarium": {
+      type: "raster-dem",
+      tiles: ["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"],
+      tileSize: 256,
+      encoding: "terrarium",
     }
   },
   layers: [
@@ -23,5 +29,6 @@ export const satelliteStyle: any = {
       minzoom: 0,
       maxzoom: 22,
     },
-  ]
+  ],
+  terrain: { source: "terrarium", exaggeration: 1.5 },
 };

@@ -17,13 +17,15 @@ export async function GET(request: NextRequest) {
     const maxLng = searchParams.get("maxLng");
     const maxLat = searchParams.get("maxLat");
 
-    let whereClause = `WHERE c.is_active = true`;
+    let whereClause = `
+      WHERE c.is_active = true 
+      AND (sk.is_active = true OR w.sub_kategori_id IS NULL)`;
     const values: (string | number | string[])[] = [];
     let paramIndex = 1;
 
     // --- FILTER KEYWORD ---
     if (search) {
-      whereClause += ` AND w.nama_desti ILIKE $${paramIndex}`;
+      whereClause += ` AND w.nama_destinasi ILIKE $${paramIndex}`;
       values.push(`%${search}%`);
       paramIndex++;
     }
@@ -56,14 +58,13 @@ export async function GET(request: NextRequest) {
     const dataQuery = `
       SELECT 
         w.gid::text, 
-        w.nama_desti as name, 
+        w.nama_destinasi as name, 
         c.nama as category, 
         sk.nama as sub_kategori,
-        COALESCE(w.harga, 0) as price, 
-        COALESCE(w.rating_gmaps, 0) as rating, 
-        COALESCE(w.jumlah_ulasan, 0) as reviews,
+        w.harga as price, 
+        w.rating_gmaps as rating, 
+        w.jumlah_ulasan as reviews,
         w.alamat as address,
-        NULL as phone,
         w.web as link,
         w.link_gmaps as maps_link,
         ST_X(w.geom) as lng, 

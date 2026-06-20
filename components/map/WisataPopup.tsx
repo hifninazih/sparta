@@ -5,9 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/core/popover";
-import { 
-  Star, Navigation, Info, ExternalLink, X 
-} from "lucide-react";
+import { Star, Navigation, Info, ExternalLink, X } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { WisataSearchResult } from "@/store/useSearchStore";
 import { Button } from "@/components/core/button";
@@ -31,7 +29,7 @@ export function WisataMarkerPopover({
 }: WisataMarkerPopoverProps) {
   const { getCategoryColor, getCategoryIcon } = useCategoryStore();
   const popoverRef = useRef<HTMLDivElement>(null);
-  
+
   // State untuk modal detail
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -83,7 +81,7 @@ export function WisataMarkerPopover({
                   <Icon className="h-3 w-3 shrink-0" />
                   {catName}
                 </div>
-                <h3 className="text-base leading-tight font-black text-black line-clamp-2">
+                <h3 className="line-clamp-2 text-base leading-tight font-black text-black">
                   {wisata.name}
                 </h3>
               </div>
@@ -100,12 +98,14 @@ export function WisataMarkerPopover({
               <div className="flex items-center justify-between gap-2">
                 <span className="flex items-center gap-1 text-sm font-bold text-slate-700">
                   <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
-                  {wisata.rating ? parseFloat(wisata.rating as any).toFixed(1) : "0"}
+                  {wisata.rating
+                    ? parseFloat(wisata.rating as any).toFixed(1)
+                    : "0"}
                   <span className="ml-0.5 text-[10px] font-semibold text-slate-500">
                     ({wisata.reviews || 0})
                   </span>
                 </span>
-                <span className="text-xs font-black text-green-600 bg-green-50 px-1.5 py-0.5 border border-green-200 rounded">
+                <span className="rounded border border-green-200 bg-green-50 px-1.5 py-0.5 text-xs font-black text-green-600">
                   {wisata.price === 0
                     ? "GRATIS"
                     : wisata.price
@@ -116,9 +116,9 @@ export function WisataMarkerPopover({
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 border-t-2 border-black p-3 bg-slate-50">
+            <div className="flex gap-2 border-t-2 border-black bg-slate-50 p-3">
               <Button
-                className="flex-1 text-[11px] font-bold h-8"
+                className="h-8 flex-1 text-[11px] font-bold"
                 size="rect"
                 variant="outline"
                 onClick={() => setIsModalOpen(true)}
@@ -127,12 +127,12 @@ export function WisataMarkerPopover({
                 Detail
               </Button>
               <Button
-                className="flex-1 text-[11px] font-bold h-8"
+                className="h-8 flex-1 text-[11px] font-bold"
                 size="rect"
                 onClick={handleDirections}
                 startIcon={<Navigation className="h-3.5 w-3.5" />}
               >
-                Rute
+                Buka di Google Maps
               </Button>
             </div>
           </div>

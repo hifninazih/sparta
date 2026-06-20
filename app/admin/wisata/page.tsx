@@ -54,7 +54,6 @@ interface Wisata {
   rating: number;
   reviews: number;
   address: string;
-  phone: string;
   link: string;
   maps_link: string;
   username_instagram?: string;
@@ -100,7 +99,6 @@ export default function WisataManagementPage() {
     rating: number | string;
     reviews: number | string;
     address: string;
-    phone: string;
     link: string;
     maps_link: string;
     username_instagram: string;
@@ -116,7 +114,6 @@ export default function WisataManagementPage() {
     rating: 4.0,
     reviews: 0,
     address: "",
-    phone: "",
     link: "",
     maps_link: "",
     username_instagram: "",
@@ -140,7 +137,6 @@ export default function WisataManagementPage() {
       rating: 4.5,
       reviews: 0,
       address: "",
-      phone: "",
       link: "",
       maps_link: "",
       username_instagram: "",
@@ -162,7 +158,6 @@ export default function WisataManagementPage() {
       rating: Math.round(item.rating * 10) / 10,
       reviews: item.reviews,
       address: item.address || "",
-      phone: item.phone || "",
       link: item.link || "",
       maps_link: item.maps_link || "",
       username_instagram: item.username_instagram || "",

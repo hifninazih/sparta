@@ -8,7 +8,6 @@ export interface WisataRecommendation {
   rating: number;
   reviews: number;
   address?: string;
-  phone?: string;
   link?: string;
   maps_link?: string;
   username_instagram?: string;

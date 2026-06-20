@@ -13,7 +13,6 @@ export interface UnifiedSearchResult {
   price?: number;
   rating?: number;
   reviews?: number;
-  phone?: string;
   link?: string;
   maps_link?: string;
   username_instagram?: string;
@@ -43,15 +42,17 @@ export async function GET(request: NextRequest) {
     // 1. QUERY LOKAL: Cari di Database (PostgreSQL)
     const localQuery = `
       SELECT 
-        w.gid::text, w.nama_desti as name, c.nama as category, sk.nama as sub_kategori,
-        COALESCE(w.harga, 0) as price, COALESCE(w.rating_gmaps, 0) as rating, COALESCE(w.jumlah_ulasan, 0) as reviews, 
-        w.alamat as address, NULL as phone, w.web as link, w.link_gmaps as maps_link,
+        w.gid::text, w.nama_destinasi as name, c.nama as category, sk.nama as sub_kategori,
+        w.harga as price, w.rating_gmaps as rating, w.jumlah_ulasan as reviews, 
+        w.alamat as address, w.web as link, w.link_gmaps as maps_link,
         w.username_instagram, w.daya_tarik_utama, w.daya_tarik_pendukung,
         ST_X(w.geom) as lng, ST_Y(w.geom) as lat 
       FROM destinasi w
       LEFT JOIN kategori c ON w.kategori_id = c.id
       LEFT JOIN sub_kategori sk ON w.sub_kategori_id = sk.id
-      WHERE w.nama_desti ILIKE $1 AND c.is_active = true
+      WHERE w.nama_destinasi ILIKE $1 
+        AND c.is_active = true
+        AND (sk.is_active = true OR w.sub_kategori_id IS NULL)
       LIMIT 5
     `;
     const localDbPromise = pool.query(localQuery, [`%${keyword}%`]);
@@ -85,7 +86,6 @@ export async function GET(request: NextRequest) {
         rating: row.rating,
         reviews: row.reviews,
         address: row.address,
-        phone: row.phone,
         link: row.link,
         maps_link: row.maps_link,
         username_instagram: row.username_instagram,
@@ -94,14 +94,16 @@ export async function GET(request: NextRequest) {
       }),
     );
 
-    const formattedOsm: UnifiedSearchResult[] = osmResult.map((item: NominatimResult) => ({
-      gid: `osm-${item.place_id}`,
-      name: item.name || item.display_name.split(",")[0], // Ambil nama utamanya saja
-      type: "osm",
-      lng: parseFloat(item.lon),
-      lat: parseFloat(item.lat),
-      address: item.display_name, // Alamat lengkapnya simpan di sini
-    }));
+    const formattedOsm: UnifiedSearchResult[] = osmResult.map(
+      (item: NominatimResult) => ({
+        gid: `osm-${item.place_id}`,
+        name: item.name || item.display_name.split(",")[0], // Ambil nama utamanya saja
+        type: "osm",
+        lng: parseFloat(item.lon),
+        lat: parseFloat(item.lat),
+        address: item.display_name, // Alamat lengkapnya simpan di sini
+      }),
+    );
 
     // 5. Gabungkan hasil (Prioritaskan DB Lokal di atas OSM)
     const combinedResults = [...formattedLocal, ...formattedOsm];

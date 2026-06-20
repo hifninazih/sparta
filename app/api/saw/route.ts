@@ -64,14 +64,13 @@ export async function POST(request: NextRequest) {
     const dataQuery = `
       SELECT 
         w.gid::text, 
-        w.nama_desti as name, 
+        w.nama_destinasi as name, 
         c.nama as category, 
         sk.nama as sub_kategori,
-        COALESCE(w.harga, 0) as price, 
-        COALESCE(w.rating_gmaps, 0) as rating, 
-        COALESCE(w.jumlah_ulasan, 0) as reviews,
+        w.harga as price, 
+        w.rating_gmaps as rating, 
+        w.jumlah_ulasan as reviews,
         w.alamat as address,
-        NULL as phone,
         w.web as link,
         w.link_gmaps as maps_link,
         w.username_instagram,
@@ -81,9 +80,14 @@ export async function POST(request: NextRequest) {
         ST_Y(w.geom) as lat,
         ST_DistanceSphere(w.geom, ST_MakePoint($1, $2)) as distance_m
       FROM destinasi w
-      LEFT JOIN kategori c ON w.kategori_id = c.id
+      LEFT JOIN kategori k ON w.kategori_id = k.id
       LEFT JOIN sub_kategori sk ON w.sub_kategori_id = sk.id
-      WHERE c.is_active = true ${categoryClause}
+      WHERE k.is_active = true 
+        AND (sk.is_active = true OR w.sub_kategori_id IS NULL)
+        AND w.harga IS NOT NULL 
+        AND w.rating_gmaps IS NOT NULL 
+        AND w.jumlah_ulasan IS NOT NULL
+        ${categoryClause}
     `;
 
     const client = await pool.connect();
@@ -103,6 +107,7 @@ export async function POST(request: NextRequest) {
     // FASE 4: PROSES ALGORITMA SAW (DARI UTILITAS)
     // Data yang masuk sudah terfilter per kategori.
     // SAW hanya bersaing di dalam kategori terpilih.
+    // SAW menghitung yang memiliki data lengkap harga, ulasan, dan rating.
     // ==========================================
     const totalWeight = w_jarak + w_harga + w_reviews + w_rating;
     const safeTotalWeight = totalWeight === 0 ? 1 : totalWeight;

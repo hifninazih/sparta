@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await getSession();
   const { id } = await params;
@@ -14,24 +14,54 @@ export async function PATCH(
   }
 
   try {
-    const { 
-      name, kategori_id, sub_kategori_id, price, rating, reviews, address, phone, link, maps_link, username_instagram, daya_tarik_utama, daya_tarik_pendukung, lng, lat 
+    const {
+      name,
+      kategori_id,
+      sub_kategori_id,
+      price,
+      rating,
+      reviews,
+      address,
+      link,
+      maps_link,
+      username_instagram,
+      daya_tarik_utama,
+      daya_tarik_pendukung,
+      lng,
+      lat,
     } = await request.json();
 
     const client = await pool.connect();
     try {
       const query = `
         UPDATE destinasi 
-        SET nama_desti = $1, kategori_id = $2, sub_kategori_id = $3, harga = $4, rating_gmaps = $5, jumlah_ulasan = $6, alamat = $7, web = $8, link_gmaps = $9, username_instagram = $10, daya_tarik_utama = $11, daya_tarik_pendukung = $12, geom = ST_SetSRID(ST_MakePoint($14::float8, $13::float8), 4326)
+        SET nama_destinasi = $1, kategori_id = $2, sub_kategori_id = $3, harga = $4, rating_gmaps = $5, jumlah_ulasan = $6, alamat = $7, web = $8, link_gmaps = $9, username_instagram = $10, daya_tarik_utama = $11, daya_tarik_pendukung = $12, geom = ST_SetSRID(ST_MakePoint($14::float8, $13::float8), 4326)
         WHERE gid = $15
-        RETURNING gid, nama_desti as name, (SELECT nama FROM kategori WHERE id = $2) as category, (SELECT nama FROM sub_kategori WHERE id = $3) as sub_kategori, kategori_id, sub_kategori_id, harga as price, rating_gmaps as rating, jumlah_ulasan as reviews, alamat as address, NULL as phone, web as link, link_gmaps as maps_link, username_instagram, daya_tarik_utama, daya_tarik_pendukung, ST_X(geom) as lng, ST_Y(geom) as lat
+        RETURNING gid, nama_destinasi as name, (SELECT nama FROM kategori WHERE id = $2) as category, (SELECT nama FROM sub_kategori WHERE id = $3) as sub_kategori, kategori_id, sub_kategori_id, harga as price, rating_gmaps as rating, jumlah_ulasan as reviews, alamat as address, web as link, link_gmaps as maps_link, username_instagram, daya_tarik_utama, daya_tarik_pendukung, ST_X(geom) as lng, ST_Y(geom) as lat
       `;
       const result = await client.query(query, [
-        name, kategori_id, sub_kategori_id || null, price, rating, reviews, address, link, maps_link, username_instagram, daya_tarik_utama, daya_tarik_pendukung, lat, lng, id
+        name,
+        kategori_id,
+        sub_kategori_id || null,
+        price,
+        rating,
+        reviews,
+        address,
+        link,
+        maps_link,
+        username_instagram,
+        daya_tarik_utama,
+        daya_tarik_pendukung,
+        lat,
+        lng,
+        id,
       ]);
 
       if (result.rowCount === 0) {
-        return NextResponse.json({ message: "Wisata not found" }, { status: 404 });
+        return NextResponse.json(
+          { message: "Wisata not found" },
+          { status: 404 },
+        );
       }
 
       return NextResponse.json(result.rows[0]);
@@ -40,13 +70,16 @@ export async function PATCH(
     }
   } catch (error) {
     console.error("Update Wisata Error:", error);
-    return NextResponse.json({ message: "Error updating wisata" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error updating wisata" },
+      { status: 500 },
+    );
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await getSession();
   const { id } = await params;
@@ -65,6 +98,9 @@ export async function DELETE(
     }
   } catch (error) {
     console.error("Delete Wisata Error:", error);
-    return NextResponse.json({ message: "Error deleting wisata" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error deleting wisata" },
+      { status: 500 },
+    );
   }
 }
