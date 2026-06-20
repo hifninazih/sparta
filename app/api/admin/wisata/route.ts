@@ -18,12 +18,14 @@ export async function GET(request: NextRequest) {
     try {
       const query = `
         SELECT 
-          w.gid, w.name, c.name as category, w.price, w.rating, w.reviews, w.address, w.phone, w.link, w.maps_link,
+          w.gid, w.nama_desti as name, c.nama as category, sk.nama as sub_kategori, w.kategori_id, w.sub_kategori_id, COALESCE(w.harga, 0) as price, COALESCE(w.rating_gmaps, 0) as rating, COALESCE(w.jumlah_ulasan, 0) as reviews, w.alamat as address, NULL as phone, w.web as link, w.link_gmaps as maps_link,
+          w.username_instagram, w.daya_tarik_utama, w.daya_tarik_pendukung,
           ST_X(w.geom) as lng, ST_Y(w.geom) as lat
-        FROM wisata w
-        LEFT JOIN categories c ON w.category_id = c.id
-        WHERE w.name ILIKE $1 OR c.name ILIKE $1
-        ORDER BY w.name ASC
+        FROM destinasi w
+        LEFT JOIN kategori c ON w.kategori_id = c.id
+        LEFT JOIN sub_kategori sk ON w.sub_kategori_id = sk.id
+        WHERE w.nama_desti ILIKE $1 OR c.nama ILIKE $1
+        ORDER BY w.nama_desti ASC
       `;
       const result = await client.query(query, [`%${search}%`]);
       return NextResponse.json(result.rows);
@@ -44,25 +46,27 @@ export async function POST(request: NextRequest) {
 
   try {
     const { 
-      name, category, price, rating, reviews, address, phone, link, maps_link, lng, lat 
+      name, kategori_id, sub_kategori_id, price, rating, reviews, address, phone, link, maps_link, username_instagram, daya_tarik_utama, daya_tarik_pendukung, lng, lat 
     } = await request.json();
     
-    if (!name || !category || lng === undefined || lat === undefined) {
+    if (!name || !kategori_id || lng === undefined || lat === undefined) {
       return NextResponse.json({ message: "Field wajib (nama, kategori, koordinat) tidak boleh kosong" }, { status: 400 });
     }
+
+    const newId = generateId();
 
     const client = await pool.connect();
     try {
       const query = `
-        INSERT INTO wisata (
-          name, category_id, price, rating, reviews, address, phone, link, maps_link, geom
+        INSERT INTO destinasi (
+          id, nama_desti, kategori_id, sub_kategori_id, harga, rating_gmaps, jumlah_ulasan, alamat, web, link_gmaps, username_instagram, daya_tarik_utama, daya_tarik_pendukung, lat, lon, geom
         ) VALUES (
-          $1, (SELECT id FROM categories WHERE name = $2), $3, $4, $5, $6, $7, $8, $9, ST_SetSRID(ST_MakePoint($11, $10), 4326)
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, ST_SetSRID(ST_MakePoint($15, $14), 4326)
         )
-        RETURNING gid, name, (SELECT name FROM categories WHERE id = category_id) as category, price, rating, reviews, address, phone, link, maps_link, ST_X(geom) as lng, ST_Y(geom) as lat
+        RETURNING gid, nama_desti as name, (SELECT nama FROM kategori WHERE id = $3) as category, (SELECT nama FROM sub_kategori WHERE id = $4) as sub_kategori, kategori_id, sub_kategori_id, harga as price, rating_gmaps as rating, jumlah_ulasan as reviews, alamat as address, NULL as phone, web as link, link_gmaps as maps_link, username_instagram, daya_tarik_utama, daya_tarik_pendukung, ST_X(geom) as lng, ST_Y(geom) as lat
       `;
       const result = await client.query(query, [
-        name, category, price || 0, rating || 0, reviews || 0, address, phone, link, maps_link, lat, lng
+        newId, name, kategori_id, sub_kategori_id || null, price || 0, rating || 0, reviews || 0, address, link, maps_link, username_instagram, daya_tarik_utama, daya_tarik_pendukung, lat, lng
       ]);
       return NextResponse.json(result.rows[0]);
     } finally {

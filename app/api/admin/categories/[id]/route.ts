@@ -19,17 +19,17 @@ export async function PATCH(
     const client = await pool.connect();
     try {
       // Periksa apakah nama kategori sudah dipakai oleh ID lain
-      const checkQuery = `SELECT id FROM categories WHERE name = $1 AND id != $2`;
+      const checkQuery = `SELECT id FROM kategori WHERE nama = $1 AND id != $2`;
       const checkResult = await client.query(checkQuery, [name, id]);
       if (checkResult.rows.length > 0) {
         return NextResponse.json({ message: "Kategori dengan nama ini sudah ada" }, { status: 400 });
       }
 
       const query = `
-        UPDATE categories 
-        SET name = $1, color = $2, icon = $3, is_active = $4
+        UPDATE kategori 
+        SET nama = $1, warna = $2, ikon = $3, is_active = $4
         WHERE id = $5
-        RETURNING id, name, color, icon, is_active, created_at
+        RETURNING id, nama as name, warna as color, ikon as icon, is_active, created_at
       `;
       const result = await client.query(query, [name, color, icon, is_active, id]);
 
@@ -37,7 +37,13 @@ export async function PATCH(
         return NextResponse.json({ message: "Category not found" }, { status: 404 });
       }
 
-      return NextResponse.json(result.rows[0]);
+      const updatedCat = result.rows[0];
+      
+      // Fetch sub categories to include in response
+      const subCatResult = await client.query(`SELECT id, nama as name, is_active FROM sub_kategori WHERE kategori_id = $1`, [id]);
+      updatedCat.sub_categories = subCatResult.rows;
+
+      return NextResponse.json(updatedCat);
     } finally {
       client.release();
     }
@@ -61,12 +67,11 @@ export async function DELETE(
   try {
     const client = await pool.connect();
     try {
-      await client.query("DELETE FROM categories WHERE id = $1", [id]);
+      await client.query("DELETE FROM kategori WHERE id = $1", [id]);
       return NextResponse.json({ message: "Category deleted successfully" });
     } catch (err: any) {
       if (err.code === '23503') {
-        // Foreign key violation error code in PostgreSQL
-        return NextResponse.json({ message: "Kategori tidak bisa dihapus karena masih digunakan oleh data wisata." }, { status: 400 });
+        return NextResponse.json({ message: "Kategori tidak bisa dihapus karena masih digunakan oleh data wisata atau sub kategori." }, { status: 400 });
       }
       throw err;
     } finally {

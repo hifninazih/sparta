@@ -11,6 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/core/dialog";
+import { cn } from "@/lib/utils";
 import { BobotSlider } from "@/components/shared/bobot-slider";
 import { FilterChips } from "@/components/shared/filter-chips";
 import {
@@ -305,20 +306,21 @@ export function PreferensiDialog() {
               LANGKAH 2: KATEGORI (Multi-select)
           ========================================= */}
           {currentStepData.type === "category" && (
-            <div className="flex w-full flex-col items-center gap-6">
+            <div className="relative flex w-full flex-col items-center">
               <FilterChips
                 value={selectedCategories}
                 onChange={setSelectedCategories}
                 className="justify-center"
               />
-              {selectedCategories.length > 0 && (
-                <button
-                  onClick={() => setSelectedCategories([])}
-                  className="text-[11px] font-black uppercase tracking-wider text-red-500 hover:underline"
-                >
-                  ✖ Hapus Pilihan
-                </button>
-              )}
+              <button
+                onClick={() => setSelectedCategories([])}
+                className={cn(
+                  "absolute -bottom-8 text-[11px] font-black uppercase tracking-wider text-red-500 hover:underline transition-all",
+                  selectedCategories.length > 0 ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
+                )}
+              >
+                ✖ Hapus Pilihan
+              </button>
             </div>
           )}
 

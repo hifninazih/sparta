@@ -1,5 +1,11 @@
 import { create } from "zustand";
 
+export interface SubCategory {
+  id: number;
+  name: string;
+  is_active: boolean;
+}
+
 export interface Category {
   id: number;
   name: string;
@@ -7,6 +13,7 @@ export interface Category {
   icon: string;
   is_active: boolean;
   created_at: string;
+  sub_categories?: SubCategory[];
 }
 
 interface CategoryState {

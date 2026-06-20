@@ -1,17 +1,12 @@
-import React from "react";
 import Link from "next/link";
 import {
   Compass,
   Zap,
   Layers,
-  ArrowRight,
   Navigation,
   Globe,
   MapPin,
   Map,
-  HelpCircle,
-  TrendingUp,
-  Award,
 } from "lucide-react";
 import { Button } from "@/components/core/button";
 import Header from "@/components/layout/Header";
@@ -41,7 +36,7 @@ export default function LandingPage() {
               <div className="flex flex-col items-center text-center lg:col-span-7 lg:items-start lg:text-left">
                 <div className="mb-6 inline-flex -rotate-1 transform items-center rounded-full border-2 border-black bg-[#DCFFBC] px-4 py-1.5 text-xs font-black text-black shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-transform hover:rotate-0 sm:text-sm">
                   <Zap className="mr-2 h-4 w-4 fill-blue-600 text-blue-600" />
-                  <span>SISTEM REKOMENDASI KEPUTUSAN</span>
+                  <span>SISTEM REKOMENDASI WISATA</span>
                 </div>
 
                 <h1 className="max-w-xl text-4xl font-black tracking-tighter text-black drop-shadow-sm sm:text-6xl lg:text-7xl lg:leading-[1.05]">
@@ -68,7 +63,7 @@ export default function LandingPage() {
                     <Button
                       size="lg"
                       variant="gradient"
-                      className="h-14 w-full border-2 px-8 text-base shadow-[3px_4px_0px_rgba(0,0,0,1)] hover:shadow-[1px_2px_0px_rgba(0,0,0,1)] sm:text-lg"
+                      className="h-14 w-full border-2 px-8 text-base shadow-[1px_2px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:-translate-x-0.5 hover:shadow-[3px_4px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:translate-x-0.5 active:shadow-[0px_0px_0px_rgba(0,0,0,1)] sm:text-lg transition-all"
                     >
                       Buka Peta Interaktif
                     </Button>
@@ -77,7 +72,7 @@ export default function LandingPage() {
                     <Button
                       size="lg"
                       variant="outline"
-                      className="h-14 w-full border-2 bg-white px-8 text-base shadow-[3px_4px_0px_rgba(0,0,0,1)] hover:bg-slate-100 hover:shadow-[1px_2px_0px_rgba(0,0,0,1)] sm:text-lg"
+                      className="h-14 w-full border-2 bg-white px-8 text-base shadow-[1px_2px_0px_rgba(0,0,0,1)] hover:bg-slate-100 hover:-translate-y-1 hover:-translate-x-0.5 hover:shadow-[3px_4px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:translate-x-0.5 active:shadow-[0px_0px_0px_rgba(0,0,0,1)] sm:text-lg transition-all"
                     >
                       Pelajari Metodologi
                     </Button>

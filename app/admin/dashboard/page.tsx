@@ -34,11 +34,11 @@ export default async function AdminDashboardPage() {
   try {
     const client = await pool.connect();
     try {
-      const totalRes = await client.query("SELECT COUNT(*) FROM wisata");
+      const totalRes = await client.query("SELECT COUNT(*) FROM destinasi");
       totalWisata = parseInt(totalRes.rows[0].count);
 
       const catRes = await client.query(
-        "SELECT category, COUNT(*) as count FROM wisata GROUP BY category ORDER BY count DESC"
+        "SELECT c.nama as category, COUNT(w.gid) as count FROM destinasi w LEFT JOIN kategori c ON w.kategori_id = c.id GROUP BY c.nama ORDER BY count DESC"
       );
       categoryStats = catRes.rows.map((row) => ({
         category: row.category,
@@ -52,7 +52,7 @@ export default async function AdminDashboardPage() {
           d.wadmkk as kabupaten,
           COUNT(w.gid) as count
         FROM public.administrasi_desa d
-        JOIN wisata w ON ST_Intersects(d.geom, w.geom)
+        JOIN destinasi w ON ST_Intersects(d.geom, w.geom)
         GROUP BY d.wadmkc, d.wadmkk
         ORDER BY count DESC
         LIMIT 5
@@ -69,7 +69,7 @@ export default async function AdminDashboardPage() {
           d.wadmkk as name, 
           COUNT(w.gid) as count
         FROM public.administrasi_desa d
-        JOIN wisata w ON ST_Intersects(d.geom, w.geom)
+        JOIN destinasi w ON ST_Intersects(d.geom, w.geom)
         GROUP BY d.wadmkk
         ORDER BY count DESC
         LIMIT 5

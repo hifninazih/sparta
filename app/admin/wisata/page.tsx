@@ -47,6 +47,9 @@ interface Wisata {
   gid: number;
   name: string;
   category: string;
+  sub_kategori?: string;
+  kategori_id: number;
+  sub_kategori_id?: number | null;
   price: number;
   rating: number;
   reviews: number;
@@ -54,6 +57,9 @@ interface Wisata {
   phone: string;
   link: string;
   maps_link: string;
+  username_instagram?: string;
+  daya_tarik_utama?: string;
+  daya_tarik_pendukung?: string;
   lng: number;
   lat: number;
 }
@@ -88,7 +94,8 @@ export default function WisataManagementPage() {
 
   const [formData, setFormData] = useState<{
     name: string;
-    category: string;
+    kategori_id: number | "";
+    sub_kategori_id: number | "";
     price: number | string;
     rating: number | string;
     reviews: number | string;
@@ -96,11 +103,15 @@ export default function WisataManagementPage() {
     phone: string;
     link: string;
     maps_link: string;
+    username_instagram: string;
+    daya_tarik_utama: string;
+    daya_tarik_pendukung: string;
     lng: number;
     lat: number;
   }>({
     name: "",
-    category: "",
+    kategori_id: "",
+    sub_kategori_id: "",
     price: 0,
     rating: 4.0,
     reviews: 0,
@@ -108,6 +119,9 @@ export default function WisataManagementPage() {
     phone: "",
     link: "",
     maps_link: "",
+    username_instagram: "",
+    daya_tarik_utama: "",
+    daya_tarik_pendukung: "",
     lng: 110.3695,
     lat: -7.7956,
   });
@@ -120,7 +134,8 @@ export default function WisataManagementPage() {
     setSelectedItem(null);
     setFormData({
       name: "",
-      category: "",
+      kategori_id: "",
+      sub_kategori_id: "",
       price: 0,
       rating: 4.5,
       reviews: 0,
@@ -128,6 +143,9 @@ export default function WisataManagementPage() {
       phone: "",
       link: "",
       maps_link: "",
+      username_instagram: "",
+      daya_tarik_utama: "",
+      daya_tarik_pendukung: "",
       lng: 110.3695,
       lat: -7.7956,
     });
@@ -138,7 +156,8 @@ export default function WisataManagementPage() {
     setSelectedItem(item);
     setFormData({
       name: item.name,
-      category: item.category,
+      kategori_id: item.kategori_id,
+      sub_kategori_id: item.sub_kategori_id || "",
       price: item.price,
       rating: Math.round(item.rating * 10) / 10,
       reviews: item.reviews,
@@ -146,6 +165,9 @@ export default function WisataManagementPage() {
       phone: item.phone || "",
       link: item.link || "",
       maps_link: item.maps_link || "",
+      username_instagram: item.username_instagram || "",
+      daya_tarik_utama: item.daya_tarik_utama || "",
+      daya_tarik_pendukung: item.daya_tarik_pendukung || "",
       lng: item.lng,
       lat: item.lat,
     });
@@ -356,20 +378,35 @@ export default function WisataManagementPage() {
                     onChange={e => setFormData({...formData, name: e.target.value})}
                   />
                 </FormField>
-                <FormField id="category" label="Kategori">
-                  <select
-                    id="category"
-                    required
-                    value={formData.category}
-                    onChange={e => setFormData({...formData, category: e.target.value})}
-                    className="flex h-10 w-full min-w-0 rounded-md border-2 border-black bg-white px-3 py-2 text-sm font-bold ring-offset-background transition-all outline-none shadow-[2px_2px_0px_rgba(0,0,0,1)] focus-visible:shadow-[1px_1px_0px_rgba(0,0,0,1)] focus-visible:translate-x-[1px] focus-visible:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="" disabled>Pilih kategori...</option>
-                    {categories.map((k) => (
-                      <option key={k.id} value={k.name}>{k.name}</option>
-                    ))}
-                  </select>
-                </FormField>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField id="kategori_id" label="Kategori">
+                    <select
+                      id="kategori_id"
+                      required
+                      value={formData.kategori_id}
+                      onChange={e => setFormData({...formData, kategori_id: Number(e.target.value), sub_kategori_id: ""})}
+                      className="flex h-10 w-full min-w-0 rounded-md border-2 border-black bg-white px-3 py-2 text-sm font-bold ring-offset-background transition-all outline-none shadow-[2px_2px_0px_rgba(0,0,0,1)] focus-visible:shadow-[1px_1px_0px_rgba(0,0,0,1)] focus-visible:translate-x-[1px] focus-visible:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="" disabled>Pilih kategori...</option>
+                      {categories.map((k) => (
+                        <option key={k.id} value={k.id}>{k.name}</option>
+                      ))}
+                    </select>
+                  </FormField>
+                  <FormField id="sub_kategori_id" label="Sub Kategori">
+                    <select
+                      id="sub_kategori_id"
+                      value={formData.sub_kategori_id}
+                      onChange={e => setFormData({...formData, sub_kategori_id: Number(e.target.value)})}
+                      className="flex h-10 w-full min-w-0 rounded-md border-2 border-black bg-white px-3 py-2 text-sm font-bold ring-offset-background transition-all outline-none shadow-[2px_2px_0px_rgba(0,0,0,1)] focus-visible:shadow-[1px_1px_0px_rgba(0,0,0,1)] focus-visible:translate-x-[1px] focus-visible:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">(Tidak Ada)</option>
+                      {categories.find(c => c.id === formData.kategori_id)?.sub_categories?.map(sk => (
+                        <option key={sk.id} value={sk.id}>{sk.name}</option>
+                      ))}
+                    </select>
+                  </FormField>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <FormField id="rating" label="Rating (1-5)">
                     <Input 
@@ -413,11 +450,11 @@ export default function WisataManagementPage() {
                   />
                 </FormField>
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField id="phone" label="No. Telepon">
+                  <FormField id="username_instagram" label="Username Instagram">
                     <Input 
-                      id="phone" 
-                      value={formData.phone}
-                      onChange={e => setFormData({...formData, phone: e.target.value})}
+                      id="username_instagram" 
+                      value={formData.username_instagram}
+                      onChange={e => setFormData({...formData, username_instagram: e.target.value})}
                     />
                   </FormField>
                   <FormField id="link" label="Website/Link">
@@ -425,6 +462,22 @@ export default function WisataManagementPage() {
                       id="link" 
                       value={formData.link}
                       onChange={e => setFormData({...formData, link: e.target.value})}
+                    />
+                  </FormField>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField id="daya_tarik_utama" label="Daya Tarik Utama">
+                    <Input 
+                      id="daya_tarik_utama" 
+                      value={formData.daya_tarik_utama}
+                      onChange={e => setFormData({...formData, daya_tarik_utama: e.target.value})}
+                    />
+                  </FormField>
+                  <FormField id="daya_tarik_pendukung" label="Daya Tarik Pendukung">
+                    <Input 
+                      id="daya_tarik_pendukung" 
+                      value={formData.daya_tarik_pendukung}
+                      onChange={e => setFormData({...formData, daya_tarik_pendukung: e.target.value})}
                     />
                   </FormField>
                 </div>

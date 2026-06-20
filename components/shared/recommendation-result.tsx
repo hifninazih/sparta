@@ -7,7 +7,9 @@ import {
   WisataRecommendation,
 } from "@/store/useRecommendationStore";
 import { X, MapPin, Star, Ticket } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCategoryStore } from "@/store/useCategoryStore";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   Drawer,
@@ -141,7 +143,14 @@ export function RecommendationResult() {
 
           {/* Badge kategori */}
           <div className="flex items-center gap-1">
-            <span className="rounded border border-black/20 bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-gray-600">
+            <span 
+              className="flex items-center gap-1 rounded border border-black/20 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-black"
+              style={{ backgroundColor: useCategoryStore.getState().getCategoryColor(item.category) }}
+            >
+              {(() => {
+                const Icon = (LucideIcons as any)[useCategoryStore.getState().getCategoryIcon(item.category) || "MapPin"];
+                return Icon ? <Icon className="size-3" strokeWidth={2.5} /> : null;
+              })()}
               {item.category}
             </span>
           </div>

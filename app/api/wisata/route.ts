@@ -23,14 +23,14 @@ export async function GET(request: NextRequest) {
 
     // --- FILTER KEYWORD ---
     if (search) {
-      whereClause += ` AND w.name ILIKE $${paramIndex}`;
+      whereClause += ` AND w.nama_desti ILIKE $${paramIndex}`;
       values.push(`%${search}%`);
       paramIndex++;
     }
 
     // --- FILTER KATEGORI (multi-value dengan ANY) ---
     if (kategoriList.length > 0) {
-      whereClause += ` AND c.name = ANY($${paramIndex})`;
+      whereClause += ` AND c.nama = ANY($${paramIndex})`;
       values.push(kategoriList);
       paramIndex++;
     }
@@ -56,31 +56,34 @@ export async function GET(request: NextRequest) {
     const dataQuery = `
       SELECT 
         w.gid::text, 
-        w.name, 
-        c.name as category, 
-        w.price, 
-        w.rating, 
-        w.reviews,
-        w.address,
-        w.phone,
-        w.link,
-        w.maps_link,
+        w.nama_desti as name, 
+        c.nama as category, 
+        sk.nama as sub_kategori,
+        COALESCE(w.harga, 0) as price, 
+        COALESCE(w.rating_gmaps, 0) as rating, 
+        COALESCE(w.jumlah_ulasan, 0) as reviews,
+        w.alamat as address,
+        NULL as phone,
+        w.web as link,
+        w.link_gmaps as maps_link,
         ST_X(w.geom) as lng, 
         ST_Y(w.geom) as lat,
-        (SELECT namobj FROM public.administrasi_desa d WHERE ST_Intersects(d.geom, w.geom) LIMIT 1) as desa,
-        (SELECT wadmkc FROM public.administrasi_desa d WHERE ST_Intersects(d.geom, w.geom) LIMIT 1) as kecamatan,
-        (SELECT wadmkk FROM public.administrasi_desa d WHERE ST_Intersects(d.geom, w.geom) LIMIT 1) as kabupaten
-      FROM wisata w
-      LEFT JOIN categories c ON w.category_id = c.id
+        w.kalurahan_kelurahan as desa,
+        w.kapanewon_kemantren as kecamatan,
+        w.kabupaten_kota as kabupaten
+      FROM destinasi w
+      LEFT JOIN kategori c ON w.kategori_id = c.id
+      LEFT JOIN sub_kategori sk ON w.sub_kategori_id = sk.id
       ${whereClause}
-      ORDER BY w.rating DESC 
+      ORDER BY w.rating_gmaps DESC NULLS LAST 
       LIMIT 20
     `;
 
     const countQuery = `
       SELECT COUNT(*) 
-      FROM wisata w 
-      LEFT JOIN categories c ON w.category_id = c.id 
+      FROM destinasi w 
+      LEFT JOIN kategori c ON w.kategori_id = c.id 
+      LEFT JOIN sub_kategori sk ON w.sub_kategori_id = sk.id
       ${whereClause}
     `;
 

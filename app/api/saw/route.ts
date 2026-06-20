@@ -57,27 +57,27 @@ export async function POST(request: NextRequest) {
 
     let categoryClause = "";
     if (hasCategoryFilter) {
-      categoryClause = "AND c.name = ANY($3)";
+      categoryClause = "AND c.nama = ANY($3)";
       queryParams.push(categoryList);
     }
 
     const dataQuery = `
       SELECT 
         w.gid::text, 
-        w.name, 
-        c.name as category, 
-        w.price, 
-        w.rating, 
-        w.reviews,
-        w.address,
-        w.phone,
-        w.link,
-        w.maps_link,
+        w.nama_desti as name, 
+        c.nama as category, 
+        COALESCE(w.harga, 0) as price, 
+        COALESCE(w.rating_gmaps, 0) as rating, 
+        COALESCE(w.jumlah_ulasan, 0) as reviews,
+        w.alamat as address,
+        NULL as phone,
+        w.web as link,
+        w.link_gmaps as maps_link,
         ST_X(w.geom) as lng, 
         ST_Y(w.geom) as lat,
         ST_DistanceSphere(w.geom, ST_MakePoint($1, $2)) as distance_m
-      FROM wisata w
-      LEFT JOIN categories c ON w.category_id = c.id
+      FROM destinasi w
+      LEFT JOIN kategori c ON w.kategori_id = c.id
       WHERE c.is_active = true ${categoryClause}
     `;
 

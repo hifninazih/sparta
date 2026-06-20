@@ -12,6 +12,9 @@ interface Wisata {
   gid: number;
   name: string;
   category: string;
+  sub_kategori: string;
+  kategori_id: number;
+  sub_kategori_id: number | null;
   price: number;
   rating: number;
   reviews: number;
@@ -19,6 +22,9 @@ interface Wisata {
   phone: string;
   link: string;
   maps_link: string;
+  username_instagram: string;
+  daya_tarik_utama: string;
+  daya_tarik_pendukung: string;
   lng: number;
   lat: number;
 }

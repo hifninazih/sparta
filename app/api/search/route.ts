@@ -40,12 +40,14 @@ export async function GET(request: NextRequest) {
     // 1. QUERY LOKAL: Cari di Database (PostgreSQL)
     const localQuery = `
       SELECT 
-        w.gid::text, w.name, c.name as category, 
-        w.price, w.rating, w.reviews, w.address, w.phone, w.link, w.maps_link,
+        w.gid::text, w.nama_desti as name, c.nama as category, sk.nama as sub_kategori,
+        COALESCE(w.harga, 0) as price, COALESCE(w.rating_gmaps, 0) as rating, COALESCE(w.jumlah_ulasan, 0) as reviews, 
+        w.alamat as address, NULL as phone, w.web as link, w.link_gmaps as maps_link,
         ST_X(w.geom) as lng, ST_Y(w.geom) as lat 
-      FROM wisata w
-      LEFT JOIN categories c ON w.category_id = c.id
-      WHERE w.name ILIKE $1 AND c.is_active = true
+      FROM destinasi w
+      LEFT JOIN kategori c ON w.kategori_id = c.id
+      LEFT JOIN sub_kategori sk ON w.sub_kategori_id = sk.id
+      WHERE w.nama_desti ILIKE $1 AND c.is_active = true
       LIMIT 5
     `;
     const localDbPromise = pool.query(localQuery, [`%${keyword}%`]);

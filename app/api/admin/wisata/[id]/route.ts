@@ -15,19 +15,19 @@ export async function PATCH(
 
   try {
     const { 
-      name, category, price, rating, reviews, address, phone, link, maps_link, lng, lat 
+      name, kategori_id, sub_kategori_id, price, rating, reviews, address, phone, link, maps_link, username_instagram, daya_tarik_utama, daya_tarik_pendukung, lng, lat 
     } = await request.json();
 
     const client = await pool.connect();
     try {
       const query = `
-        UPDATE wisata 
-        SET name = $1, category_id = (SELECT id FROM categories WHERE name = $2), price = $3, rating = $4, reviews = $5, address = $6, phone = $7, link = $8, maps_link = $9, geom = ST_SetSRID(ST_MakePoint($11::float8, $10::float8), 4326)
-        WHERE gid = $12
-        RETURNING gid, name, (SELECT name FROM categories WHERE id = category_id) as category, price, rating, reviews, address, phone, link, maps_link, ST_X(geom) as lng, ST_Y(geom) as lat
+        UPDATE destinasi 
+        SET nama_desti = $1, kategori_id = $2, sub_kategori_id = $3, harga = $4, rating_gmaps = $5, jumlah_ulasan = $6, alamat = $7, web = $8, link_gmaps = $9, username_instagram = $10, daya_tarik_utama = $11, daya_tarik_pendukung = $12, geom = ST_SetSRID(ST_MakePoint($14::float8, $13::float8), 4326)
+        WHERE gid = $15
+        RETURNING gid, nama_desti as name, (SELECT nama FROM kategori WHERE id = $2) as category, (SELECT nama FROM sub_kategori WHERE id = $3) as sub_kategori, kategori_id, sub_kategori_id, harga as price, rating_gmaps as rating, jumlah_ulasan as reviews, alamat as address, NULL as phone, web as link, link_gmaps as maps_link, username_instagram, daya_tarik_utama, daya_tarik_pendukung, ST_X(geom) as lng, ST_Y(geom) as lat
       `;
       const result = await client.query(query, [
-        name, category, price, rating, reviews, address, phone, link, maps_link, lat, lng, id
+        name, kategori_id, sub_kategori_id || null, price, rating, reviews, address, link, maps_link, username_instagram, daya_tarik_utama, daya_tarik_pendukung, lat, lng, id
       ]);
 
       if (result.rowCount === 0) {
@@ -58,7 +58,7 @@ export async function DELETE(
   try {
     const client = await pool.connect();
     try {
-      await client.query("DELETE FROM wisata WHERE gid = $1", [id]);
+      await client.query("DELETE FROM destinasi WHERE gid = $1", [id]);
       return NextResponse.json({ message: "Wisata deleted successfully" });
     } finally {
       client.release();

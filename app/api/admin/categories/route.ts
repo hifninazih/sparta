@@ -16,10 +16,17 @@ export async function GET(request: NextRequest) {
     try {
       const query = `
         SELECT 
-          id, name, color, icon, is_active, created_at
-        FROM categories
-        WHERE name ILIKE $1
-        ORDER BY id DESC
+          k.id, k.nama as name, k.warna as color, k.ikon as icon, k.is_active, k.created_at,
+          COALESCE(
+            json_agg(
+              json_build_object('id', sk.id, 'name', sk.nama, 'is_active', sk.is_active)
+            ) FILTER (WHERE sk.id IS NOT NULL), '[]'
+          ) as sub_categories
+        FROM kategori k
+        LEFT JOIN sub_kategori sk ON k.id = sk.kategori_id
+        WHERE k.nama ILIKE $1
+        GROUP BY k.id
+        ORDER BY k.id DESC
       `;
       const result = await client.query(query, [`%${search}%`]);
       return NextResponse.json(result.rows);
@@ -48,19 +55,21 @@ export async function POST(request: NextRequest) {
     const client = await pool.connect();
     try {
       // Periksa apakah nama kategori sudah ada
-      const checkQuery = `SELECT id FROM categories WHERE name = $1`;
+      const checkQuery = `SELECT id FROM kategori WHERE nama = $1`;
       const checkResult = await client.query(checkQuery, [name]);
       if (checkResult.rows.length > 0) {
         return NextResponse.json({ message: "Kategori dengan nama ini sudah ada" }, { status: 400 });
       }
 
       const query = `
-        INSERT INTO categories (name, color, icon, is_active)
+        INSERT INTO kategori (nama, warna, ikon, is_active)
         VALUES ($1, $2, $3, $4)
-        RETURNING id, name, color, icon, is_active, created_at
+        RETURNING id, nama as name, warna as color, ikon as icon, is_active, created_at
       `;
       const result = await client.query(query, [name, color || "#000000", icon || "MapPin", is_active ?? true]);
-      return NextResponse.json(result.rows[0]);
+      const newCat = result.rows[0];
+      newCat.sub_categories = []; // Initialize empty array for newly created category
+      return NextResponse.json(newCat);
     } finally {
       client.release();
     }

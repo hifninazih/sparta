@@ -206,6 +206,7 @@ export default function Maps() {
           terrain={terrainProps as any}
           cursor={isPickingLocation ? "crosshair" : "grab"}
           attributionControl={false}
+          reuseMaps={true}
         >
           {/* TERRAIN SOURCE */}
           <Source 

@@ -47,6 +47,8 @@ import {
   DialogTitle,
 } from "@/components/core/dialog";
 
+import { SubCategoryDialog } from "./SubCategoryDialog";
+
 const AVAILABLE_ICONS = [
   { name: "MapPin", component: MapPin },
   { name: "Mountain", component: Mountain },
@@ -75,6 +77,9 @@ export default function CategoryManagementPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<AdminCategory | null>(null);
+  
+  const [isSubDialogOpen, setIsSubDialogOpen] = useState(false);
+  const [selectedCategoryForSub, setSelectedCategoryForSub] = useState<AdminCategory | null>(null);
 
   const [formData, setFormData] = useState<{
     name: string;
@@ -134,13 +139,11 @@ export default function CategoryManagementPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus kategori ini?")) {
-      try {
-        await removeCategory(id);
-        toast.success("Kategori berhasil dihapus");
-      } catch (error: any) {
-        toast.error(error.message);
-      }
+    try {
+      await removeCategory(id);
+      toast.success("Kategori berhasil dihapus");
+    } catch (error: any) {
+      toast.error(error.message);
     }
   };
 
@@ -236,12 +239,25 @@ export default function CategoryManagementPage() {
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  <ActionButtons 
-                    onEdit={() => handleOpenDialog(item)}
-                    onDelete={() => handleDelete(item.id)}
-                    deleteTitle="Hapus Kategori?"
-                    deleteDescription={`Apakah Anda yakin ingin menghapus kategori ${item.name}? Ini tidak dapat dibatalkan.`}
-                  />
+                  <div className="flex items-center justify-end gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="rect" 
+                      onClick={() => {
+                        setSelectedCategoryForSub(item);
+                        setIsSubDialogOpen(true);
+                      }}
+                      className="h-8 px-2 text-xs font-bold"
+                    >
+                      Sub Kategori ({item.sub_categories?.length || 0})
+                    </Button>
+                    <ActionButtons 
+                      onEdit={() => handleOpenDialog(item)}
+                      onDelete={() => handleDelete(item.id)}
+                      deleteTitle="Hapus Kategori?"
+                      deleteDescription={`Apakah Anda yakin ingin menghapus kategori ${item.name}? Ini tidak dapat dibatalkan.`}
+                    />
+                  </div>
                 </TableCell>
               </TableRow>
             ))
@@ -348,6 +364,12 @@ export default function CategoryManagementPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <SubCategoryDialog 
+        category={selectedCategoryForSub ? categories.find(c => c.id === selectedCategoryForSub.id) || null : null}
+        isOpen={isSubDialogOpen}
+        onClose={() => setIsSubDialogOpen(false)}
+      />
     </div>
   );
 }
