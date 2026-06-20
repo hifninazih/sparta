@@ -250,7 +250,7 @@ export function PreferensiDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent className="gap-0 overflow-hidden border-2 border-black p-0 sm:max-w-md">
-        <DialogHeader className="p-6 pr-8 pb-2">
+        <DialogHeader className="p-6 px-12 pb-2">
           <DialogTitle className="text-center text-lg leading-tight font-bold">
             {currentStepData.title}
           </DialogTitle>
