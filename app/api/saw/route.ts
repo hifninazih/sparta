@@ -80,9 +80,9 @@ export async function POST(request: NextRequest) {
         ST_Y(w.geom) as lat,
         ST_DistanceSphere(w.geom, ST_MakePoint($1, $2)) as distance_m
       FROM destinasi w
-      LEFT JOIN kategori k ON w.kategori_id = k.id
+      LEFT JOIN kategori c ON w.kategori_id = c.id
       LEFT JOIN sub_kategori sk ON w.sub_kategori_id = sk.id
-      WHERE k.is_active = true 
+      WHERE c.is_active = true 
         AND (sk.is_active = true OR w.sub_kategori_id IS NULL)
         AND w.harga IS NOT NULL 
         AND w.rating_gmaps IS NOT NULL 
