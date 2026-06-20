@@ -18,6 +18,9 @@ export interface UnifiedSearchResult {
   username_instagram?: string;
   daya_tarik_utama?: string;
   daya_tarik_pendukung?: string;
+  desa?: string;
+  kecamatan?: string;
+  kabupaten?: string;
 }
 
 // Tipe respons dari Nominatim OSM API
@@ -98,6 +101,9 @@ export async function GET(request: NextRequest) {
         username_instagram: row.username_instagram,
         daya_tarik_utama: row.daya_tarik_utama,
         daya_tarik_pendukung: row.daya_tarik_pendukung,
+        desa: row.desa,
+        kecamatan: row.kecamatan,
+        kabupaten: row.kabupaten,
       }),
     );
 
