@@ -109,14 +109,13 @@ export function WisataDetailModal({
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
                 <span className="leading-snug capitalize">
                   {[
+                    wisata.address ? `${wisata.address}` : null,
                     wisata.desa ? `${wisata.desa}` : null,
                     wisata.kecamatan ? `${wisata.kecamatan}` : null,
                     wisata.kabupaten,
                   ]
                     .filter(Boolean)
-                    .join(", ") ||
-                    wisata.address ||
-                    "Tidak ada informasi alamat"}
+                    .join(", ") || "Tidak ada informasi alamat"}
                 </span>
               </div>
               <Button

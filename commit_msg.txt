@@ -1,5 +1,0 @@
-style: refine Neo-Brutalism UI/UX and improve component interactions
-
-- Toned down extreme Neo-Brutalism styling (borders and shadows) across admin components (NeoCard, PageHeader, SearchSection, Table, Input, Select, Textarea, ActionButtons) and the Landing Page for a cleaner aesthetic.
-- Enhanced `Select` component option hover state readability by applying contrasting theme colors (neon green and black).
-- Fixed form state retention in admin dialogs (Tambah Admin & Tambah Wisata) by automatically resetting form data upon dialog closure.

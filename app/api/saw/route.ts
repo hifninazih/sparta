@@ -78,10 +78,19 @@ export async function POST(request: NextRequest) {
         w.daya_tarik_pendukung,
         ST_X(w.geom) as lng, 
         ST_Y(w.geom) as lat,
+        ad.namobj as desa,
+        ad.wadmkc as kecamatan,
+        ad.wadmkk as kabupaten,
         ST_DistanceSphere(w.geom, ST_MakePoint($1, $2)) as distance_m
       FROM destinasi w
       LEFT JOIN kategori c ON w.kategori_id = c.id
       LEFT JOIN sub_kategori sk ON w.sub_kategori_id = sk.id
+      LEFT JOIN LATERAL (
+        SELECT namobj, wadmkc, wadmkk 
+        FROM administrasi_desa 
+        WHERE ST_Intersects(w.geom, geom) 
+        LIMIT 1
+      ) ad ON true
       WHERE c.is_active = true 
         AND (sk.is_active = true OR w.sub_kategori_id IS NULL)
         AND w.harga IS NOT NULL 

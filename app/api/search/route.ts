@@ -46,10 +46,17 @@ export async function GET(request: NextRequest) {
         w.harga as price, w.rating_gmaps as rating, w.jumlah_ulasan as reviews, 
         w.alamat as address, w.web as link, w.link_gmaps as maps_link,
         w.username_instagram, w.daya_tarik_utama, w.daya_tarik_pendukung,
-        ST_X(w.geom) as lng, ST_Y(w.geom) as lat 
+        ST_X(w.geom) as lng, ST_Y(w.geom) as lat,
+        ad.namobj as desa, ad.wadmkc as kecamatan, ad.wadmkk as kabupaten
       FROM destinasi w
       LEFT JOIN kategori c ON w.kategori_id = c.id
       LEFT JOIN sub_kategori sk ON w.sub_kategori_id = sk.id
+      LEFT JOIN LATERAL (
+        SELECT namobj, wadmkc, wadmkk 
+        FROM administrasi_desa 
+        WHERE ST_Intersects(w.geom, geom) 
+        LIMIT 1
+      ) ad ON true
       WHERE w.nama_destinasi ILIKE $1 
         AND c.is_active = true
         AND (sk.is_active = true OR w.sub_kategori_id IS NULL)
