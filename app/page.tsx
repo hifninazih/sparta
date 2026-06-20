@@ -232,7 +232,7 @@ export default function LandingPage() {
                 {
                   step: "02",
                   title: "Normalisasi Nilai",
-                  desc: "Kriteria Benefit (rating, ulasan) dibagi nilai maksimal. Kriteria Cost (harga, jarak) dibagi nilai minimal, sehingga rentang nilai bernilai 0 hingga 1.",
+                  desc: "Kriteria Benefit (rating, ulasan) dibagi dengan nilai maksimal. Untuk Kriteria Cost (harga, jarak), nilai minimal dibagi dengan nilai destinasi tersebut, sehingga skala terselaraskan.",
                   color: "bg-[#DCFFBC]",
                 },
                 {
@@ -412,18 +412,18 @@ export default function LandingPage() {
               <div className="grid w-full flex-1 grid-cols-2 gap-4">
                 <div className="rounded-2xl border-4 border-black bg-white p-6 text-center shadow-[5px_5px_0px_rgba(0,0,0,1)]">
                   <span className="block text-5xl font-black text-blue-600">
-                    7
+                    320+
                   </span>
                   <span className="mt-2 block text-xs font-black tracking-wider text-black uppercase">
-                    Kategori Wisata
+                    Destinasi Wisata
                   </span>
                 </div>
                 <div className="rounded-2xl border-4 border-black bg-[#FFF59D] p-6 text-center shadow-[5px_5px_0px_rgba(0,0,0,1)]">
                   <span className="block text-5xl font-black text-black">
-                    100%
+                    4
                   </span>
                   <span className="mt-2 block text-xs font-black tracking-wider text-slate-800 uppercase">
-                    Visual Spasial
+                    Kategori Utama
                   </span>
                 </div>
                 <div className="col-span-2 rounded-2xl border-4 border-black bg-[#DCFFBC] p-6 text-center shadow-[5px_5px_0px_rgba(0,0,0,1)]">
