@@ -38,10 +38,12 @@ export default function SelectedSuggestionMarker() {
               onClick={(e) => e.stopPropagation()}
               onPointerDown={(e) => e.stopPropagation()}
             >
-              {/* Tooltip Nama yang Menempel (Selalu Muncul) */}
-              <div className="pointer-events-none absolute -top-12 z-50 rounded-lg border-2 border-black bg-white px-3 py-1.5 text-xs font-black whitespace-nowrap shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all">
-                {selectedPlace.name}
-              </div>
+              {/* Tooltip Nama yang Menempel (Muncul ketika popover tidak buka) */}
+              {activeWisata?.gid !== selectedPlace.gid && (
+                <div className="pointer-events-none absolute -top-12 z-50 rounded-lg border-2 border-black bg-white px-3 py-1.5 text-xs font-black whitespace-nowrap shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all">
+                  {selectedPlace.name}
+                </div>
+              )}
 
               {/* Menggunakan warna kategori (atau Oranye jika dari OSM) agar mencolok dibandingkan marker lain */}
               <div
