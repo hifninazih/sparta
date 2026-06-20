@@ -16,6 +16,9 @@ export interface UnifiedSearchResult {
   phone?: string;
   link?: string;
   maps_link?: string;
+  username_instagram?: string;
+  daya_tarik_utama?: string;
+  daya_tarik_pendukung?: string;
 }
 
 // Tipe respons dari Nominatim OSM API
@@ -43,6 +46,7 @@ export async function GET(request: NextRequest) {
         w.gid::text, w.nama_desti as name, c.nama as category, sk.nama as sub_kategori,
         COALESCE(w.harga, 0) as price, COALESCE(w.rating_gmaps, 0) as rating, COALESCE(w.jumlah_ulasan, 0) as reviews, 
         w.alamat as address, NULL as phone, w.web as link, w.link_gmaps as maps_link,
+        w.username_instagram, w.daya_tarik_utama, w.daya_tarik_pendukung,
         ST_X(w.geom) as lng, ST_Y(w.geom) as lat 
       FROM destinasi w
       LEFT JOIN kategori c ON w.kategori_id = c.id
@@ -84,6 +88,9 @@ export async function GET(request: NextRequest) {
         phone: row.phone,
         link: row.link,
         maps_link: row.maps_link,
+        username_instagram: row.username_instagram,
+        daya_tarik_utama: row.daya_tarik_utama,
+        daya_tarik_pendukung: row.daya_tarik_pendukung,
       }),
     );
 

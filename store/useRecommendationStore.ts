@@ -11,6 +11,10 @@ export interface WisataRecommendation {
   phone?: string;
   link?: string;
   maps_link?: string;
+  username_instagram?: string;
+  daya_tarik_utama?: string;
+  daya_tarik_pendukung?: string;
+  sub_kategori?: string;
   lng: number;
   lat: number;
   distance_m: number;

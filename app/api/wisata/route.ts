@@ -70,7 +70,10 @@ export async function GET(request: NextRequest) {
         ST_Y(w.geom) as lat,
         w.kalurahan_kelurahan as desa,
         w.kapanewon_kemantren as kecamatan,
-        w.kabupaten_kota as kabupaten
+        w.kabupaten_kota as kabupaten,
+        w.username_instagram,
+        w.daya_tarik_utama,
+        w.daya_tarik_pendukung
       FROM destinasi w
       LEFT JOIN kategori c ON w.kategori_id = c.id
       LEFT JOIN sub_kategori sk ON w.sub_kategori_id = sk.id
