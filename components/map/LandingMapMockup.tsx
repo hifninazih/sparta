@@ -21,7 +21,6 @@ export default function LandingMapMockup() {
         attributionControl={false}
         style={{ width: "100%", height: "100%" }}
         mapStyle={streetStyle}
-        reuseMaps={true}
       >
         {/* Prambanan */}
         <Marker longitude={110.4938} latitude={-7.752} anchor="bottom">

@@ -23,7 +23,7 @@ export function MapPicker({ lng, lat, onChange }: MapPickerProps) {
         style={{ width: "100%", height: "100%" }}
         mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
         onClick={(e) => onChange(e.lngLat.lng, e.lngLat.lat)}
-        reuseMaps={true}
+        id="picker-map"
       >
         <Marker longitude={lng} latitude={lat} anchor="bottom">
           <MapPin className="h-8 w-8 text-red-600 fill-red-100" />

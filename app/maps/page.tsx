@@ -197,7 +197,10 @@ export default function Maps() {
             setViewState(e.viewState);
             triggerLiveSearch();
           }}
-          onLoad={triggerLiveSearch}
+          onLoad={(e) => {
+            e.target.resize();
+            triggerLiveSearch();
+          }}
           onClick={handleMapClick}
           onDragStart={handleMapInteraction}
           onZoomStart={handleMapInteraction}
@@ -206,7 +209,6 @@ export default function Maps() {
           terrain={terrainProps as any}
           cursor={isPickingLocation ? "crosshair" : "grab"}
           attributionControl={false}
-          reuseMaps={true}
         >
           {/* TERRAIN SOURCE */}
           <Source 
