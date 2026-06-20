@@ -49,6 +49,7 @@ export default function Maps() {
     minZoom,
     maxBounds,
     setSelectedLocation,
+    setSelectedAddress,
     isSatellite,
     activeWisata,
     setActiveWisata,
@@ -141,8 +142,17 @@ export default function Maps() {
     if (!isPickingLocation) return;
 
     const { lng, lat } = event.lngLat;
-
     setSelectedLocation([lng, lat]);
+    setSelectedAddress("Mengambil detail lokasi...");
+
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setSelectedAddress(data.display_name || "Alamat tidak ditemukan");
+      })
+      .catch(() => {
+        setSelectedAddress("Gagal mengambil alamat");
+      });
 
     setIsPickingLocation(false);
     setStep(1);

@@ -17,6 +17,9 @@ interface MapState {
   selectedLocation: [number, number] | null;
   setSelectedLocation: (loc: [number, number] | null) => void;
 
+  selectedAddress: string | null;
+  setSelectedAddress: (addr: string | null) => void;
+
   setViewState: (viewState: ViewState) => void;
   isSatellite: boolean;
   toggleMapStyle: () => void;
@@ -46,6 +49,9 @@ export const useMapStore = create<MapState>((set) => ({
 
   selectedLocation: null,
   setSelectedLocation: (loc) => set({ selectedLocation: loc }),
+
+  selectedAddress: null,
+  setSelectedAddress: (addr) => set({ selectedAddress: addr }),
 
   setViewState: (newViewState) => set({ viewState: newViewState }),
   isSatellite: false,

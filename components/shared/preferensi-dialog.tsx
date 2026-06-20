@@ -97,8 +97,13 @@ export function PreferensiDialog() {
     setIsPickingLocation,
   } = useWizardStore();
   const { selectedCategories, setSelectedCategories } = useSearchStore();
-  const { setUserLocation, selectedLocation, setSelectedLocation } =
-    useMapStore();
+  const {
+    setUserLocation,
+    selectedLocation,
+    setSelectedLocation,
+    selectedAddress,
+    setSelectedAddress,
+  } = useMapStore();
   const { setRecommendations, setIsLoading } = useRecommendationStore();
   const { run, stepIndex, nextStep: tourNextStep } = useTourStore();
 
@@ -118,11 +123,21 @@ export function PreferensiDialog() {
     }
 
     setIsLoadingGPS(true);
+    setSelectedAddress("Mencari alamat lokasi saat ini...");
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { longitude, latitude } = position.coords;
         setUserLocation([longitude, latitude]);
         setSelectedLocation([longitude, latitude]);
+        
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await res.json();
+          setSelectedAddress(data.display_name || "Alamat tidak ditemukan");
+        } catch (e) {
+          setSelectedAddress("Gagal mengambil alamat");
+        }
+
         setIsLoadingGPS(false);
       },
       (error) => {
@@ -150,6 +165,7 @@ export function PreferensiDialog() {
 
   const handleClearLocation = () => {
     setSelectedLocation(null);
+    setSelectedAddress(null);
   };
 
   // --- FUNGSI 3: KALKULASI SAW ---
@@ -249,17 +265,18 @@ export function PreferensiDialog() {
           {currentStepData.type === "location" && (
             <div className="flex w-full flex-col items-center justify-center">
               {selectedLocation ? (
-                <div className="flex w-full max-w-70 items-center justify-between rounded-md border-2 border-black bg-[#DCFFBC] p-3 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                  <div className="flex items-center gap-3 overflow-hidden">
+                <div className="flex w-full items-center justify-between rounded-md border-2 border-black bg-[#DCFFBC] p-3 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                  <div className="flex items-center gap-3 pr-2">
                     <div className="rounded-full border border-black bg-white p-1.5">
                       <MapPinCheck
                         className="size-5 shrink-0 text-black"
                         fill="#fff"
                       />
                     </div>
-                    <div className="flex flex-col font-mono text-[11px] leading-tight font-bold text-black sm:text-xs">
-                      <span>Lat: {selectedLocation[1].toFixed(5)}</span>
-                      <span>Lng: {selectedLocation[0].toFixed(5)}</span>
+                    <div className="flex flex-col font-sans text-xs leading-snug font-bold text-black sm:text-sm">
+                      <span>
+                        {selectedAddress || "Memuat alamat..."}
+                      </span>
                     </div>
                   </div>
                   <button
