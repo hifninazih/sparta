@@ -54,8 +54,8 @@ export default function LandingPage() {
                   <strong className="bg-[#DCFFBC] px-1 text-black">
                     Simple Additive Weighting (SAW)
                   </strong>{" "}
-                  untuk memberikan rekomendasi wisata akurat yang disesuaikan
-                  berdasarkan kriteria Jarak, Harga, Rating, dan Ulasan Anda.
+                  untuk memberikan rekomendasi wisata yang disesuaikan
+                  berdasarkan kriteria Jarak, Harga, Rating, dan Ulasan.
                 </p>
 
                 <div className="mt-8 flex w-full max-w-sm flex-col space-y-4 sm:max-w-none sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4 lg:justify-start">
@@ -65,7 +65,7 @@ export default function LandingPage() {
                       variant="gradient"
                       className="h-14 w-full border-2 px-8 text-base shadow-[1px_2px_0px_rgba(0,0,0,1)] transition-all hover:-translate-x-0.5 hover:-translate-y-1 hover:shadow-[3px_4px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[0px_0px_0px_rgba(0,0,0,1)] sm:text-lg"
                     >
-                      Buka Peta Interaktif
+                      Buka Peta
                     </Button>
                   </Link>
                   <a href="#how-it-works" className="w-full sm:w-auto">
