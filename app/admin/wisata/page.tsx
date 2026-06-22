@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   Table, 
   TableBody, 
@@ -30,10 +30,16 @@ import {
   Banknote,
   Navigation,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Filter,
+  X
 } from "lucide-react";
 import { toast } from "sonner";
 import { MapPicker } from "@/components/map/MapPicker";
+import * as LucideIcons from "lucide-react";
 
 import { useAdminStore } from "@/store/useAdminStore";
 import { PageHeader } from "@/components/admin/PageHeader";
@@ -73,7 +79,7 @@ export default function WisataManagementPage() {
     removeWisata 
   } = useAdminStore();
 
-  const { categories, fetchCategories } = useCategoryStore();
+  const { categories, fetchCategories, getCategoryColor, getCategoryIcon } = useCategoryStore();
 
   useEffect(() => {
     if (categories.length === 0) fetchCategories();
@@ -84,12 +90,48 @@ export default function WisataManagementPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Wisata | null>(null);
 
+  // --- Sort & Filter State ---
+  type SortKey = "name" | "rating" | "price" | "reviews";
+  type SortDir = "asc" | "desc";
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [filterCategory, setFilterCategory] = useState<string[]>([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  // Close filter dropdown on outside click
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setIsFilterOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, []);
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, sortKey, sortDir, filterCategory]);
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40 inline" />;
+    return sortDir === "asc"
+      ? <ArrowUp className="h-3 w-3 ml-1 text-blue-600 inline" />
+      : <ArrowDown className="h-3 w-3 ml-1 text-blue-600 inline" />;
+  };
 
   const [formData, setFormData] = useState<{
     name: string;
@@ -226,10 +268,24 @@ export default function WisataManagementPage() {
     }
   };
 
-  const filteredData = wisata.filter(item => 
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredData = wisata
+    .filter(item =>
+      (item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+       item.category.toLowerCase().includes(searchQuery.toLowerCase())) &&
+      (filterCategory.length === 0 || filterCategory.includes(item.category))
+    )
+    .sort((a, b) => {
+      let aVal: any = a[sortKey === "price" ? "price" : sortKey === "rating" ? "rating" : sortKey === "reviews" ? "reviews" : "name"];
+      let bVal: any = b[sortKey === "price" ? "price" : sortKey === "rating" ? "rating" : sortKey === "reviews" ? "reviews" : "name"];
+      if (typeof aVal === "string") aVal = aVal.toLowerCase();
+      if (typeof bVal === "string") bVal = bVal.toLowerCase();
+      if (aVal < bVal) return sortDir === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+
+  // Unique categories for filter dropdown
+  const uniqueCategories = Array.from(new Set(wisata.map(w => w.category))).sort();
 
   const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
   const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -263,10 +319,104 @@ export default function WisataManagementPage() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Nama Wisata</TableHead>
-            <TableHead>Kategori</TableHead>
-            <TableHead className="text-right">Harga</TableHead>
-            <TableHead className="text-center">Rating</TableHead>
+            <TableHead>
+              <button onClick={() => handleSort("name")} className="flex items-center font-black hover:text-blue-600 transition-colors">
+                Nama Wisata <SortIcon col="name" />
+              </button>
+            </TableHead>
+            <TableHead>
+              {/* Kategori header with inline multi-select filter dropdown */}
+              <div className="relative" ref={filterRef}>
+                <button
+                  onClick={() => setIsFilterOpen(o => !o)}
+                  className={`flex items-center gap-1 font-black transition-colors ${
+                    filterCategory.length > 0 ? "text-blue-600" : "hover:text-blue-600"
+                  }`}
+                >
+                  Kategori
+                  <Filter className={`h-3.5 w-3.5 ml-0.5 ${
+                    filterCategory.length > 0 ? "text-blue-600" : "opacity-40"
+                  }`} />
+                  {filterCategory.length > 0 && (
+                    <span className="ml-1 rounded-full bg-blue-600 px-1.5 py-0.5 text-[9px] text-white font-black">
+                      {filterCategory.length}
+                    </span>
+                  )}
+                </button>
+
+                {isFilterOpen && (
+                  <div className="absolute top-full left-0 z-50 mt-1 min-w-[200px] rounded-xl border-2 border-black bg-white shadow-[4px_4px_0px_rgba(0,0,0,1)] overflow-hidden">
+                    <div className="flex items-center justify-between border-b-2 border-black px-3 py-2">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Filter Kategori</p>
+                      {filterCategory.length > 0 && (
+                        <button
+                          onClick={() => setFilterCategory([])}
+                          className="text-[10px] font-black text-red-500 hover:underline flex items-center gap-0.5"
+                        >
+                          <X className="h-3 w-3" /> Reset
+                        </button>
+                      )}
+                    </div>
+                    <ul className="flex flex-col max-h-60 overflow-y-auto">
+                      {uniqueCategories.map(cat => {
+                        const color = getCategoryColor(cat);
+                        const iconName = getCategoryIcon(cat);
+                        const Icon = (LucideIcons as any)[iconName] || LucideIcons.MapPin;
+                        const isChecked = filterCategory.includes(cat);
+                        const textColor = (() => {
+                          const c = color.replace('#','');
+                          const r = parseInt(c.substring(0,2),16);
+                          const g = parseInt(c.substring(2,4),16);
+                          const b = parseInt(c.substring(4,6),16);
+                          return (r*299+g*587+b*114)/1000 < 128 ? '#fff' : '#111';
+                        })();
+                        return (
+                          <li key={cat}>
+                            <button
+                              onClick={() =>
+                                setFilterCategory(prev =>
+                                  prev.includes(cat)
+                                    ? prev.filter(c => c !== cat)
+                                    : [...prev, cat]
+                                )
+                              }
+                              className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold transition-colors hover:bg-slate-50 ${
+                                isChecked ? "bg-blue-50" : ""
+                              }`}
+                            >
+                              {/* Checkbox */}
+                              <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 border-black transition-colors ${
+                                isChecked ? "bg-blue-600" : "bg-white"
+                              }`}>
+                                {isChecked && <span className="text-white text-[10px] font-black leading-none">✓</span>}
+                              </span>
+                              {/* Category icon */}
+                              <span
+                                className="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-black"
+                                style={{ backgroundColor: color }}
+                              >
+                                <Icon className="h-3 w-3" strokeWidth={2.5} style={{ color: textColor }} />
+                              </span>
+                              {cat}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </TableHead>
+            <TableHead className="text-right">
+              <button onClick={() => handleSort("price")} className="flex items-center ml-auto font-black hover:text-blue-600 transition-colors">
+                Harga <SortIcon col="price" />
+              </button>
+            </TableHead>
+            <TableHead className="text-center">
+              <button onClick={() => handleSort("rating")} className="flex items-center justify-center w-full font-black hover:text-blue-600 transition-colors">
+                Rating <SortIcon col="rating" />
+              </button>
+            </TableHead>
             <TableHead className="text-right">Aksi</TableHead>
           </TableRow>
         </TableHeader>
@@ -291,9 +441,29 @@ export default function WisataManagementPage() {
                   <div className="text-[10px] font-mono text-slate-400 uppercase tracking-widest mt-0.5">GID: {item.gid}</div>
                 </TableCell>
                 <TableCell>
-                  <div className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-300 text-[10px] font-black uppercase w-fit">
-                    {item.category}
-                  </div>
+                  {(() => {
+                    const color = getCategoryColor(item.category);
+                    const iconName = getCategoryIcon(item.category);
+                    const Icon = (LucideIcons as any)[iconName] || LucideIcons.MapPin;
+                    // Determine text color (dark or light) based on bg
+                    const isDark = (hex: string) => {
+                      const c = hex.replace('#','');
+                      const r = parseInt(c.substring(0,2),16);
+                      const g = parseInt(c.substring(2,4),16);
+                      const b = parseInt(c.substring(4,6),16);
+                      return (r*299 + g*587 + b*114) / 1000 < 128;
+                    };
+                    const textColor = isDark(color) ? '#fff' : '#111';
+                    return (
+                      <div
+                        className="flex items-center gap-1.5 px-2 py-1 rounded-lg border-2 border-black text-[11px] font-black uppercase w-fit shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                        style={{ backgroundColor: color, color: textColor }}
+                      >
+                        <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
+                        {item.category}
+                      </div>
+                    );
+                  })()}
                 </TableCell>
                 <TableCell className="text-right font-mono font-bold text-slate-700">
                   Rp {item.price.toLocaleString('id-ID')}
