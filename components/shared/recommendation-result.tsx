@@ -61,12 +61,7 @@ export function RecommendationResult() {
       essential: true,
       padding: isDesktop
         ? { left: 384, top: 0, bottom: 0, right: 0 }
-        : {
-            bottom: window.innerHeight * SNAP_POINTS[1], // Menargetkan posisi 0.6 saat drawer turun
-            top: 80,
-            left: 0,
-            right: 0,
-          },
+        : { bottom: 0, top: 0, left: 0, right: 0 },
     });
   };
 
@@ -117,7 +112,7 @@ export function RecommendationResult() {
             if (!isDesktop) {
               setMobileSnap(SNAP_POINTS[0]);
             }
-            if (run && useTourStore.getState().stepIndex === 9) {
+            if (run && useTourStore.getState().stepIndex === 10) {
               setTimeout(() => {
                 tourNextStep();
               }, 1300);

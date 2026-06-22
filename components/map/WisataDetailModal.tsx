@@ -22,6 +22,7 @@ import * as LucideIcons from "lucide-react";
 import { WisataSearchResult } from "@/store/useSearchStore";
 import { Button } from "@/components/core/button";
 import { useCategoryStore } from "@/store/useCategoryStore";
+import { useTourStore } from "@/store/useTourStore";
 
 interface WisataDetailModalProps {
   wisata: WisataSearchResult | null;
@@ -35,6 +36,14 @@ export function WisataDetailModal({
   onOpenChange,
 }: WisataDetailModalProps) {
   const { getCategoryColor, getCategoryIcon } = useCategoryStore();
+  const { run, stepIndex, nextStep: tourNextStep } = useTourStore();
+
+  const handleOpenChange = (open: boolean) => {
+    onOpenChange(open);
+    if (!open && run && stepIndex === 12) {
+      tourNextStep();
+    }
+  };
 
   if (!wisata) return null;
 
@@ -54,8 +63,10 @@ export function WisataDetailModal({
   const Icon = (LucideIcons as any)[iconName] || LucideIcons.MapPin;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-lg gap-0 overflow-y-auto rounded-xl border-2 border-black p-0 sm:max-w-2xl">
+    <Dialog open={isOpen} onOpenChange={handleOpenChange} modal={!run}>
+      <DialogContent className="sparta-modal-detail max-h-[90vh] max-w-lg gap-0 overflow-y-auto rounded-xl border-2 border-black p-0 sm:max-w-2xl" onInteractOutside={(e) => {
+        if (run) e.preventDefault(); // Prevent closing when interacting with Joyride outside the modal
+      }}>
         <DialogHeader className="sr-only">
           <DialogTitle>{wisata.name}</DialogTitle>
           <DialogDescription>Detail Wisata</DialogDescription>

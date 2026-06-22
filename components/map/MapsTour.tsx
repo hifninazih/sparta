@@ -123,8 +123,8 @@ export default function MapsTour({}: MapsTourProps) {
       // Animasi peta ke 3D untuk memunculkan ikon kompas
       spartaMap?.getMap()?.easeTo({ pitch: 60, bearing: -45, duration: 1500 });
     }
-    // Kembali ke mode 2D saat masuk ke step ke-3 (Peta Dasar)
-    if (run && stepIndex === 3) {
+    // Kembali ke mode 2D setelah step Reset Kompas selesai (masuk ke step ke-4 Pencarian)
+    if (run && stepIndex === 4) {
       spartaMap?.getMap()?.easeTo({ pitch: 0, bearing: 0, duration: 1000 });
     }
   }, [run, stepIndex, clearRecommendations, spartaMap]);
@@ -135,6 +135,13 @@ export default function MapsTour({}: MapsTourProps) {
       title: "Selamat Datang!",
       content: "Mari kita lihat fitur-fitur yang tersedia di sistem ini.",
       placement: "center",
+    },
+    {
+      target: ".tour-basemaps-toggle",
+      title: "Peta Dasar",
+      content:
+        "Anda bisa mengubah tampilan peta menjadi mode peta jalan atau satelit melalui tombol ini.",
+      placement: "left",
     },
     {
       target: ".tour-map-controls",
@@ -151,11 +158,11 @@ export default function MapsTour({}: MapsTourProps) {
       placement: "left",
     },
     {
-      target: ".tour-basemaps-toggle",
-      title: "Peta Dasar",
+      target: isDesktop ? ".tour-panduan-desktop" : ".tour-panduan-mobile",
+      title: "Panduan",
       content:
-        "Anda bisa mengubah tampilan peta menjadi mode peta jalan atau satelit melalui tombol ini.",
-      placement: "left",
+        "Tombol Panduan ini bisa Anda klik kapan pun jika Anda ingin mengulangi tur atau butuh panduan penggunaan.",
+      placement: "bottom" as const,
     },
     {
       target: isDesktop ? ".tour-search-desktop" : ".tour-search-mobile",
@@ -206,17 +213,23 @@ export default function MapsTour({}: MapsTourProps) {
     },
     {
       target: ".sparta-popup",
-      title: "Informasi Detail",
+      title: "Ringkasan Wisata",
       content:
-        "Popup ini berisi informasi detail wisata. Anda juga dapat menekan 'Rute ke Sini' untuk membuka navigasi.",
+        "Popup ini menampilkan informasi singkat. Silakan klik tombol 'Detail' untuk melihat informasi selengkapnya.",
       placement: "right",
+      // @ts-ignore: spotlightClicks may not be in Step type for this version
+      spotlightClicks: true,
+      buttons: [],
     },
     {
-      target: isDesktop ? ".tour-panduan-desktop" : ".tour-panduan-mobile",
-      title: "Panduan",
+      target: ".sparta-modal-detail",
+      title: "Informasi Detail",
       content:
-        "Kapan pun Anda butuh bantuan lagi, klik tombol Panduan ini. Tur selesai!",
-      placement: "bottom" as const,
+        "Ini adalah halaman detail wisata lengkap. Tutup jendela/modal ini (klik tombol X atau klik di luar) untuk menyelesaikan tur.",
+      placement: "center",
+      // @ts-ignore: spotlightClicks may not be in Step type for this version
+      spotlightClicks: true,
+      buttons: [],
     },
   ];
 
@@ -253,7 +266,7 @@ export default function MapsTour({}: MapsTourProps) {
         primaryColor: "#000",
         backgroundColor: "#ffffff",
         textColor: "#111827",
-        arrowColor: "#ffffff"
+        arrowColor: "#ffffff",
       }}
       steps={steps}
       tooltipComponent={CustomTooltip}

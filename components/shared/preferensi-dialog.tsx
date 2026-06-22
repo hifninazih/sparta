@@ -175,7 +175,7 @@ export function PreferensiDialog() {
     setIsOpen(false);
     setIsLoading(true);
 
-    if (run && useTourStore.getState().stepIndex === 6) {
+    if (run && useTourStore.getState().stepIndex === 7) {
       tourNextStep();
     }
 
@@ -202,7 +202,7 @@ export function PreferensiDialog() {
 
       if (result.success) {
         setRecommendations(result.data);
-        if (run && useTourStore.getState().stepIndex === 7) {
+        if (run && useTourStore.getState().stepIndex === 8) {
           setTimeout(() => {
             tourNextStep();
           }, 600);
@@ -238,10 +238,10 @@ export function PreferensiDialog() {
     <Dialog open={isOpen} onOpenChange={(open) => {
       setIsOpen(open);
       const currentStep = useTourStore.getState().stepIndex;
-      if (open && run && currentStep === 5) {
+      if (open && run && currentStep === 6) {
         tourNextStep();
-      } else if (!open && run && currentStep === 6) {
-        useTourStore.getState().setStepIndex(5);
+      } else if (!open && run && currentStep === 7) {
+        useTourStore.getState().setStepIndex(6);
       }
     }}>
       <DialogTrigger asChild>

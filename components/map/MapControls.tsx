@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Plus, Minus, ChevronLeft, ChevronRight } from "lucide-react"
-import { cn } from "@/lib/utils"
-import compassIcon from "@/assets/compass.svg"
+import * as React from "react";
+import { Plus, Minus, ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import compassIcon from "@/assets/compass.svg";
 
 /* =========================================
    KOMPONEN ZOOM BUTTON 

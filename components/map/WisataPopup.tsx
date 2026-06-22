@@ -11,6 +11,7 @@ import { WisataSearchResult } from "@/store/useSearchStore";
 import { Button } from "@/components/core/button";
 import { useRef, useState } from "react";
 import { useCategoryStore } from "@/store/useCategoryStore";
+import { useTourStore } from "@/store/useTourStore";
 import { Z } from "@/lib/z-index";
 import { WisataDetailModal } from "./WisataDetailModal";
 
@@ -28,6 +29,7 @@ export function WisataMarkerPopover({
   children,
 }: WisataMarkerPopoverProps) {
   const { getCategoryColor, getCategoryIcon } = useCategoryStore();
+  const { run, stepIndex, nextStep: tourNextStep } = useTourStore();
   const popoverRef = useRef<HTMLDivElement>(null);
 
   // State untuk modal detail
@@ -118,10 +120,15 @@ export function WisataMarkerPopover({
             {/* Actions */}
             <div className="flex gap-2 border-t-2 border-black bg-slate-50 p-3">
               <Button
-                className="h-8 flex-1 text-[11px] font-bold"
+                className="h-8 flex-1 text-[11px] font-bold sparta-btn-detail"
                 size="rect"
                 variant="outline"
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => {
+                  setIsModalOpen(true);
+                  if (run && stepIndex === 11) {
+                    setTimeout(() => tourNextStep(), 300);
+                  }
+                }}
                 startIcon={<Info className="h-3.5 w-3.5" />}
               >
                 Detail
