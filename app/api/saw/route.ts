@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
         ad.namobj as desa,
         ad.wadmkc as kecamatan,
         ad.wadmkk as kabupaten,
-        ST_DistanceSphere(w.geom, ST_MakePoint($1, $2)) as distance_m
+        ST_Distance(ST_Transform(w.geom, 32749), ST_Transform(ST_SetSRID(ST_MakePoint($1, $2), 4326), 32749)) as distance_m
       FROM destinasi w
       LEFT JOIN kategori c ON w.kategori_id = c.id
       LEFT JOIN sub_kategori sk ON w.sub_kategori_id = sk.id
