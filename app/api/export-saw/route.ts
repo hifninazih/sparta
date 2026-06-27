@@ -196,10 +196,22 @@ export async function GET(request: NextRequest) {
       "Max Ulasan": maxReviews
     };
 
+    const paramData = [
+      { "Parameter": "Titik Asal (Longitude)", "Nilai": lng },
+      { "Parameter": "Titik Asal (Latitude)", "Nilai": lat },
+      { "Parameter": "Bobot Jarak", "Nilai": w_jarak },
+      { "Parameter": "Bobot Harga", "Nilai": w_harga },
+      { "Parameter": "Bobot Rating", "Nilai": w_rating },
+      { "Parameter": "Bobot Ulasan", "Nilai": w_reviews },
+      { "Parameter": "Filter Kategori", "Nilai": hasCategoryFilter ? categoryList.join(", ") : "Semua Kategori" },
+      { "Parameter": "Waktu Simulasi", "Nilai": new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" }) }
+    ];
+
     if (format === "json") {
       return NextResponse.json({
         success: true,
         data: {
+          parameter: paramData,
           mentah: sheetMentah,
           min_max: nilaiMinMax,
           normalisasi: sheetNormalisasi,
@@ -208,9 +220,11 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    const wsParameter = xlsx.utils.json_to_sheet(paramData);
     const wsMinMax = xlsx.utils.json_to_sheet([nilaiMinMax]);
 
     const wb = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(wb, wsParameter, "0. Parameter");
     xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(sheetMentah), "1. Data Asli");
     xlsx.utils.book_append_sheet(wb, wsMinMax, "Nilai Max Min");
     xlsx.utils.book_append_sheet(wb, xlsx.utils.json_to_sheet(sheetNormalisasi), "2. Normalisasi");
