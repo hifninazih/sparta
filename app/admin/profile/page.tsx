@@ -48,7 +48,9 @@ export default function AdminProfilePage() {
       return;
     }
     if (!formData.currentPassword) {
-      toast.error("Silakan masukkan password saat ini untuk memverifikasi perubahan.");
+      toast.error(
+        "Silakan masukkan password saat ini untuk memverifikasi perubahan.",
+      );
       return;
     }
 
@@ -81,7 +83,7 @@ export default function AdminProfilePage() {
 
       if (res.ok) {
         toast.success("Profil berhasil diperbarui!");
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           currentPassword: "",
           password: "",
@@ -101,9 +103,9 @@ export default function AdminProfilePage() {
   };
 
   return (
-    <div className="p-6 sm:p-10 bg-[#f8fafc] min-h-screen">
-      <PageHeader 
-        title="Profil Saya" 
+    <div className="min-h-screen bg-[#f8fafc] p-6 sm:p-10">
+      <PageHeader
+        title="Profil Saya"
         description="Kelola informasi akun dan hak akses sistem SPARTA Anda."
         icon={<User className="h-8 w-8" />}
       />
@@ -114,12 +116,15 @@ export default function AdminProfilePage() {
           <NeoCard title="Informasi Dasar" icon={<User className="h-5 w-5" />}>
             <div className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="full_name" className="text-sm font-black text-black">
+                <Label
+                  htmlFor="full_name"
+                  className="text-sm font-black text-black"
+                >
                   Nama Lengkap
                 </Label>
                 <Input
                   id="full_name"
-                  placeholder="Budi Santoso"
+                  placeholder="Masukkan nama lengkap"
                   value={formData.full_name}
                   onChange={(e) =>
                     setFormData({ ...formData, full_name: e.target.value })
@@ -127,7 +132,10 @@ export default function AdminProfilePage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="username" className="text-sm font-black text-black">
+                <Label
+                  htmlFor="username"
+                  className="text-sm font-black text-black"
+                >
                   Username
                 </Label>
                 <Input
@@ -143,26 +151,34 @@ export default function AdminProfilePage() {
           </NeoCard>
 
           {/* Card: Keamanan (Opsional) */}
-          <NeoCard 
-            title="Keamanan Account" 
+          <NeoCard
+            title="Keamanan Account"
             icon={<Shield className="h-5 w-5" />}
           >
             <div className="space-y-6">
-              <div className="flex items-center space-x-3 p-3 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50">
-                <input 
-                  type="checkbox" 
+              <div className="flex items-center space-x-3 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-3">
+                <input
+                  type="checkbox"
                   id="togglePassword"
                   checked={isChangingPassword}
                   onChange={(e) => setIsChangePassword(e.target.checked)}
-                  className="h-5 w-5 rounded border-2 border-black accent-blue-600 cursor-pointer"
+                  className="h-5 w-5 cursor-pointer rounded border-2 border-black accent-blue-600"
                 />
-                <Label htmlFor="togglePassword" className="font-bold cursor-pointer">Saya ingin mengubah password</Label>
+                <Label
+                  htmlFor="togglePassword"
+                  className="cursor-pointer font-bold"
+                >
+                  Saya ingin mengubah password
+                </Label>
               </div>
 
               {isChangingPassword && (
-                <div className="grid gap-6 sm:grid-cols-2 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="animate-in fade-in slide-in-from-top-2 grid gap-6 pt-2 duration-300 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="pass" className="text-sm font-black text-black">
+                    <Label
+                      htmlFor="pass"
+                      className="text-sm font-black text-black"
+                    >
                       Password Baru
                     </Label>
                     <Input
@@ -178,7 +194,10 @@ export default function AdminProfilePage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirm" className="text-sm font-black text-black">
+                    <Label
+                      htmlFor="confirm"
+                      className="text-sm font-black text-black"
+                    >
                       Konfirmasi Password
                     </Label>
                     <Input
@@ -206,7 +225,10 @@ export default function AdminProfilePage() {
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-blue-600" />
-                <Label htmlFor="current" className="text-sm font-black text-black">
+                <Label
+                  htmlFor="current"
+                  className="text-sm font-black text-black"
+                >
                   Masukkan Password Saat Ini untuk Menyimpan
                 </Label>
               </div>
@@ -222,7 +244,8 @@ export default function AdminProfilePage() {
                 className="bg-white"
               />
               <p className="text-[10px] font-bold text-slate-400">
-                Wajib diisi untuk setiap perubahan informasi profil demi keamanan akun Anda.
+                Wajib diisi untuk setiap perubahan informasi profil demi
+                keamanan akun Anda.
               </p>
             </div>
           </div>
