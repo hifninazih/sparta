@@ -234,6 +234,10 @@ export function PreferensiDialog() {
         ? selectedCategories[0]
         : `${selectedCategories.length} kategori`;
 
+  // Hitung total bobot untuk validasi langkah terakhir
+  const totalWeight = jarak + harga + reviews + rating;
+  const isZeroWeight = isLastStep && totalWeight === 0;
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => {
       setIsOpen(open);
@@ -373,7 +377,12 @@ export function PreferensiDialog() {
         </div>
 
         {/* --- FOOTER NAVIGASI --- */}
-        <DialogFooter className="flex-row items-center border-t-2 border-black bg-slate-100 p-4 sm:justify-between">
+        <DialogFooter className="flex flex-col items-center border-t-2 border-black bg-slate-100 p-4 sm:flex-col gap-2">
+          {isZeroWeight && (
+            <div className="w-full text-center text-xs font-bold text-red-500 animate-pulse">
+              Pastikan minimal ada satu kriteria preferensi yang tidak bernilai 0.
+            </div>
+          )}
           <div
             className={`flex w-full ${isFirstStep ? "justify-end" : "justify-between"}`}
           >
@@ -395,7 +404,7 @@ export function PreferensiDialog() {
               className="font-bold"
               endIcon={isLastStep ? <Search /> : <ArrowRight />}
               onClick={isLastStep ? handleKalkulasi : nextStep}
-              disabled={isFirstStep && !selectedLocation}
+              disabled={(isFirstStep && !selectedLocation) || isZeroWeight}
             >
               {isLastStep ? "Cari Wisata" : "Selanjutnya"}
             </Button>
