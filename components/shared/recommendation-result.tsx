@@ -124,27 +124,36 @@ export function RecommendationResult() {
             activeWisataId === item.gid
               ? "border-blue-600 bg-blue-50 shadow-[4px_4px_0px_rgba(0,0,0,1)]"
               : "",
-            index === 0 && "tour-result-item"
+            index === 0 && "tour-result-item",
           )}
         >
           {/* Badge rank + skor */}
           <div className="bg-primary absolute -top-3 -right-2 flex items-center gap-1 rounded-full border-2 border-black px-2 py-0.5 text-xs font-black shadow-sm">
-            <span>#{index + 1}</span>
-            <span className="opacity-50">|</span>
-            <span>{(item.score * 100).toFixed(1)}</span>
+            <span>{index + 1}</span>
+            {/* <span className="opacity-50">|</span> */}
+            {/* <span>{(item.score * 100).toFixed(1)}</span> */}
           </div>
 
           <h3 className="line-clamp-1 pr-12 text-sm font-bold">{item.name}</h3>
 
           {/* Badge kategori */}
           <div className="flex items-center gap-1">
-            <span 
+            <span
               className="flex items-center gap-1 rounded border border-black/20 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-black"
-              style={{ backgroundColor: useCategoryStore.getState().getCategoryColor(item.category) }}
+              style={{
+                backgroundColor: useCategoryStore
+                  .getState()
+                  .getCategoryColor(item.category),
+              }}
             >
               {(() => {
-                const Icon = (LucideIcons as any)[useCategoryStore.getState().getCategoryIcon(item.category) || "MapPin"];
-                return Icon ? <Icon className="size-3" strokeWidth={2.5} /> : null;
+                const Icon = (LucideIcons as any)[
+                  useCategoryStore.getState().getCategoryIcon(item.category) ||
+                    "MapPin"
+                ];
+                return Icon ? (
+                  <Icon className="size-3" strokeWidth={2.5} />
+                ) : null;
               })()}
               {item.category}
             </span>
@@ -232,9 +241,7 @@ export function RecommendationResult() {
       modal={false}
       dismissible={false}
     >
-      <DrawerContent
-        className="tour-recommendation-container h-[85vh] shadow-[0px_-4px_0px_rgba(0,0,0,1)]"
-      >
+      <DrawerContent className="tour-recommendation-container h-[85vh] shadow-[0px_-4px_0px_rgba(0,0,0,1)]">
         <DrawerHeader className="flex touch-none flex-row items-center justify-between pb-4 text-left">
           <div>
             <DrawerTitle>Top Rekomendasi</DrawerTitle>
